@@ -2,30 +2,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
 :root {
-  --bg-base: #030912;
-  --bg-surface: #060e1c;
-  --bg-panel: #09132200;
-  --bg-card: #0c1a2e;
-  --bg-elevated: #101f35;
-  --bg-hover: #13243c;
-  --border-dim: #101c2e;
-  --border-default: #182a44;
-  --border-bright: #243f65;
-  --accent: #1b6bef;
-  --accent-dim: #1458c7;
-  --accent-bright: #4d8ef5;
-  --accent-glow: rgba(27, 107, 239, 0.18);
-  --teal: #0ab89e;
-  --teal-glow: rgba(10, 184, 158, 0.14);
-  --success: #12d97a;
-  --success-glow: rgba(18, 217, 122, 0.15);
-  --warning: #f5a623;
-  --warning-glow: rgba(245, 166, 35, 0.15);
-  --error: #ff4655;
-  --error-glow: rgba(255, 70, 85, 0.15);
-  --text-primary: #d8e8f8;
-  --text-secondary: #7890b0;
-  --text-muted: #3a5070;
+  --bg-base: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-panel: #f1f5f900;
+  --bg-card: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --bg-hover: #e8eef5;
+  --border-dim: #e2e8f0;
+  --border-default: #cbd5e1;
+  --border-bright: #94a3b8;
+  --accent: #1d4ed8;
+  --accent-dim: #1e40af;
+  --accent-bright: #3b82f6;
+  --accent-glow: rgba(29, 78, 216, 0.1);
+  --teal: #0d9488;
+  --teal-glow: rgba(13, 148, 136, 0.1);
+  --success: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --warning-glow: rgba(245, 158, 11, 0.1);
+  --error: #ef4444;
+  --error-glow: rgba(239, 68, 68, 0.1);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
   --sidebar-width: 218px;
 }
 
@@ -69,8 +69,8 @@ html, body {
   min-height: 100vh;
   overflow-x: hidden;
   background:
-    radial-gradient(ellipse 60% 40% at 70% -10%, rgba(27,107,239,0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 10% 80%, rgba(10,184,158,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 70% -10%, rgba(29, 78, 216, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 10% 80%, rgba(13, 148, 136, 0.04) 0%, transparent 50%),
     var(--bg-base);
 }
 
