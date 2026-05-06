@@ -53,6 +53,7 @@ type SetType = 'train' | 'val' | 'test'
 
 interface SliceForm {
   name: string
+  comment: string
   datasetId: string
   trainRatio: number
   valRatio: number
@@ -66,6 +67,7 @@ function RouteComponent() {
   const [pageSize] = useState(20)
   const [form, setForm] = useState<SliceForm>({
     name: '',
+    comment: '',
     datasetId: 'ds-001',
     trainRatio: 70,
     valRatio: 20,
@@ -407,6 +409,17 @@ function RouteComponent() {
 
               <div style={{ marginBottom: 16 }}>
                 <label className="form-label">切分名称</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder={`切分_${new Date().toLocaleDateString('zh-CN')}`}
+                  value={form.name}
+                  onChange={e => setField('name', e.target.value)}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label className="form-label">备注</label>
                 <input
                   type="text"
                   className="form-input"

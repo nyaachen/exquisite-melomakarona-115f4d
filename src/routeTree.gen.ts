@@ -11,14 +11,24 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VisualIndexRouteImport } from './routes/visual/index'
+import { Route as ValidateIndexRouteImport } from './routes/validate/index'
+import { Route as TemplateIndexRouteImport } from './routes/template/index'
 import { Route as TasksIndexRouteImport } from './routes/tasks/index'
+import { Route as SquareIndexRouteImport } from './routes/square/index'
 import { Route as SlicesIndexRouteImport } from './routes/slices/index'
 import { Route as MonitorIndexRouteImport } from './routes/monitor/index'
 import { Route as ModelsIndexRouteImport } from './routes/models/index'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets/index'
 import { Route as VisualModelIdRouteImport } from './routes/visual/$modelId'
+import { Route as ValidateCreateRouteImport } from './routes/validate/create'
+import { Route as ValidateTaskIdRouteImport } from './routes/validate/$taskId'
+import { Route as TemplateCreateRouteImport } from './routes/template/create'
+import { Route as TemplateTemplateIdRouteImport } from './routes/template/$templateId'
 import { Route as TasksCreateRouteImport } from './routes/tasks/create'
 import { Route as TasksTaskIdRouteImport } from './routes/tasks/$taskId'
+import { Route as SystemUserRouteImport } from './routes/system/user'
+import { Route as SquareCreateRouteImport } from './routes/square/create'
 import { Route as SlicesCreateRouteImport } from './routes/slices/create'
 import { Route as ModelsSquareRouteImport } from './routes/models/square'
 import { Route as ModelsManualUploadRouteImport } from './routes/models/manualUpload'
@@ -35,9 +45,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VisualIndexRoute = VisualIndexRouteImport.update({
+  id: '/visual/',
+  path: '/visual/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ValidateIndexRoute = ValidateIndexRouteImport.update({
+  id: '/validate/',
+  path: '/validate/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateIndexRoute = TemplateIndexRouteImport.update({
+  id: '/template/',
+  path: '/template/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksIndexRoute = TasksIndexRouteImport.update({
   id: '/tasks/',
   path: '/tasks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SquareIndexRoute = SquareIndexRouteImport.update({
+  id: '/square/',
+  path: '/square/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlicesIndexRoute = SlicesIndexRouteImport.update({
@@ -65,6 +95,26 @@ const VisualModelIdRoute = VisualModelIdRouteImport.update({
   path: '/visual/$modelId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ValidateCreateRoute = ValidateCreateRouteImport.update({
+  id: '/validate/create',
+  path: '/validate/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ValidateTaskIdRoute = ValidateTaskIdRouteImport.update({
+  id: '/validate/$taskId',
+  path: '/validate/$taskId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateCreateRoute = TemplateCreateRouteImport.update({
+  id: '/template/create',
+  path: '/template/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplateTemplateIdRoute = TemplateTemplateIdRouteImport.update({
+  id: '/template/$templateId',
+  path: '/template/$templateId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksCreateRoute = TasksCreateRouteImport.update({
   id: '/tasks/create',
   path: '/tasks/create',
@@ -73,6 +123,16 @@ const TasksCreateRoute = TasksCreateRouteImport.update({
 const TasksTaskIdRoute = TasksTaskIdRouteImport.update({
   id: '/tasks/$taskId',
   path: '/tasks/$taskId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SystemUserRoute = SystemUserRouteImport.update({
+  id: '/system/user',
+  path: '/system/user',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SquareCreateRoute = SquareCreateRouteImport.update({
+  id: '/square/create',
+  path: '/square/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlicesCreateRoute = SlicesCreateRouteImport.update({
@@ -109,14 +169,24 @@ export interface FileRoutesByFullPath {
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/models/square': typeof ModelsSquareRoute
   '/slices/create': typeof SlicesCreateRoute
+  '/square/create': typeof SquareCreateRoute
+  '/system/user': typeof SystemUserRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/tasks/create': typeof TasksCreateRoute
+  '/template/$templateId': typeof TemplateTemplateIdRoute
+  '/template/create': typeof TemplateCreateRoute
+  '/validate/$taskId': typeof ValidateTaskIdRoute
+  '/validate/create': typeof ValidateCreateRoute
   '/visual/$modelId': typeof VisualModelIdRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
   '/slices/': typeof SlicesIndexRoute
+  '/square/': typeof SquareIndexRoute
   '/tasks/': typeof TasksIndexRoute
+  '/template/': typeof TemplateIndexRoute
+  '/validate/': typeof ValidateIndexRoute
+  '/visual/': typeof VisualIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,14 +196,24 @@ export interface FileRoutesByTo {
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/models/square': typeof ModelsSquareRoute
   '/slices/create': typeof SlicesCreateRoute
+  '/square/create': typeof SquareCreateRoute
+  '/system/user': typeof SystemUserRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/tasks/create': typeof TasksCreateRoute
+  '/template/$templateId': typeof TemplateTemplateIdRoute
+  '/template/create': typeof TemplateCreateRoute
+  '/validate/$taskId': typeof ValidateTaskIdRoute
+  '/validate/create': typeof ValidateCreateRoute
   '/visual/$modelId': typeof VisualModelIdRoute
   '/datasets': typeof DatasetsIndexRoute
   '/models': typeof ModelsIndexRoute
   '/monitor': typeof MonitorIndexRoute
   '/slices': typeof SlicesIndexRoute
+  '/square': typeof SquareIndexRoute
   '/tasks': typeof TasksIndexRoute
+  '/template': typeof TemplateIndexRoute
+  '/validate': typeof ValidateIndexRoute
+  '/visual': typeof VisualIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -144,14 +224,24 @@ export interface FileRoutesById {
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/models/square': typeof ModelsSquareRoute
   '/slices/create': typeof SlicesCreateRoute
+  '/square/create': typeof SquareCreateRoute
+  '/system/user': typeof SystemUserRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/tasks/create': typeof TasksCreateRoute
+  '/template/$templateId': typeof TemplateTemplateIdRoute
+  '/template/create': typeof TemplateCreateRoute
+  '/validate/$taskId': typeof ValidateTaskIdRoute
+  '/validate/create': typeof ValidateCreateRoute
   '/visual/$modelId': typeof VisualModelIdRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
   '/slices/': typeof SlicesIndexRoute
+  '/square/': typeof SquareIndexRoute
   '/tasks/': typeof TasksIndexRoute
+  '/template/': typeof TemplateIndexRoute
+  '/validate/': typeof ValidateIndexRoute
+  '/visual/': typeof VisualIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,14 +253,24 @@ export interface FileRouteTypes {
     | '/models/manualUpload'
     | '/models/square'
     | '/slices/create'
+    | '/square/create'
+    | '/system/user'
     | '/tasks/$taskId'
     | '/tasks/create'
+    | '/template/$templateId'
+    | '/template/create'
+    | '/validate/$taskId'
+    | '/validate/create'
     | '/visual/$modelId'
     | '/datasets/'
     | '/models/'
     | '/monitor/'
     | '/slices/'
+    | '/square/'
     | '/tasks/'
+    | '/template/'
+    | '/validate/'
+    | '/visual/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -180,14 +280,24 @@ export interface FileRouteTypes {
     | '/models/manualUpload'
     | '/models/square'
     | '/slices/create'
+    | '/square/create'
+    | '/system/user'
     | '/tasks/$taskId'
     | '/tasks/create'
+    | '/template/$templateId'
+    | '/template/create'
+    | '/validate/$taskId'
+    | '/validate/create'
     | '/visual/$modelId'
     | '/datasets'
     | '/models'
     | '/monitor'
     | '/slices'
+    | '/square'
     | '/tasks'
+    | '/template'
+    | '/validate'
+    | '/visual'
   id:
     | '__root__'
     | '/'
@@ -197,14 +307,24 @@ export interface FileRouteTypes {
     | '/models/manualUpload'
     | '/models/square'
     | '/slices/create'
+    | '/square/create'
+    | '/system/user'
     | '/tasks/$taskId'
     | '/tasks/create'
+    | '/template/$templateId'
+    | '/template/create'
+    | '/validate/$taskId'
+    | '/validate/create'
     | '/visual/$modelId'
     | '/datasets/'
     | '/models/'
     | '/monitor/'
     | '/slices/'
+    | '/square/'
     | '/tasks/'
+    | '/template/'
+    | '/validate/'
+    | '/visual/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -215,14 +335,24 @@ export interface RootRouteChildren {
   ModelsManualUploadRoute: typeof ModelsManualUploadRoute
   ModelsSquareRoute: typeof ModelsSquareRoute
   SlicesCreateRoute: typeof SlicesCreateRoute
+  SquareCreateRoute: typeof SquareCreateRoute
+  SystemUserRoute: typeof SystemUserRoute
   TasksTaskIdRoute: typeof TasksTaskIdRoute
   TasksCreateRoute: typeof TasksCreateRoute
+  TemplateTemplateIdRoute: typeof TemplateTemplateIdRoute
+  TemplateCreateRoute: typeof TemplateCreateRoute
+  ValidateTaskIdRoute: typeof ValidateTaskIdRoute
+  ValidateCreateRoute: typeof ValidateCreateRoute
   VisualModelIdRoute: typeof VisualModelIdRoute
   DatasetsIndexRoute: typeof DatasetsIndexRoute
   ModelsIndexRoute: typeof ModelsIndexRoute
   MonitorIndexRoute: typeof MonitorIndexRoute
   SlicesIndexRoute: typeof SlicesIndexRoute
+  SquareIndexRoute: typeof SquareIndexRoute
   TasksIndexRoute: typeof TasksIndexRoute
+  TemplateIndexRoute: typeof TemplateIndexRoute
+  ValidateIndexRoute: typeof ValidateIndexRoute
+  VisualIndexRoute: typeof VisualIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -241,11 +371,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/visual/': {
+      id: '/visual/'
+      path: '/visual'
+      fullPath: '/visual/'
+      preLoaderRoute: typeof VisualIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/validate/': {
+      id: '/validate/'
+      path: '/validate'
+      fullPath: '/validate/'
+      preLoaderRoute: typeof ValidateIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/': {
+      id: '/template/'
+      path: '/template'
+      fullPath: '/template/'
+      preLoaderRoute: typeof TemplateIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks/': {
       id: '/tasks/'
       path: '/tasks'
       fullPath: '/tasks/'
       preLoaderRoute: typeof TasksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/square/': {
+      id: '/square/'
+      path: '/square'
+      fullPath: '/square/'
+      preLoaderRoute: typeof SquareIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/slices/': {
@@ -283,6 +441,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VisualModelIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/validate/create': {
+      id: '/validate/create'
+      path: '/validate/create'
+      fullPath: '/validate/create'
+      preLoaderRoute: typeof ValidateCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/validate/$taskId': {
+      id: '/validate/$taskId'
+      path: '/validate/$taskId'
+      fullPath: '/validate/$taskId'
+      preLoaderRoute: typeof ValidateTaskIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/create': {
+      id: '/template/create'
+      path: '/template/create'
+      fullPath: '/template/create'
+      preLoaderRoute: typeof TemplateCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/template/$templateId': {
+      id: '/template/$templateId'
+      path: '/template/$templateId'
+      fullPath: '/template/$templateId'
+      preLoaderRoute: typeof TemplateTemplateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks/create': {
       id: '/tasks/create'
       path: '/tasks/create'
@@ -295,6 +481,20 @@ declare module '@tanstack/react-router' {
       path: '/tasks/$taskId'
       fullPath: '/tasks/$taskId'
       preLoaderRoute: typeof TasksTaskIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/system/user': {
+      id: '/system/user'
+      path: '/system/user'
+      fullPath: '/system/user'
+      preLoaderRoute: typeof SystemUserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/square/create': {
+      id: '/square/create'
+      path: '/square/create'
+      fullPath: '/square/create'
+      preLoaderRoute: typeof SquareCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/slices/create': {
@@ -343,14 +543,24 @@ const rootRouteChildren: RootRouteChildren = {
   ModelsManualUploadRoute: ModelsManualUploadRoute,
   ModelsSquareRoute: ModelsSquareRoute,
   SlicesCreateRoute: SlicesCreateRoute,
+  SquareCreateRoute: SquareCreateRoute,
+  SystemUserRoute: SystemUserRoute,
   TasksTaskIdRoute: TasksTaskIdRoute,
   TasksCreateRoute: TasksCreateRoute,
+  TemplateTemplateIdRoute: TemplateTemplateIdRoute,
+  TemplateCreateRoute: TemplateCreateRoute,
+  ValidateTaskIdRoute: ValidateTaskIdRoute,
+  ValidateCreateRoute: ValidateCreateRoute,
   VisualModelIdRoute: VisualModelIdRoute,
   DatasetsIndexRoute: DatasetsIndexRoute,
   ModelsIndexRoute: ModelsIndexRoute,
   MonitorIndexRoute: MonitorIndexRoute,
   SlicesIndexRoute: SlicesIndexRoute,
+  SquareIndexRoute: SquareIndexRoute,
   TasksIndexRoute: TasksIndexRoute,
+  TemplateIndexRoute: TemplateIndexRoute,
+  ValidateIndexRoute: ValidateIndexRoute,
+  VisualIndexRoute: VisualIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
