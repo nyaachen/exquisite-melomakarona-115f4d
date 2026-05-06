@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Info,
   Zap,
+  Copy,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/tasks/create')({
@@ -21,6 +22,14 @@ const DATASETS = [
   { id: 'ds-002', name: '施工安全帽检测集', images: 2391, classes: ['安全帽', '无安全帽', '人员'], source: '科宝标注平台', synced: '2026-04-28 11:20' },
   { id: 'ds-003', name: '工厂设备异常检测集', images: 1628, classes: ['正常设备', '异常设备', '待检修'], source: '科宝标注平台', synced: '2026-04-29 07:45' },
   { id: 'ds-004', name: '车牌识别数据集', images: 7840, classes: ['车牌', '遮挡车牌', '模糊车牌'], source: '科宝标注平台', synced: '2026-04-27 20:10' },
+]
+
+// ─── Mock slices ───
+const SLICES = [
+  { id: 'slice-001', name: '道路缺陷检测标准切分', datasetId: 'ds-001', datasetName: '道路缺陷检测数据集 v2.3', trainCount: 3410, valCount: 974, testCount: 488, creator: '张工', createdAt: '2026-04-28 14:20' },
+  { id: 'slice-002', name: '施工安全帽检测初版', datasetId: 'ds-002', datasetName: '施工安全帽检测集', trainCount: 1913, valCount: 239, testCount: 239, creator: '李工', createdAt: '2026-04-27 09:15' },
+  { id: 'slice-003', name: '设备异常检测标准切分', datasetId: 'ds-003', datasetName: '工厂设备异常检测集', trainCount: 1139, valCount: 326, testCount: 163, creator: '王工', createdAt: '2026-04-29 08:30' },
+  { id: 'slice-004', name: '车牌识别 v1.0 切分', datasetId: 'ds-004', datasetName: '车牌识别数据集', trainCount: 6272, valCount: 784, testCount: 784, creator: '赵工', createdAt: '2026-04-26 16:45' },
 ]
 
 // ─── YOLO model variants ───
@@ -42,6 +51,7 @@ const STEPS = [
 
 interface FormState {
   datasetId: string
+  sliceId: string | null
   trainRatio: number
   valRatio: number
   testRatio: number
@@ -66,6 +76,7 @@ function CreateTask() {
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState<FormState>({
     datasetId: 'ds-001',
+    sliceId: null,
     trainRatio: 70,
     valRatio: 20,
     testRatio: 10,
@@ -154,103 +165,214 @@ function CreateTask() {
           {/* ── Step 1: Dataset Split ── */}
           {step === 1 && (
             <div>
-              <SectionTitle icon={<Layers size={15} />} title="选择数据集" subtitle="从科宝标注平台同步的数据集" />
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-                {DATASETS.map(ds => (
-                  <div
-                    key={ds.id}
-                    className={`select-card`}
-                    style={{ borderColor: form.datasetId === ds.id ? 'var(--accent)' : undefined, background: form.datasetId === ds.id ? 'var(--accent-glow)' : undefined }}
-                    onClick={() => setField('datasetId', ds.id)}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                      <div>
-                        <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{ds.name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
-                          同步于 {ds.synced} · {ds.source}
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          <span style={{ background: 'rgba(27,107,239,0.1)', color: 'var(--accent-bright)', fontSize: 11, padding: '2px 8px', borderRadius: 4, fontFamily: 'JetBrains Mono' }}>
-                            {ds.images.toLocaleString()} 张
-                          </span>
-                          <span style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: 11, padding: '2px 8px', borderRadius: 4 }}>
-                            {ds.classes.length} 类别
-                          </span>
-                        </div>
-                      </div>
-                      {form.datasetId === ds.id && (
-                        <div style={{ width: 20, height: 20, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <CheckCircle2 size={12} color="white" />
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
-                      {ds.classes.join(' · ')}
-                    </div>
-                  </div>
-                ))}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                <button
+                  className={`btn ${form.sliceId === null ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setField('sliceId', null)}
+                >
+                  <Sliders size={14} /> 快速创建切分
+                </button>
+                <button
+                  className={`btn ${form.sliceId !== null ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => { setField('sliceId', SLICES[0]?.id || null) }}
+                >
+                  <Copy size={14} /> 选择已有切分
+                </button>
               </div>
 
-              <SectionTitle icon={<Sliders size={15} />} title="训练/验证/测试集划分" subtitle="拖动滑块调整各集合比例" />
+              {/* Option A: Quick Split - Create new split on the fly */}
+              {form.sliceId === null && (
+                <div style={{ animation: 'slideIn 0.2s ease-out' }}>
+                  <SectionTitle icon={<Layers size={15} />} title="选择数据集" subtitle="从科宝标注平台同步的数据集" />
 
-              <div className="card" style={{ padding: 24 }}>
-                {/* Visual split bar */}
-                <div className="split-bar" style={{ marginBottom: 20 }}>
-                  <div className="split-seg split-train" style={{ flex: form.trainRatio }}>
-                    训练集 {form.trainRatio}%
-                  </div>
-                  <div className="split-seg split-val" style={{ flex: form.valRatio }}>
-                    验证集 {form.valRatio}%
-                  </div>
-                  <div className="split-seg split-test" style={{ flex: form.testRatio }}>
-                    测试集 {form.testRatio}%
-                  </div>
-                </div>
-
-                {/* Image counts */}
-                {dataset && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
-                    {[
-                      { label: '训练集', ratio: form.trainRatio, color: 'var(--accent-bright)' },
-                      { label: '验证集', ratio: form.valRatio, color: 'var(--teal)' },
-                      { label: '测试集', ratio: form.testRatio, color: 'var(--warning)' },
-                    ].map(s => (
-                      <div key={s.label} className="metric-chip">
-                        <div className="metric-chip-value" style={{ color: s.color, fontSize: 18 }}>
-                          {Math.round(dataset.images * s.ratio / 100).toLocaleString()}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+                    {DATASETS.map(ds => (
+                      <div
+                        key={ds.id}
+                        className={`select-card`}
+                        style={{ borderColor: form.datasetId === ds.id ? 'var(--accent)' : undefined, background: form.datasetId === ds.id ? 'var(--accent-glow)' : undefined }}
+                        onClick={() => setField('datasetId', ds.id)}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                          <div>
+                            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{ds.name}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+                              同步于 {ds.synced} · {ds.source}
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <span style={{ background: 'rgba(27,107,239,0.1)', color: 'var(--accent-bright)', fontSize: 11, padding: '2px 8px', borderRadius: 4, fontFamily: 'JetBrains Mono' }}>
+                                {ds.images.toLocaleString()} 张
+                              </span>
+                              <span style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: 11, padding: '2px 8px', borderRadius: 4 }}>
+                                {ds.classes.length} 类别
+                              </span>
+                            </div>
+                          </div>
+                          {form.datasetId === ds.id && (
+                            <div style={{ width: 20, height: 20, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <CheckCircle2 size={12} color="white" />
+                            </div>
+                          )}
                         </div>
-                        <div className="metric-chip-label">{s.label} ({s.ratio}%)</div>
+                        <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
+                          {ds.classes.join(' · ')}
+                        </div>
                       </div>
                     ))}
                   </div>
-                )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <SliderField
-                    label="训练集比例"
-                    value={form.trainRatio}
-                    min={50} max={90}
-                    onChange={v => adjustSplit('trainRatio', v)}
-                    color="var(--accent)"
-                    suffix="%"
-                  />
-                  <SliderField
-                    label="验证集比例"
-                    value={form.valRatio}
-                    min={5} max={30}
-                    onChange={v => adjustSplit('valRatio', v)}
-                    color="var(--teal)"
-                    suffix="%"
-                    hint={`测试集自动计算为 ${form.testRatio}%`}
-                  />
-                </div>
+                  <SectionTitle icon={<Sliders size={15} />} title="训练/验证/测试集划分" subtitle="拖动滑块调整各集合比例" />
 
-                <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(27,107,239,0.06)', borderRadius: 8, border: '1px solid rgba(27,107,239,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-                  <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
-                  <span>推荐训练集 70%、验证集 20%、测试集 10%。过小的验证集可能导致过拟合评估不准确。</span>
+                  <div className="card" style={{ padding: 24 }}>
+                    {/* Visual split bar */}
+                    <div className="split-bar" style={{ marginBottom: 20 }}>
+                      <div className="split-seg split-train" style={{ flex: form.trainRatio }}>
+                        训练集 {form.trainRatio}%
+                      </div>
+                      <div className="split-seg split-val" style={{ flex: form.valRatio }}>
+                        验证集 {form.valRatio}%
+                      </div>
+                      <div className="split-seg split-test" style={{ flex: form.testRatio }}>
+                        测试集 {form.testRatio}%
+                      </div>
+                    </div>
+
+                    {/* Image counts */}
+                    {dataset && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
+                        {[
+                          { label: '训练集', ratio: form.trainRatio, color: 'var(--accent-bright)' },
+                          { label: '验证集', ratio: form.valRatio, color: 'var(--teal)' },
+                          { label: '测试集', ratio: form.testRatio, color: 'var(--warning)' },
+                        ].map(s => (
+                          <div key={s.label} className="metric-chip">
+                            <div className="metric-chip-value" style={{ color: s.color, fontSize: 18 }}>
+                              {Math.round(dataset.images * s.ratio / 100).toLocaleString()}
+                            </div>
+                            <div className="metric-chip-label">{s.label} ({s.ratio}%)</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      <SliderField
+                        label="训练集比例"
+                        value={form.trainRatio}
+                        min={50} max={90}
+                        onChange={v => adjustSplit('trainRatio', v)}
+                        color="var(--accent)"
+                        suffix="%"
+                      />
+                      <SliderField
+                        label="验证集比例"
+                        value={form.valRatio}
+                        min={5} max={30}
+                        onChange={v => adjustSplit('valRatio', v)}
+                        color="var(--teal)"
+                        suffix="%"
+                        hint={`测试集自动计算为 ${form.testRatio}%`}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(27,107,239,0.06)', borderRadius: 8, border: '1px solid rgba(27,107,239,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+                      <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
+                      <span>推荐训练集 70%、验证集 20%、测试集 10%。过小的验证集可能导致过拟合评估不准确。</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Option B: Select Existing Slice */}
+              {form.sliceId !== null && (
+                <div style={{ animation: 'slideIn 0.2s ease-out' }}>
+                  <SectionTitle icon={<Copy size={15} />} title="选择切分" subtitle="从已保存的切分中选择" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                    {SLICES.map(slice => {
+                      const total = slice.trainCount + slice.valCount + slice.testCount
+                      const trainPct = Math.round((slice.trainCount / total) * 100)
+                      const valPct = Math.round((slice.valCount / total) * 100)
+                      const testPct = Math.round((slice.testCount / total) * 100)
+                      return (
+                        <div
+                          key={slice.id}
+                          className="select-card"
+                          style={{
+                            borderColor: form.sliceId === slice.id ? 'var(--accent)' : undefined,
+                            background: form.sliceId === slice.id ? 'var(--accent-glow)' : undefined,
+                            display: 'flex', alignItems: 'center', gap: 16,
+                          }}
+                          onClick={() => setField('sliceId', slice.id)}
+                        >
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{slice.name}</span>
+                            </div>
+                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>
+                              数据集: {slice.datasetName} · 创建者: {slice.creator} · 创建于 {slice.createdAt}
+                            </div>
+                            <div style={{ display: 'flex', gap: 12 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ color: 'var(--accent-bright)', fontWeight: 600 }}>{slice.trainCount.toLocaleString()}</span>
+                                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>训练集 ({trainPct}%)</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ color: 'var(--teal)', fontWeight: 600 }}>{slice.valCount.toLocaleString()}</span>
+                                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>验证集 ({valPct}%)</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ color: 'var(--warning)', fontWeight: 600 }}>{slice.testCount.toLocaleString()}</span>
+                                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>测试集 ({testPct}%)</span>
+                              </div>
+                            </div>
+                          </div>
+                          {form.sliceId === slice.id && (
+                            <div style={{ width: 20, height: 20, background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <CheckCircle2 size={12} color="white" />
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  <div className="card" style={{ padding: 20 }}>
+                    {form.sliceId && (
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>选中的切分信息</div>
+                        {(() => {
+                          const slice = SLICES.find(s => s.id === form.sliceId)
+                          if (!slice) return null
+                          const total = slice.trainCount + slice.valCount + slice.testCount
+                          return (
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>{slice.name}</div>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                                {[
+                                  { label: '训练集', count: slice.trainCount, pct: Math.round((slice.trainCount / total) * 100), color: 'var(--accent-bright)' },
+                                  { label: '验证集', count: slice.valCount, pct: Math.round((slice.valCount / total) * 100), color: 'var(--teal)' },
+                                  { label: '测试集', count: slice.testCount, pct: Math.round((slice.testCount / total) * 100), color: 'var(--warning)' },
+                                ].map(s => (
+                                  <div key={s.label} className="metric-chip">
+                                    <div className="metric-chip-value" style={{ color: s.color, fontSize: 18 }}>
+                                      {s.count.toLocaleString()}
+                                    </div>
+                                    <div className="metric-chip-label">{s.label} ({s.pct}%)</div>
+                                  </div>
+                                ))}
+                              </div>
+                              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border-dim)', fontSize: 12, color: 'var(--text-muted)' }}>
+                                数据集: {slice.datasetName} · 创建者: {slice.creator} · 创建于 {slice.createdAt}
+                              </div>
+                            </div>
+                          )
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

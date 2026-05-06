@@ -65,7 +65,8 @@ function Sidebar() {
         <NavLink to="/models" icon={<Package size={15} />} label="模型管理" />
 
         <div className="nav-label">数据</div>
-        <NavLink to="/datasets" icon={<Layers size={15} />} label="数据集同步" />
+        <NavLink to="/datasets" icon={<Layers size={15} />} label="数据集" />
+        <NavLink to="/slices" icon={<Layers size={15} />} label="划分" />
         <NavLink to="/monitor" icon={<Activity size={15} />} label="资源监控" />
       </div>
 
