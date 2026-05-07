@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Package, Plus, Copy, ArrowLeft, CheckCircle2, AlertCircle, Layers } from 'lucide-react'
 
-export const Route = createFileRoute('/square/create')({
+export const Route = createFileRoute('/models/create')({
   component: PublishModel,
 })
 

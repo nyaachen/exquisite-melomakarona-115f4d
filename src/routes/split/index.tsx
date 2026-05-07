@@ -13,7 +13,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
-export const Route = createFileRoute('/slices/')({
+export const Route = createFileRoute('/split/')({
   component: SlicesList,
 })
 

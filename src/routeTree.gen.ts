@@ -11,27 +11,26 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VisualIndexRouteImport } from './routes/visual/index'
 import { Route as ValidateIndexRouteImport } from './routes/validate/index'
+import { Route as TrainIndexRouteImport } from './routes/train/index'
 import { Route as TemplateIndexRouteImport } from './routes/template/index'
 import { Route as TasksIndexRouteImport } from './routes/tasks/index'
-import { Route as SquareIndexRouteImport } from './routes/square/index'
-import { Route as SlicesIndexRouteImport } from './routes/slices/index'
+import { Route as SplitIndexRouteImport } from './routes/split/index'
 import { Route as MonitorIndexRouteImport } from './routes/monitor/index'
 import { Route as ModelsIndexRouteImport } from './routes/models/index'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets/index'
-import { Route as VisualModelIdRouteImport } from './routes/visual/$modelId'
 import { Route as ValidateCreateRouteImport } from './routes/validate/create'
 import { Route as ValidateTaskIdRouteImport } from './routes/validate/$taskId'
+import { Route as TrainCreateRouteImport } from './routes/train/create'
+import { Route as TrainTaskIdRouteImport } from './routes/train/$taskId'
 import { Route as TemplateCreateRouteImport } from './routes/template/create'
 import { Route as TemplateTemplateIdRouteImport } from './routes/template/$templateId'
 import { Route as TasksCreateRouteImport } from './routes/tasks/create'
 import { Route as TasksTaskIdRouteImport } from './routes/tasks/$taskId'
 import { Route as SystemUserRouteImport } from './routes/system/user'
-import { Route as SquareCreateRouteImport } from './routes/square/create'
-import { Route as SlicesCreateRouteImport } from './routes/slices/create'
-import { Route as ModelsSquareRouteImport } from './routes/models/square'
+import { Route as SplitCreateRouteImport } from './routes/split/create'
 import { Route as ModelsManualUploadRouteImport } from './routes/models/manualUpload'
+import { Route as ModelsCreateRouteImport } from './routes/models/create'
 import { Route as ModelsModelIdRouteImport } from './routes/models/$modelId'
 import { Route as DatasetsDatasetIdRouteImport } from './routes/datasets/$datasetId'
 
@@ -45,14 +44,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VisualIndexRoute = VisualIndexRouteImport.update({
-  id: '/visual/',
-  path: '/visual/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ValidateIndexRoute = ValidateIndexRouteImport.update({
   id: '/validate/',
   path: '/validate/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrainIndexRoute = TrainIndexRouteImport.update({
+  id: '/train/',
+  path: '/train/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateIndexRoute = TemplateIndexRouteImport.update({
@@ -65,14 +64,9 @@ const TasksIndexRoute = TasksIndexRouteImport.update({
   path: '/tasks/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SquareIndexRoute = SquareIndexRouteImport.update({
-  id: '/square/',
-  path: '/square/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SlicesIndexRoute = SlicesIndexRouteImport.update({
-  id: '/slices/',
-  path: '/slices/',
+const SplitIndexRoute = SplitIndexRouteImport.update({
+  id: '/split/',
+  path: '/split/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MonitorIndexRoute = MonitorIndexRouteImport.update({
@@ -90,11 +84,6 @@ const DatasetsIndexRoute = DatasetsIndexRouteImport.update({
   path: '/datasets/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VisualModelIdRoute = VisualModelIdRouteImport.update({
-  id: '/visual/$modelId',
-  path: '/visual/$modelId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ValidateCreateRoute = ValidateCreateRouteImport.update({
   id: '/validate/create',
   path: '/validate/create',
@@ -103,6 +92,16 @@ const ValidateCreateRoute = ValidateCreateRouteImport.update({
 const ValidateTaskIdRoute = ValidateTaskIdRouteImport.update({
   id: '/validate/$taskId',
   path: '/validate/$taskId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrainCreateRoute = TrainCreateRouteImport.update({
+  id: '/train/create',
+  path: '/train/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrainTaskIdRoute = TrainTaskIdRouteImport.update({
+  id: '/train/$taskId',
+  path: '/train/$taskId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplateCreateRoute = TemplateCreateRouteImport.update({
@@ -130,24 +129,19 @@ const SystemUserRoute = SystemUserRouteImport.update({
   path: '/system/user',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SquareCreateRoute = SquareCreateRouteImport.update({
-  id: '/square/create',
-  path: '/square/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SlicesCreateRoute = SlicesCreateRouteImport.update({
-  id: '/slices/create',
-  path: '/slices/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModelsSquareRoute = ModelsSquareRouteImport.update({
-  id: '/models/square',
-  path: '/models/square',
+const SplitCreateRoute = SplitCreateRouteImport.update({
+  id: '/split/create',
+  path: '/split/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsManualUploadRoute = ModelsManualUploadRouteImport.update({
   id: '/models/manualUpload',
   path: '/models/manualUpload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelsCreateRoute = ModelsCreateRouteImport.update({
+  id: '/models/create',
+  path: '/models/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsModelIdRoute = ModelsModelIdRouteImport.update({
@@ -166,54 +160,52 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
+  '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
-  '/models/square': typeof ModelsSquareRoute
-  '/slices/create': typeof SlicesCreateRoute
-  '/square/create': typeof SquareCreateRoute
+  '/split/create': typeof SplitCreateRoute
   '/system/user': typeof SystemUserRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/tasks/create': typeof TasksCreateRoute
   '/template/$templateId': typeof TemplateTemplateIdRoute
   '/template/create': typeof TemplateCreateRoute
+  '/train/$taskId': typeof TrainTaskIdRoute
+  '/train/create': typeof TrainCreateRoute
   '/validate/$taskId': typeof ValidateTaskIdRoute
   '/validate/create': typeof ValidateCreateRoute
-  '/visual/$modelId': typeof VisualModelIdRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
-  '/slices/': typeof SlicesIndexRoute
-  '/square/': typeof SquareIndexRoute
+  '/split/': typeof SplitIndexRoute
   '/tasks/': typeof TasksIndexRoute
   '/template/': typeof TemplateIndexRoute
+  '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
-  '/visual/': typeof VisualIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/faq': typeof FaqRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
+  '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
-  '/models/square': typeof ModelsSquareRoute
-  '/slices/create': typeof SlicesCreateRoute
-  '/square/create': typeof SquareCreateRoute
+  '/split/create': typeof SplitCreateRoute
   '/system/user': typeof SystemUserRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/tasks/create': typeof TasksCreateRoute
   '/template/$templateId': typeof TemplateTemplateIdRoute
   '/template/create': typeof TemplateCreateRoute
+  '/train/$taskId': typeof TrainTaskIdRoute
+  '/train/create': typeof TrainCreateRoute
   '/validate/$taskId': typeof ValidateTaskIdRoute
   '/validate/create': typeof ValidateCreateRoute
-  '/visual/$modelId': typeof VisualModelIdRoute
   '/datasets': typeof DatasetsIndexRoute
   '/models': typeof ModelsIndexRoute
   '/monitor': typeof MonitorIndexRoute
-  '/slices': typeof SlicesIndexRoute
-  '/square': typeof SquareIndexRoute
+  '/split': typeof SplitIndexRoute
   '/tasks': typeof TasksIndexRoute
   '/template': typeof TemplateIndexRoute
+  '/train': typeof TrainIndexRoute
   '/validate': typeof ValidateIndexRoute
-  '/visual': typeof VisualIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -221,27 +213,26 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
+  '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
-  '/models/square': typeof ModelsSquareRoute
-  '/slices/create': typeof SlicesCreateRoute
-  '/square/create': typeof SquareCreateRoute
+  '/split/create': typeof SplitCreateRoute
   '/system/user': typeof SystemUserRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
   '/tasks/create': typeof TasksCreateRoute
   '/template/$templateId': typeof TemplateTemplateIdRoute
   '/template/create': typeof TemplateCreateRoute
+  '/train/$taskId': typeof TrainTaskIdRoute
+  '/train/create': typeof TrainCreateRoute
   '/validate/$taskId': typeof ValidateTaskIdRoute
   '/validate/create': typeof ValidateCreateRoute
-  '/visual/$modelId': typeof VisualModelIdRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
-  '/slices/': typeof SlicesIndexRoute
-  '/square/': typeof SquareIndexRoute
+  '/split/': typeof SplitIndexRoute
   '/tasks/': typeof TasksIndexRoute
   '/template/': typeof TemplateIndexRoute
+  '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
-  '/visual/': typeof VisualIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -250,81 +241,78 @@ export interface FileRouteTypes {
     | '/faq'
     | '/datasets/$datasetId'
     | '/models/$modelId'
+    | '/models/create'
     | '/models/manualUpload'
-    | '/models/square'
-    | '/slices/create'
-    | '/square/create'
+    | '/split/create'
     | '/system/user'
     | '/tasks/$taskId'
     | '/tasks/create'
     | '/template/$templateId'
     | '/template/create'
+    | '/train/$taskId'
+    | '/train/create'
     | '/validate/$taskId'
     | '/validate/create'
-    | '/visual/$modelId'
     | '/datasets/'
     | '/models/'
     | '/monitor/'
-    | '/slices/'
-    | '/square/'
+    | '/split/'
     | '/tasks/'
     | '/template/'
+    | '/train/'
     | '/validate/'
-    | '/visual/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/faq'
     | '/datasets/$datasetId'
     | '/models/$modelId'
+    | '/models/create'
     | '/models/manualUpload'
-    | '/models/square'
-    | '/slices/create'
-    | '/square/create'
+    | '/split/create'
     | '/system/user'
     | '/tasks/$taskId'
     | '/tasks/create'
     | '/template/$templateId'
     | '/template/create'
+    | '/train/$taskId'
+    | '/train/create'
     | '/validate/$taskId'
     | '/validate/create'
-    | '/visual/$modelId'
     | '/datasets'
     | '/models'
     | '/monitor'
-    | '/slices'
-    | '/square'
+    | '/split'
     | '/tasks'
     | '/template'
+    | '/train'
     | '/validate'
-    | '/visual'
   id:
     | '__root__'
     | '/'
     | '/faq'
     | '/datasets/$datasetId'
     | '/models/$modelId'
+    | '/models/create'
     | '/models/manualUpload'
-    | '/models/square'
-    | '/slices/create'
-    | '/square/create'
+    | '/split/create'
     | '/system/user'
     | '/tasks/$taskId'
     | '/tasks/create'
     | '/template/$templateId'
     | '/template/create'
+    | '/train/$taskId'
+    | '/train/create'
     | '/validate/$taskId'
     | '/validate/create'
-    | '/visual/$modelId'
     | '/datasets/'
     | '/models/'
     | '/monitor/'
-    | '/slices/'
-    | '/square/'
+    | '/split/'
     | '/tasks/'
     | '/template/'
+    | '/train/'
     | '/validate/'
-    | '/visual/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -332,27 +320,26 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   DatasetsDatasetIdRoute: typeof DatasetsDatasetIdRoute
   ModelsModelIdRoute: typeof ModelsModelIdRoute
+  ModelsCreateRoute: typeof ModelsCreateRoute
   ModelsManualUploadRoute: typeof ModelsManualUploadRoute
-  ModelsSquareRoute: typeof ModelsSquareRoute
-  SlicesCreateRoute: typeof SlicesCreateRoute
-  SquareCreateRoute: typeof SquareCreateRoute
+  SplitCreateRoute: typeof SplitCreateRoute
   SystemUserRoute: typeof SystemUserRoute
   TasksTaskIdRoute: typeof TasksTaskIdRoute
   TasksCreateRoute: typeof TasksCreateRoute
   TemplateTemplateIdRoute: typeof TemplateTemplateIdRoute
   TemplateCreateRoute: typeof TemplateCreateRoute
+  TrainTaskIdRoute: typeof TrainTaskIdRoute
+  TrainCreateRoute: typeof TrainCreateRoute
   ValidateTaskIdRoute: typeof ValidateTaskIdRoute
   ValidateCreateRoute: typeof ValidateCreateRoute
-  VisualModelIdRoute: typeof VisualModelIdRoute
   DatasetsIndexRoute: typeof DatasetsIndexRoute
   ModelsIndexRoute: typeof ModelsIndexRoute
   MonitorIndexRoute: typeof MonitorIndexRoute
-  SlicesIndexRoute: typeof SlicesIndexRoute
-  SquareIndexRoute: typeof SquareIndexRoute
+  SplitIndexRoute: typeof SplitIndexRoute
   TasksIndexRoute: typeof TasksIndexRoute
   TemplateIndexRoute: typeof TemplateIndexRoute
+  TrainIndexRoute: typeof TrainIndexRoute
   ValidateIndexRoute: typeof ValidateIndexRoute
-  VisualIndexRoute: typeof VisualIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -371,18 +358,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/visual/': {
-      id: '/visual/'
-      path: '/visual'
-      fullPath: '/visual/'
-      preLoaderRoute: typeof VisualIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/validate/': {
       id: '/validate/'
       path: '/validate'
       fullPath: '/validate/'
       preLoaderRoute: typeof ValidateIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/train/': {
+      id: '/train/'
+      path: '/train'
+      fullPath: '/train/'
+      preLoaderRoute: typeof TrainIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/': {
@@ -399,18 +386,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/square/': {
-      id: '/square/'
-      path: '/square'
-      fullPath: '/square/'
-      preLoaderRoute: typeof SquareIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/slices/': {
-      id: '/slices/'
-      path: '/slices'
-      fullPath: '/slices/'
-      preLoaderRoute: typeof SlicesIndexRouteImport
+    '/split/': {
+      id: '/split/'
+      path: '/split'
+      fullPath: '/split/'
+      preLoaderRoute: typeof SplitIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/monitor/': {
@@ -434,13 +414,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DatasetsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/visual/$modelId': {
-      id: '/visual/$modelId'
-      path: '/visual/$modelId'
-      fullPath: '/visual/$modelId'
-      preLoaderRoute: typeof VisualModelIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/validate/create': {
       id: '/validate/create'
       path: '/validate/create'
@@ -453,6 +426,20 @@ declare module '@tanstack/react-router' {
       path: '/validate/$taskId'
       fullPath: '/validate/$taskId'
       preLoaderRoute: typeof ValidateTaskIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/train/create': {
+      id: '/train/create'
+      path: '/train/create'
+      fullPath: '/train/create'
+      preLoaderRoute: typeof TrainCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/train/$taskId': {
+      id: '/train/$taskId'
+      path: '/train/$taskId'
+      fullPath: '/train/$taskId'
+      preLoaderRoute: typeof TrainTaskIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/template/create': {
@@ -490,25 +477,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SystemUserRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/square/create': {
-      id: '/square/create'
-      path: '/square/create'
-      fullPath: '/square/create'
-      preLoaderRoute: typeof SquareCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/slices/create': {
-      id: '/slices/create'
-      path: '/slices/create'
-      fullPath: '/slices/create'
-      preLoaderRoute: typeof SlicesCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/models/square': {
-      id: '/models/square'
-      path: '/models/square'
-      fullPath: '/models/square'
-      preLoaderRoute: typeof ModelsSquareRouteImport
+    '/split/create': {
+      id: '/split/create'
+      path: '/split/create'
+      fullPath: '/split/create'
+      preLoaderRoute: typeof SplitCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/models/manualUpload': {
@@ -516,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/models/manualUpload'
       fullPath: '/models/manualUpload'
       preLoaderRoute: typeof ModelsManualUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/models/create': {
+      id: '/models/create'
+      path: '/models/create'
+      fullPath: '/models/create'
+      preLoaderRoute: typeof ModelsCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/models/$modelId': {
@@ -540,27 +520,26 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   DatasetsDatasetIdRoute: DatasetsDatasetIdRoute,
   ModelsModelIdRoute: ModelsModelIdRoute,
+  ModelsCreateRoute: ModelsCreateRoute,
   ModelsManualUploadRoute: ModelsManualUploadRoute,
-  ModelsSquareRoute: ModelsSquareRoute,
-  SlicesCreateRoute: SlicesCreateRoute,
-  SquareCreateRoute: SquareCreateRoute,
+  SplitCreateRoute: SplitCreateRoute,
   SystemUserRoute: SystemUserRoute,
   TasksTaskIdRoute: TasksTaskIdRoute,
   TasksCreateRoute: TasksCreateRoute,
   TemplateTemplateIdRoute: TemplateTemplateIdRoute,
   TemplateCreateRoute: TemplateCreateRoute,
+  TrainTaskIdRoute: TrainTaskIdRoute,
+  TrainCreateRoute: TrainCreateRoute,
   ValidateTaskIdRoute: ValidateTaskIdRoute,
   ValidateCreateRoute: ValidateCreateRoute,
-  VisualModelIdRoute: VisualModelIdRoute,
   DatasetsIndexRoute: DatasetsIndexRoute,
   ModelsIndexRoute: ModelsIndexRoute,
   MonitorIndexRoute: MonitorIndexRoute,
-  SlicesIndexRoute: SlicesIndexRoute,
-  SquareIndexRoute: SquareIndexRoute,
+  SplitIndexRoute: SplitIndexRoute,
   TasksIndexRoute: TasksIndexRoute,
   TemplateIndexRoute: TemplateIndexRoute,
+  TrainIndexRoute: TrainIndexRoute,
   ValidateIndexRoute: ValidateIndexRoute,
-  VisualIndexRoute: VisualIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

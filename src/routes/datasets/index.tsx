@@ -176,9 +176,6 @@ function DatasetsPage() {
           <button className="btn btn-secondary btn-sm">
             <RefreshCw size={13} /> 从科宝标注平台同步
           </button>
-          <Link to="/tasks/create" className="btn btn-primary btn-sm">
-            <ArrowRight size={13} /> 创建数据集划分
-          </Link>
         </div>
       </div>
 
@@ -221,8 +218,14 @@ function DatasetsPage() {
                     </td>
                     <td style={{ fontSize: 12 }}>{ds.images.toLocaleString()}</td>
                     <td>
+                      <Link to={`/datasets/${ds.id}`}  className="btn btn-ghost btn-sm">
+                        查看详情 <ArrowRight size={11} />
+                      </Link>
+                      <Link to="/split/create" className="btn btn-ghost btn-sm">
+                        创建划分 <ArrowRight size={11} />
+                      </Link>
                       <Link to="/tasks/create" className="btn btn-ghost btn-sm">
-                        前往标注平台查看 <ArrowRight size={11} />
+                        创建训练任务 <ArrowRight size={11} />
                       </Link>
                     </td>
                   </tr>

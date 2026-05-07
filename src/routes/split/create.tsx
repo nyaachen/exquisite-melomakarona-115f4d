@@ -15,7 +15,7 @@ import {
   Image,
 } from 'lucide-react'
 
-export const Route = createFileRoute('/slices/create')({
+export const Route = createFileRoute('/split/create')({
   component: RouteComponent,
 })
 

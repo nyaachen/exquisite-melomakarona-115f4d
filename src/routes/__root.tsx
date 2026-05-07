@@ -56,35 +56,33 @@ function Sidebar() {
       </div>
 
       <div className="nav-section">
-        <div className="nav-label">工作台</div>
-        <NavLink to="/" icon={<LayoutDashboard size={15} />} label="训练概览" />
+        
+        <NavLink to="/" icon={<LayoutDashboard size={15} />} label="首页" />
+
+        <div className="nav-label">模型</div>
+        <NavLink to="/models" icon={<Package size={15} />} label="模型广场" />
 
         <div className="nav-label">数据</div>
         <NavLink to="/datasets" icon={<Layers size={15} />} label="数据集" />
-        <NavLink to="/slices" icon={<Layers size={15} />} label="划分" />
 
         <div className="nav-label">训练</div>
-        <NavLink to="/tasks/create" icon={<PlusCircle size={15} />} label="创建训练任务" />
-        <NavLink to="/tasks" icon={<Cpu size={15} />} label="训练任务" />
-        <NavLink to="/models" icon={<Package size={15} />} label="训练结果" />
-
-        <div className="nav-label">模型</div>
-        <NavLink to="/square" icon={<Package size={15} />} label="模型广场" />
-        <NavLink to="/visual" icon={<Package size={15} />} label="可视化" />
-        <NavLink to="/validate" icon={<Package size={15} />} label="验证" />
+        <NavLink to="/split" icon={<Layers size={15} />} label="split" />
+        <NavLink to="/template" icon={<Activity size={15} />} label="训练预设" />
+        <NavLink to="/train" icon={<Cpu size={15} />} label="训练任务" />
+        <NavLink to="/validate" icon={<Package size={15} />} label="验证任务" />
 
         <div className="nav-label">系统</div>
+        <NavLink to="/template" icon={<Activity size={15} />} label="模型模板" />
         <NavLink to="/monitor" icon={<Activity size={15} />} label="资源监控" />
-        <NavLink to="/template" icon={<Activity size={15} />} label="模板" />
       </div>
 
       <div className="sidebar-footer">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success)' }} />
+        <div className="flex items-center gap-1.5 mb-1">
+          <div className="status-dot status-dot-success" />
           <span>云服务器 · GPU×4 在线</span>
         </div>
-        <div style={{ color: 'var(--text-muted)', fontSize: 10 }}>已连接科宝智能体中台</div>
-        <div style={{ color: 'var(--text-muted)', fontSize: 10 }}>已连接科宝标注平台</div>
+        <div className="text-xs text-muted">已连接科宝智能体中台</div>
+        <div className="text-xs text-muted">已连接科宝标注平台</div>
       </div>
     </nav>
   )
@@ -99,7 +97,7 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
     <Link to={to as any} className={`nav-link ${isActive ? 'active' : ''}`}>
       {icon}
       <span>{label}</span>
-      {isActive && <ChevronRight size={12} style={{ marginLeft: 'auto', opacity: 0.6 }} />}
+      {isActive && <ChevronRight size={12} className="ml-auto opacity-60" />}
     </Link>
   )
 }
