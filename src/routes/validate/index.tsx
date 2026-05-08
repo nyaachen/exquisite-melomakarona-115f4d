@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Plus, CheckCircle2, XCircle, Clock, RefreshCw, ArrowRight, Target } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, CheckCircle2, XCircle, Clock, RefreshCw, ArrowRight, Target, Search } from 'lucide-react'
 import { VALIDATE_STATUS } from '../../constants'
 
 export const Route = createFileRoute('/validate/')({
@@ -104,6 +105,14 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
 }
 
 function ValidateList() {
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filtered = VALIDATE_TASKS.filter(t =>
+    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.modelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    t.datasetName.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
       <div className="page-header">
@@ -118,6 +127,18 @@ function ValidateList() {
 
       <div style={{ padding: '24px 32px' }}>
         <div className="card">
+          <div className="card-header">
+            <div className="search-input">
+              <Search size={14} style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="搜索任务名称、模型或数据集..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-field"
+              />
+            </div>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>
@@ -135,7 +156,7 @@ function ValidateList() {
                 </tr>
               </thead>
               <tbody>
-                {VALIDATE_TASKS.map((task) => {
+                {filtered.map((task) => {
                   const sc = VALIDATE_STATUS[task.status]
                   const ic = STATUS_ICONS[task.status]
                   return (

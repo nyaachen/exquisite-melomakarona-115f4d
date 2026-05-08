@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { RefreshCw, Layers, ArrowRight } from 'lucide-react'
+import { useState } from 'react'
+import { RefreshCw, Layers, ArrowRight, Search } from 'lucide-react'
 
 export const Route = createFileRoute('/datasets/')({
   component: DatasetsPage,
@@ -14,6 +15,12 @@ const DATASETS = [
 ]
 
 function DatasetsPage() {
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredDatasets = DATASETS.filter(ds =>
+    ds.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
       <div className="page-header">
@@ -35,6 +42,18 @@ function DatasetsPage() {
         </div>
 
         <div className="card">
+          <div className="card-header">
+            <div className="search-input">
+              <Search size={14} style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="搜索数据集名称..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-field"
+              />
+            </div>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>
@@ -49,7 +68,7 @@ function DatasetsPage() {
                 </tr>
               </thead>
               <tbody>
-                {DATASETS.map(ds => (
+                {filteredDatasets.map(ds => (
                   <tr key={ds.id}>
                     <td className="primary">{ds.name}</td>
                     <td className="mono">{ds.images.toLocaleString()}</td>

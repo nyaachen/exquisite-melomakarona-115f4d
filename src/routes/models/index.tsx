@@ -10,6 +10,7 @@ import {
   Rocket,
   Archive,
   Upload,
+  Search,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/models/')({
@@ -126,6 +127,14 @@ const SQUARE_MODELS: SquareModel[] = [
 function SquareList() {
   const [expandedModel, setExpandedModel] = useState<string | null>(null)
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredModels = SQUARE_MODELS.filter(m =>
+    m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.classes.some(c => c.toLowerCase().includes(searchQuery.toLowerCase()))
+  )
 
   return (
     <div className="slide-in">
@@ -140,22 +149,21 @@ function SquareList() {
       </div>
 
       <div className="p-content">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
-          {[
-            { label: '模型总数', value: SQUARE_MODELS.length, color: 'var(--accent-bright)' },
-            { label: '已发布版本', value: SQUARE_MODELS.reduce((s, m) => s + m.publishedVersions, 0), color: 'var(--teal)' },
-            { label: '最高 mAP', value: Math.max(...SQUARE_MODELS.map(m => m.latestMAP)).toFixed(3), color: 'var(--success)' },
-            { label: '平均 F1', value: (SQUARE_MODELS.reduce((s, m) => s + m.latestF1, 0) / SQUARE_MODELS.length).toFixed(3), color: 'var(--warning)' },
-          ].map(s => (
-            <div key={s.label} className="stat-card" style={{ padding: 16 }}>
-              <div className="stat-label">{s.label}</div>
-              <div className="metric-chip-value" style={{ fontFamily: 'JetBrains Mono', fontSize: 26, color: s.color, margin: '6px 0 2px' }}>{s.value}</div>
-            </div>
-          ))}
+        <div style={{ marginBottom: 20 }}>
+          <div className="search-input" style={{ maxWidth: 400 }}>
+            <Search size={14} style={{ color: 'var(--text-muted)' }} />
+            <input
+              type="text"
+              placeholder="搜索模型名称、描述、类别或标签..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input-field"
+            />
+          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-          {SQUARE_MODELS.map((model) => (
+          {filteredModels.map((model) => (
             <Link
               key={model.id}
               to="/models/$modelId"

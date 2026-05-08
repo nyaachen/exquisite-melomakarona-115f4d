@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   ChevronRight,
   ChevronLeft,
@@ -16,6 +16,7 @@ import {
   Target,
   FileText,
   AlertCircle,
+  Server,
 } from 'lucide-react'
 import { DatasetPicker, type DatasetEntry } from '../../components/DatasetPicker'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
@@ -166,6 +167,47 @@ const ALL_PUBLIC_MODELS = [
   { id: 'pub-qwen-14b-base', name: 'Qwen-14B-Chat (原版)', architectureId: 'arch-qwen', source: 'Alibaba', fileSize: '28.0 GB', desc: '通义千问 140亿参数预训练', inputSize: 2048, numClasses: 0 },
 ]
 
+interface GpuCardOption {
+  id: string
+  index: number
+  model: string
+  memory: string
+}
+
+interface GpuServerOption {
+  id: string
+  name: string
+  spec: string
+  status: string
+  gpus: GpuCardOption[]
+}
+
+const GPU_SERVER_OPTIONS: GpuServerOption[] = [
+  { id: 'gpu-001', name: '训练节点-A', spec: '512GB RAM', status: 'online', gpus: [
+    { id: 'gpu-001-0', index: 0, model: 'A100', memory: '80GB' },
+    { id: 'gpu-001-1', index: 1, model: 'A100', memory: '80GB' },
+    { id: 'gpu-001-2', index: 2, model: 'A100', memory: '80GB' },
+    { id: 'gpu-001-3', index: 3, model: 'A100', memory: '80GB' },
+  ]},
+  { id: 'gpu-002', name: '训练节点-B', spec: '256GB RAM', status: 'online', gpus: [
+    { id: 'gpu-002-0', index: 0, model: 'A100', memory: '80GB' },
+    { id: 'gpu-002-1', index: 1, model: 'A100', memory: '80GB' },
+  ]},
+  { id: 'gpu-003', name: '推理节点-A', spec: '128GB RAM', status: 'online', gpus: [
+    { id: 'gpu-003-0', index: 0, model: 'V100', memory: '32GB' },
+    { id: 'gpu-003-1', index: 1, model: 'V100', memory: '32GB' },
+  ]},
+  { id: 'gpu-004', name: '备用节点', spec: '384GB RAM', status: 'maintenance', gpus: [
+    { id: 'gpu-004-0', index: 0, model: 'A6000', memory: '48GB' },
+    { id: 'gpu-004-1', index: 1, model: 'A6000', memory: '48GB' },
+    { id: 'gpu-004-2', index: 2, model: 'A6000', memory: '48GB' },
+    { id: 'gpu-004-3', index: 3, model: 'A6000', memory: '48GB' },
+  ]},
+  { id: 'gpu-005', name: '开发测试节点', spec: '64GB RAM', status: 'offline', gpus: [
+    { id: 'gpu-005-0', index: 0, model: 'RTX 4090', memory: '24GB' },
+  ]},
+]
+
 const STEPS = [
   { id: 1, label: '选择数据集', icon: <Layers size={14} /> },
   { id: 2, label: '模型与参数', icon: <Sliders size={14} /> },
@@ -193,8 +235,10 @@ function CreateTask() {
   const [startPointId, setStartPointId] = useState<string | null>(null)
   const [startPointVersion, setStartPointVersion] = useState<string>('')
 
-  // Step 3: Task name
+  // Step 3: Task name + server
   const [taskName, setTaskName] = useState('')
+  const [selectedServerId, setSelectedServerId] = useState('')
+  const [selectedGpuIds, setSelectedGpuIds] = useState<string[]>([])
 
   const visiblePresets = useMemo(() =>
     ALL_PRESETS.filter(p => p.visibility === 'public' || p.author === CURRENT_USER),
@@ -203,6 +247,8 @@ function CreateTask() {
   const visiblePublicModels = useMemo(() =>
     ALL_PUBLIC_MODELS.filter(m => m.architectureId === architectureId),
   [architectureId])
+
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }) }, [step])
 
   const architecture = ARCHITECTURES.find(a => a.id === architectureId)
   const trainDs = DATASET_ENTRIES.find(d => d.id === trainDatasetId)
@@ -303,6 +349,11 @@ function CreateTask() {
       items.push({ label: '基础模型', value: architecture.baseModel })
     }
     items.push({ label: '训练起点', value: STARTING_POINT_TYPES.find(s => s.id === startPointType)?.name || '随机' })
+    const selectedServer = GPU_SERVER_OPTIONS.find(s => s.id === selectedServerId)
+    const gpuNames = selectedServer
+      ? selectedGpuIds.map(id => selectedServer.gpus.find(g => g.id === id)).filter(Boolean).map(g => `#${g!.index} ${g!.model}`).join('、') || '未选择显卡'
+      : ''
+    items.push({ label: 'GPU 服务器', value: selectedServer ? `${selectedServer.name} · 显卡: ${gpuNames}` : '未选择' })
     if (architecture) {
       architecture.params.forEach(p => {
         const val = paramValues[p.key]
@@ -310,7 +361,7 @@ function CreateTask() {
       })
     }
     return items
-  }, [trainDs, valDs, testDs, trainImageCount, valImageCount, testImageCount, architecture, startPointType, paramValues])
+  }, [trainDs, valDs, testDs, trainImageCount, valImageCount, testImageCount, architecture, startPointType, paramValues, selectedServerId, selectedGpuIds])
 
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
@@ -343,7 +394,26 @@ function CreateTask() {
           ))}
         </div>
 
-        <div key={step} style={{ animation: 'slideIn 0.25s ease-out' }}>
+        {/* Sticky top nav */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--bg-base)', padding: '10px 0', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: step === 1 ? 'flex-end' : 'space-between', alignItems: 'center' }}>
+          {step > 1 && (
+            <button className="btn btn-secondary" onClick={() => setStep(step - 1)}><ChevronLeft size={15} /> 上一步</button>
+          )}
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>第 {step} / {STEPS.length} 步 · {STEPS[step - 1].label}</span>
+          {step === 1 && (
+            <button className="btn btn-primary" onClick={handleNextFromStep1}>下一步 <ChevronRight size={15} /></button>
+          )}
+          {step === 2 && (
+            <button className="btn btn-primary" onClick={() => setStep(3)}>下一步 <ChevronRight size={15} /></button>
+          )}
+          {step === 3 && (
+            <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting || !taskName}>
+              {submitting ? <><span className="spinner" /> 正在创建…</> : <><CheckCircle2 size={15} /> 创建训练任务</>}
+            </button>
+          )}
+        </div>
+
+        <div style={{ animation: 'slideIn 0.25s ease-out', paddingBottom: '50vh' }}>
 
           {/* ═══════════ Step 1: Select Train/Val/Test Datasets ═══════════ */}
           {step === 1 && (
@@ -601,15 +671,13 @@ function CreateTask() {
                 </div>
               )}
 
-              <SectionTitle icon={<Target size={15} />} title="训练起点" subtitle="选择训练的初始权重来源" />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-                {STARTING_POINT_TYPES.map(sp => (
-                  <div key={sp.id} className="select-card" style={{ borderColor: startPointType === sp.id ? 'var(--accent)' : undefined, background: startPointType === sp.id ? 'var(--accent-glow)' : undefined, display: 'flex', alignItems: 'center', gap: 14 }} onClick={() => { setStartPointType(sp.id); setStartPointId(null); setStartPointVersion('') }}>
-                    <div style={{ width: 36, height: 36, background: startPointType === sp.id ? 'var(--accent)' : 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: startPointType === sp.id ? 'white' : 'var(--text-secondary)' }}>{sp.icon}</div>
-                    <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{sp.name}</div><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{sp.desc}</div></div>
-                    {startPointType === sp.id && <CheckCircle2 size={18} color="var(--accent-bright)" />}
-                  </div>
-                ))}
+              <div className="form-group" style={{ marginBottom: 16 }}>
+                <label className="form-label">训练起点</label>
+                <select className="form-input" value={startPointType} onChange={e => { setStartPointType(e.target.value); setStartPointId(null); setStartPointVersion('') }}>
+                  {STARTING_POINT_TYPES.map(sp => (
+                    <option key={sp.id} value={sp.id}>{sp.name} — {sp.desc}</option>
+                  ))}
+                </select>
               </div>
 
               {startPointType === 'existing_task' && (
@@ -706,6 +774,73 @@ function CreateTask() {
                   <input type="text" className="form-input" placeholder="例：道路缺陷检测 v2.3-finetune" value={taskName} onChange={e => setTaskName(e.target.value)} />
                   <div className="form-hint">清晰的任务名称有助于后续查找和管理训练结果</div>
                 </div>
+              </div>
+
+              <SectionTitle icon={<Server size={15} />} title="选择服务器" subtitle="选择执行训练任务的 GPU 服务器" />
+              <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+                <SearchableDropdown
+                  label="GPU 服务器"
+                  color="var(--accent-bright)"
+                  selectedId={selectedServerId}
+                  onChange={(id) => { setSelectedServerId(id); setSelectedGpuIds([]) }}
+                  items={GPU_SERVER_OPTIONS.map(srv => ({
+                    id: srv.id,
+                    name: srv.name,
+                    subtitle: `${srv.gpus.length} 张 GPU · ${srv.spec}`,
+                    count: srv.gpus.length,
+                    countLabel: 'GPU',
+                  }))}
+                  placeholder="选择执行训练任务的服务器..."
+                />
+
+                {selectedServerId && (() => {
+                  const server = GPU_SERVER_OPTIONS.find(s => s.id === selectedServerId)
+                  if (!server) return null
+                  return (
+                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border-dim)' }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>
+                        选择显卡 <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>（可多选 · 已选 {selectedGpuIds.length}/{server.gpus.length} 张）</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {server.gpus.map(g => {
+                          const selected = selectedGpuIds.includes(g.id)
+                          return (
+                            <label key={g.id} style={{
+                              display: 'flex', alignItems: 'center', gap: 10,
+                              padding: '8px 12px', cursor: 'pointer',
+                              background: selected ? 'var(--accent-glow)' : 'var(--bg-elevated)',
+                              border: `1px solid ${selected ? 'var(--accent)' : 'var(--border-dim)'}`,
+                              transition: 'all 0.15s',
+                            }}>
+                              <input
+                                type="checkbox"
+                                checked={selected}
+                                onChange={() => {
+                                  setSelectedGpuIds(prev =>
+                                    prev.includes(g.id) ? prev.filter(id => id !== g.id) : [...prev, g.id]
+                                  )
+                                }}
+                                style={{ accentColor: 'var(--accent)' }}
+                              />
+                              <Cpu size={14} style={{ color: selected ? 'var(--accent-bright)' : 'var(--text-muted)' }} />
+                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: 11, color: 'var(--text-muted)', minWidth: 24 }}>#{g.index}</span>
+                              <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{g.model}</span>
+                              <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}>{g.memory}</span>
+                            </label>
+                          )
+                        })}
+                      </div>
+                      <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setSelectedGpuIds(server.gpus.map(g => g.id))}>
+                          全选
+                        </button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setSelectedGpuIds([])}>
+                          取消全选
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
 
               <SectionTitle icon={<CheckCircle2 size={15} />} title="配置确认" subtitle="请核对以下配置无误后提交" />

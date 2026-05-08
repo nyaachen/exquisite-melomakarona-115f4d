@@ -163,13 +163,18 @@ function ValidateDetail() {
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
       <div className="page-header">
-        <div>
-          <div className="breadcrumb">
-            <Link to="/">科宝训练平台</Link> ›
-            <Link to="/validate">验证任务</Link> ›
-            <span>{task.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link to="/validate" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={14} /> 返回
+          </Link>
+          <div>
+            <div className="breadcrumb">
+              <Link to="/">科宝训练平台</Link> ›
+              <Link to="/validate">验证任务</Link> ›
+              <span>{task.name}</span>
+            </div>
+            <h1 className="page-title">{task.name}</h1>
           </div>
-          <h1 className="page-title">{task.name}</h1>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {task.status === 'running' && (
@@ -182,9 +187,6 @@ function ValidateDetail() {
               刷新
             </button>
           )}
-          <Link to="/validate" className="btn btn-secondary">
-            <ArrowLeft size={14} /> 返回列表
-          </Link>
         </div>
       </div>
 

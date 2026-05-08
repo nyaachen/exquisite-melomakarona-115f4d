@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Zap, Globe, Lock } from 'lucide-react'
+import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Zap, Globe, Lock, Search } from 'lucide-react'
 import { CATEGORY_MAP } from '../../constants'
 
 export const Route = createFileRoute('/presets/')({
@@ -65,9 +65,13 @@ function PresetList() {
   const [presets, setPresets] = useState(PRESETS)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filtered = presets.filter(p =>
-    filterCategory === 'all' || p.category === filterCategory
+    (filterCategory === 'all' || p.category === filterCategory) &&
+    (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     p.architectureName.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   async function handleDelete(id: string) {
@@ -123,6 +127,18 @@ function PresetList() {
         </div>
 
         <div className="card">
+          <div className="card-header">
+            <div className="search-input">
+              <Search size={14} style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="搜索预设名称、架构或描述..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-field"
+              />
+            </div>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>

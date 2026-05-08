@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Globe, HardDrive } from 'lucide-react'
+import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Globe, HardDrive, Search } from 'lucide-react'
 import { CATEGORY_MAP } from '../../constants'
 
 export const Route = createFileRoute('/pretrained-models/')({
@@ -124,9 +124,13 @@ function PretrainedModelList() {
   const [models, setModels] = useState(PRETRAINED_MODELS)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [filterArch, setFilterArch] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filtered = models.filter(m =>
-    filterArch === 'all' || m.architectureId === filterArch
+    (filterArch === 'all' || m.architectureId === filterArch) &&
+    (m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     m.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     m.source.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   async function handleDelete(id: string) {
@@ -177,6 +181,18 @@ function PretrainedModelList() {
         </div>
 
         <div className="card">
+          <div className="card-header">
+            <div className="search-input">
+              <Search size={14} style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="搜索模型名称、来源或描述..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-field"
+              />
+            </div>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>

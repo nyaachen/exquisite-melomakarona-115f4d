@@ -486,6 +486,7 @@ function TaskDetail() {
   }
 
   return (
+    <>
     <div className="slide-in">
       {/* Header */}
       <div className="page-header">
@@ -1063,14 +1064,16 @@ function TaskDetail() {
         </div>
       </div>
 
-      {/* Publish Modal */}
-      {showPublishModal && (
-        <div className="modal-backdrop" onClick={() => setShowPublishModal(false)}>
-          <div className="modal" style={{ maxWidth: 540 }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>发布模型</span>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowPublishModal(false)}>✕</button>
-            </div>
+    </div>
+
+    {/* Publish Modal — rendered outside slide-in to avoid transform trapping */}
+    {showPublishModal && (
+      <div className="modal-backdrop" onClick={() => setShowPublishModal(false)}>
+        <div className="modal" style={{ maxWidth: 540 }} onClick={e => e.stopPropagation()}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>发布模型</span>
+            <button className="btn btn-ghost btn-sm" onClick={() => setShowPublishModal(false)}>✕</button>
+          </div>
 
             {/* Current task info */}
             <div style={{ padding: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', marginBottom: 16, fontSize: 12 }}>
@@ -1159,6 +1162,6 @@ function TaskDetail() {
         </div>
       )}
 
-    </div>
+    </>
   )
 }

@@ -10,6 +10,7 @@ import {
   ArrowRight,
   CheckCircle2,
   AlertCircle,
+  Search,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/subdatasets/')({
@@ -87,6 +88,13 @@ const SUBDATASETS = [
 function SubdatasetList() {
   const [subdatasets, setSubdatasets] = useState(SUBDATASETS)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filtered = subdatasets.filter(sub =>
+    sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sub.parentDatasetName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (sub.note && sub.note.toLowerCase().includes(searchQuery.toLowerCase()))
+  )
 
   async function handleDelete(id: string) {
     const sub = subdatasets.find(s => s.id === id)
@@ -136,6 +144,18 @@ function SubdatasetList() {
 
       <div style={{ padding: '24px 32px' }}>
         <div className="card">
+          <div className="card-header">
+            <div className="search-input">
+              <Search size={14} style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="搜索子数据集名称或父数据集..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-field"
+              />
+            </div>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>
@@ -152,7 +172,7 @@ function SubdatasetList() {
                 </tr>
               </thead>
               <tbody>
-                {subdatasets.map((sub) => {
+                {filtered.map((sub) => {
                   const total = sub.trainCount + sub.valCount + sub.testCount
                   return (
                     <tr key={sub.id}>

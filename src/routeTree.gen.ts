@@ -16,6 +16,7 @@ import { Route as SubdatasetsIndexRouteImport } from './routes/subdatasets/index
 import { Route as PretrainedModelsIndexRouteImport } from './routes/pretrained-models/index'
 import { Route as PresetsIndexRouteImport } from './routes/presets/index'
 import { Route as ModelsIndexRouteImport } from './routes/models/index'
+import { Route as GpuServersIndexRouteImport } from './routes/gpu-servers/index'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets/index'
 import { Route as ArchitecturesIndexRouteImport } from './routes/architectures/index'
 import { Route as ValidateCreateRouteImport } from './routes/validate/create'
@@ -30,6 +31,8 @@ import { Route as PresetsCreateRouteImport } from './routes/presets/create'
 import { Route as PresetsPresetIdRouteImport } from './routes/presets/$presetId'
 import { Route as ModelsManualUploadRouteImport } from './routes/models/manualUpload'
 import { Route as ModelsModelIdRouteImport } from './routes/models/$modelId'
+import { Route as GpuServersCreateRouteImport } from './routes/gpu-servers/create'
+import { Route as GpuServersServerIdRouteImport } from './routes/gpu-servers/$serverId'
 import { Route as DatasetsDatasetIdRouteImport } from './routes/datasets/$datasetId'
 import { Route as ArchitecturesCreateRouteImport } from './routes/architectures/create'
 import { Route as ArchitecturesArchitectureIdRouteImport } from './routes/architectures/$architectureId'
@@ -67,6 +70,11 @@ const PresetsIndexRoute = PresetsIndexRouteImport.update({
 const ModelsIndexRoute = ModelsIndexRouteImport.update({
   id: '/models/',
   path: '/models/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GpuServersIndexRoute = GpuServersIndexRouteImport.update({
+  id: '/gpu-servers/',
+  path: '/gpu-servers/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DatasetsIndexRoute = DatasetsIndexRouteImport.update({
@@ -139,6 +147,16 @@ const ModelsModelIdRoute = ModelsModelIdRouteImport.update({
   path: '/models/$modelId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GpuServersCreateRoute = GpuServersCreateRouteImport.update({
+  id: '/gpu-servers/create',
+  path: '/gpu-servers/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GpuServersServerIdRoute = GpuServersServerIdRouteImport.update({
+  id: '/gpu-servers/$serverId',
+  path: '/gpu-servers/$serverId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DatasetsDatasetIdRoute = DatasetsDatasetIdRouteImport.update({
   id: '/datasets/$datasetId',
   path: '/datasets/$datasetId',
@@ -161,6 +179,8 @@ export interface FileRoutesByFullPath {
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
+  '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
+  '/gpu-servers/create': typeof GpuServersCreateRoute
   '/models/$modelId': typeof ModelsModelIdRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
@@ -175,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/validate/create': typeof ValidateCreateRoute
   '/architectures/': typeof ArchitecturesIndexRoute
   '/datasets/': typeof DatasetsIndexRoute
+  '/gpu-servers/': typeof GpuServersIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/pretrained-models/': typeof PretrainedModelsIndexRoute
@@ -187,6 +208,8 @@ export interface FileRoutesByTo {
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
+  '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
+  '/gpu-servers/create': typeof GpuServersCreateRoute
   '/models/$modelId': typeof ModelsModelIdRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
@@ -201,6 +224,7 @@ export interface FileRoutesByTo {
   '/validate/create': typeof ValidateCreateRoute
   '/architectures': typeof ArchitecturesIndexRoute
   '/datasets': typeof DatasetsIndexRoute
+  '/gpu-servers': typeof GpuServersIndexRoute
   '/models': typeof ModelsIndexRoute
   '/presets': typeof PresetsIndexRoute
   '/pretrained-models': typeof PretrainedModelsIndexRoute
@@ -214,6 +238,8 @@ export interface FileRoutesById {
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
+  '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
+  '/gpu-servers/create': typeof GpuServersCreateRoute
   '/models/$modelId': typeof ModelsModelIdRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
@@ -228,6 +254,7 @@ export interface FileRoutesById {
   '/validate/create': typeof ValidateCreateRoute
   '/architectures/': typeof ArchitecturesIndexRoute
   '/datasets/': typeof DatasetsIndexRoute
+  '/gpu-servers/': typeof GpuServersIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/pretrained-models/': typeof PretrainedModelsIndexRoute
@@ -242,6 +269,8 @@ export interface FileRouteTypes {
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
+    | '/gpu-servers/$serverId'
+    | '/gpu-servers/create'
     | '/models/$modelId'
     | '/models/manualUpload'
     | '/presets/$presetId'
@@ -256,6 +285,7 @@ export interface FileRouteTypes {
     | '/validate/create'
     | '/architectures/'
     | '/datasets/'
+    | '/gpu-servers/'
     | '/models/'
     | '/presets/'
     | '/pretrained-models/'
@@ -268,6 +298,8 @@ export interface FileRouteTypes {
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
+    | '/gpu-servers/$serverId'
+    | '/gpu-servers/create'
     | '/models/$modelId'
     | '/models/manualUpload'
     | '/presets/$presetId'
@@ -282,6 +314,7 @@ export interface FileRouteTypes {
     | '/validate/create'
     | '/architectures'
     | '/datasets'
+    | '/gpu-servers'
     | '/models'
     | '/presets'
     | '/pretrained-models'
@@ -294,6 +327,8 @@ export interface FileRouteTypes {
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
+    | '/gpu-servers/$serverId'
+    | '/gpu-servers/create'
     | '/models/$modelId'
     | '/models/manualUpload'
     | '/presets/$presetId'
@@ -308,6 +343,7 @@ export interface FileRouteTypes {
     | '/validate/create'
     | '/architectures/'
     | '/datasets/'
+    | '/gpu-servers/'
     | '/models/'
     | '/presets/'
     | '/pretrained-models/'
@@ -321,6 +357,8 @@ export interface RootRouteChildren {
   ArchitecturesArchitectureIdRoute: typeof ArchitecturesArchitectureIdRoute
   ArchitecturesCreateRoute: typeof ArchitecturesCreateRoute
   DatasetsDatasetIdRoute: typeof DatasetsDatasetIdRoute
+  GpuServersServerIdRoute: typeof GpuServersServerIdRoute
+  GpuServersCreateRoute: typeof GpuServersCreateRoute
   ModelsModelIdRoute: typeof ModelsModelIdRoute
   ModelsManualUploadRoute: typeof ModelsManualUploadRoute
   PresetsPresetIdRoute: typeof PresetsPresetIdRoute
@@ -335,6 +373,7 @@ export interface RootRouteChildren {
   ValidateCreateRoute: typeof ValidateCreateRoute
   ArchitecturesIndexRoute: typeof ArchitecturesIndexRoute
   DatasetsIndexRoute: typeof DatasetsIndexRoute
+  GpuServersIndexRoute: typeof GpuServersIndexRoute
   ModelsIndexRoute: typeof ModelsIndexRoute
   PresetsIndexRoute: typeof PresetsIndexRoute
   PretrainedModelsIndexRoute: typeof PretrainedModelsIndexRoute
@@ -392,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/models'
       fullPath: '/models/'
       preLoaderRoute: typeof ModelsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gpu-servers/': {
+      id: '/gpu-servers/'
+      path: '/gpu-servers'
+      fullPath: '/gpu-servers/'
+      preLoaderRoute: typeof GpuServersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/datasets/': {
@@ -492,6 +538,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsModelIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gpu-servers/create': {
+      id: '/gpu-servers/create'
+      path: '/gpu-servers/create'
+      fullPath: '/gpu-servers/create'
+      preLoaderRoute: typeof GpuServersCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gpu-servers/$serverId': {
+      id: '/gpu-servers/$serverId'
+      path: '/gpu-servers/$serverId'
+      fullPath: '/gpu-servers/$serverId'
+      preLoaderRoute: typeof GpuServersServerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/datasets/$datasetId': {
       id: '/datasets/$datasetId'
       path: '/datasets/$datasetId'
@@ -521,6 +581,8 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitecturesArchitectureIdRoute: ArchitecturesArchitectureIdRoute,
   ArchitecturesCreateRoute: ArchitecturesCreateRoute,
   DatasetsDatasetIdRoute: DatasetsDatasetIdRoute,
+  GpuServersServerIdRoute: GpuServersServerIdRoute,
+  GpuServersCreateRoute: GpuServersCreateRoute,
   ModelsModelIdRoute: ModelsModelIdRoute,
   ModelsManualUploadRoute: ModelsManualUploadRoute,
   PresetsPresetIdRoute: PresetsPresetIdRoute,
@@ -535,6 +597,7 @@ const rootRouteChildren: RootRouteChildren = {
   ValidateCreateRoute: ValidateCreateRoute,
   ArchitecturesIndexRoute: ArchitecturesIndexRoute,
   DatasetsIndexRoute: DatasetsIndexRoute,
+  GpuServersIndexRoute: GpuServersIndexRoute,
   ModelsIndexRoute: ModelsIndexRoute,
   PresetsIndexRoute: PresetsIndexRoute,
   PretrainedModelsIndexRoute: PretrainedModelsIndexRoute,

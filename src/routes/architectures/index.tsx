@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle } from 'lucide-react'
+import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Search } from 'lucide-react'
 import { CATEGORY_MAP } from '../../constants'
 
 export const Route = createFileRoute('/architectures/')({
@@ -107,9 +107,13 @@ function ArchitectureList() {
   const [architectures, setArchitectures] = useState(ARCHITECTURES)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filtered = architectures.filter(a =>
-    filterCategory === 'all' || a.category === filterCategory
+    (filterCategory === 'all' || a.category === filterCategory) &&
+    (a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     a.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     a.baseModel.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   async function handleDelete(id: string) {
@@ -165,6 +169,18 @@ function ArchitectureList() {
         </div>
 
         <div className="card">
+          <div className="card-header">
+            <div className="search-input">
+              <Search size={14} style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                placeholder="搜索模板名称、基础模型或描述..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-field"
+              />
+            </div>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table className="data-table">
               <thead>
