@@ -74,13 +74,6 @@ const STATS = [
   { label: '已发布模型', value: '5', delta: '至科宝智能体中台', icon: <Package size={16} />, color: 'var(--teal)' },
 ]
 
-const MODEL_STATS = [
-  { label: '模型总数', value: '4', icon: <Package size={16} />, color: 'var(--accent-bright)' },
-  { label: '已发布版本', value: '7', icon: <Rocket size={16} />, color: 'var(--teal)' },
-  { label: '最高 mAP', value: '0.923', icon: <TrendingUp size={16} />, color: 'var(--success)' },
-  { label: '平均 F1', value: '0.878', icon: <CheckCircle2 size={16} />, color: 'var(--warning)' },
-]
-
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   running: <RefreshCw size={10} className="spinning" />,
   completed: <CheckCircle2 size={10} />,
@@ -90,7 +83,6 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
 
 const WEEKLY_STATS = [
   { label: '训练时长', value: '38.4', unit: 'h' },
-  { label: 'GPU 使用', value: '87.2', unit: '%' },
   { label: '数据量', value: '16.2', unit: 'k张' },
 ]
 
@@ -120,21 +112,6 @@ function Dashboard() {
       <div className="p-content">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
           {STATS.map((s) => (
-            <div key={s.label} className="stat-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="stat-label">{s.label}</span>
-                <div className="stat-icon" style={{ background: `${s.color}22`, color: s.color }}>
-                  {s.icon}
-                </div>
-              </div>
-              <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{s.delta}</div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
-          {MODEL_STATS.map((s) => (
             <div key={s.label} className="stat-card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span className="stat-label">{s.label}</span>
