@@ -11,6 +11,7 @@ import {
   Cpu,
   ArrowRight,
 } from 'lucide-react'
+import { TRAIN_STATUS } from '../../constants'
 
 export const Route = createFileRoute('/train/')({
   component: TasksList,
@@ -25,11 +26,11 @@ const ALL_TASKS = [
   { id: 'task-006', name: '火焰烟雾检测', dataset: '火焰烟雾标注集', images: 5601, baseModel: 'YOLOv8m', status: 'completed' as const, progress: 100, epoch: '120/120', mAP: 0.911, createdAt: '2026-04-25 08:00', gpu: 'A100×2', eta: '-' },
 ]
 
-const STATUS_CONFIG = {
-  running: { label: '训练中', cls: 'badge-running', icon: <RefreshCw size={10} className="spinning" /> },
-  completed: { label: '已完成', cls: 'badge-completed', icon: <CheckCircle2 size={10} /> },
-  failed: { label: '训练失败', cls: 'badge-failed', icon: <XCircle size={10} /> },
-  pending: { label: '等待中', cls: 'badge-pending', icon: <Clock size={10} /> },
+const STATUS_ICONS: Record<string, React.ReactNode> = {
+  running: <RefreshCw size={10} className="spinning" />,
+  completed: <CheckCircle2 size={10} />,
+  failed: <XCircle size={10} />,
+  pending: <Clock size={10} />,
 }
 
 function TasksList() {
@@ -106,7 +107,8 @@ function TasksList() {
               </thead>
               <tbody>
                 {filteredTasks.map((task) => {
-                  const sc = STATUS_CONFIG[task.status]
+                  const sc = TRAIN_STATUS[task.status]
+                  const ic = STATUS_ICONS[task.status]
                   return (
                     <tr key={task.id}>
                       <td className="primary">{task.name}</td>
@@ -120,7 +122,7 @@ function TasksList() {
                       </td>
                       <td>
                         <span className={`badge ${sc.cls}`}>
-                          {sc.icon} {sc.label}
+                          {ic} {sc.label}
                         </span>
                       </td>
                       <td style={{ minWidth: 128 }}>

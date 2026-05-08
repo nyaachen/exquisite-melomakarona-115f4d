@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { ArrowLeft, CheckCircle2, XCircle, RefreshCw, AlertCircle, Award, Target, Zap, Clock } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
+import { getGrade } from '../../constants'
 
 export const Route = createFileRoute('/validate/$taskId')({
   component: ValidateDetail,
@@ -146,19 +147,6 @@ function ValidateDetail() {
       return () => clearInterval(interval)
     }
   }, [task.status])
-
-  interface GradeResult {
-    label: string
-    color: string
-    icon: 'CheckCircle2' | 'AlertCircle' | 'XCircle'
-  }
-
-  function getGrade(score: number): GradeResult {
-    if (score >= 0.9) return { label: '优秀', color: 'var(--success)', icon: 'CheckCircle2' }
-    if (score >= 0.8) return { label: '良好', color: 'var(--accent-bright)', icon: 'CheckCircle2' }
-    if (score >= 0.7) return { label: '中等', color: 'var(--warning)', icon: 'AlertCircle' }
-    return { label: '较差', color: 'var(--error)', icon: 'XCircle' }
-  }
 
   function RenderIcon({ icon, size = 14, style }: { icon: string; size?: number; style?: React.CSSProperties }) {
     const iconProps = { size, style }

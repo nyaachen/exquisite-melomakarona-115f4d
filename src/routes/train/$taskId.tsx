@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
 import { NotFound } from '../../components/NotFound'
+import { TRAIN_STATUS, DEFAULT_CLASS_COLORS } from '../../constants'
 import {
   ArrowLeft,
   RefreshCw,
@@ -40,11 +41,46 @@ export const Route = createFileRoute('/train/$taskId')({
   component: TaskDetail,
 })
 
+// ─── 每轮训练指标 ───
+
+interface EpochMetric {
+  epoch: number
+  mAP: number
+  loss: number
+  valLoss: number
+}
+
+/** 为已完成/进行中的任务生成每轮训练指标（确定性，基于种子） */
+function generateEpochMetrics(
+  totalEpochs: number,
+  finalMAP: number,
+  startEpoch: number = totalEpochs,
+): EpochMetric[] {
+  const epochs: EpochMetric[] = []
+  // 模拟训练曲线：mAP 从 0.15 上升到 finalMAP，loss 从 2.0 下降到 0.35
+  const mapStart = 0.15
+  const lossStart = 2.0
+  const lossEnd = 0.35
+  for (let i = 1; i <= startEpoch; i++) {
+    const t = i / totalEpochs
+    // 使用 sigmoid-like 曲线模拟训练收敛
+    const mapProgress = 1 / (1 + Math.exp(-10 * (t - 0.3)))
+    epochs.push({
+      epoch: i,
+      mAP: Math.round((mapStart + (finalMAP - mapStart) * mapProgress) * 10000) / 10000,
+      loss: Math.round((lossStart - (lossStart - lossEnd) * mapProgress) * 10000) / 10000,
+      valLoss: Math.round(((lossStart + 0.1) - (lossStart + 0.1 - lossEnd - 0.05) * mapProgress) * 10000) / 10000,
+    })
+  }
+  return epochs
+}
+
 const TASK_DATA: Record<string, {
   name: string; dataset: string; baseModel: string; status: 'running' | 'completed' | 'failed' | 'pending';
   totalEpochs: number; startEpoch: number; mAP: number; precision: number; recall: number;
   batchSize: number; imgSize: number; optimizer: string; device: string;
   createdAt: string; classes: string[]; trainImages: number; valImages: number;
+  epochs: EpochMetric[];
   errorMsg?: string;
   published: boolean;
   modelName?: string;
@@ -58,6 +94,7 @@ const TASK_DATA: Record<string, {
     batchSize: 16, imgSize: 640, optimizer: 'SGD', device: 'A100×2',
     createdAt: '2026-04-29 09:14', classes: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物'],
     trainImages: 3410, valImages: 975,
+    epochs: generateEpochMetrics(100, 0.782, 47),
     published: false,
   },
   'task-002': {
@@ -67,6 +104,7 @@ const TASK_DATA: Record<string, {
     batchSize: 32, imgSize: 640, optimizer: 'SGD', device: 'A100×1',
     createdAt: '2026-04-28 14:30', classes: ['安全帽', '无安全帽', '人员'],
     trainImages: 1673, valImages: 478,
+    epochs: generateEpochMetrics(80, 0.923),
     published: false,
   },
   'task-003': {
@@ -76,6 +114,7 @@ const TASK_DATA: Record<string, {
     batchSize: 16, imgSize: 640, optimizer: 'AdamW', device: 'A100×4',
     createdAt: '2026-04-27 22:05', classes: ['车牌', '遮挡车牌', '模糊车牌'],
     trainImages: 5488, valImages: 1568,
+    epochs: generateEpochMetrics(120, 0.65, 23),
     errorMsg: 'CUDA out of memory. Tried to allocate 2.73 GiB (GPU 0; 79.20 GiB total capacity). Try reducing batch size or image size.',
     published: false,
   },
@@ -86,6 +125,7 @@ const TASK_DATA: Record<string, {
     batchSize: 16, imgSize: 640, optimizer: 'SGD', device: 'A100×1',
     createdAt: '2026-04-29 10:47', classes: ['正常设备', '异常设备', '待检修'],
     trainImages: 1139, valImages: 325,
+    epochs: [],
     published: false,
   },
 }
@@ -180,7 +220,14 @@ const DATASETS = [
   },
 ]
 
-const CLASS_COLORS = ['#1d4ed8', '#ef4444', '#f59e0b', '#8b5cf6', '#10b981', '#06b6d4', '#6366f1']
+const CLASS_COLORS = DEFAULT_CLASS_COLORS
+
+const PUBLISHABLE_MODELS = [
+  { id: 'sq-model-001', name: '道路缺陷检测', existingVersions: ['v2.3', 'v2.2', 'v2.1'] },
+  { id: 'sq-model-002', name: '施工安全帽检测', existingVersions: ['v1.0'] },
+  { id: 'sq-model-003', name: '人员跌倒检测', existingVersions: ['v1.0'] },
+  { id: 'sq-model-004', name: '火焰烟雾检测', existingVersions: ['v2.1', 'v2.0', 'v1.5'] },
+]
 
 type ImageSource = 'upload' | 'testset' | 'dataset'
 
@@ -190,24 +237,24 @@ interface Prediction {
   bbox: { x: number; y: number; width: number; height: number }
 }
 
-// Simulate training log lines
-const generateLog = (epoch: number, total: number): string[] => {
-  const loss = (1.8 - epoch * 0.012 + Math.random() * 0.05).toFixed(4)
-  const valLoss = (1.9 - epoch * 0.011 + Math.random() * 0.06).toFixed(4)
-  const map = (0.2 + epoch * 0.006 + Math.random() * 0.01).toFixed(3)
+// Simulate training log lines (now driven by EpochMetric)
+function generateLog(metric: EpochMetric, total: number): string[] {
+  const loss = metric.loss.toFixed(4)
+  const valLoss = metric.valLoss.toFixed(4)
+  const map = metric.mAP.toFixed(3)
   return [
-    `[dim]${new Date().toTimeString().slice(0, 8)}[0m Epoch ${epoch}/${total}`,
-    `  train/box_loss: ${loss}  train/cls_loss: ${(parseFloat(loss) * 0.6).toFixed(4)}  train/dfl_loss: ${(parseFloat(loss) * 0.3).toFixed(4)}`,
-    `  val/box_loss:   ${valLoss}  val/cls_loss:   ${(parseFloat(valLoss) * 0.6).toFixed(4)}  val/dfl_loss:   ${(parseFloat(valLoss) * 0.3).toFixed(4)}`,
-    `  metrics/mAP50: ${map}  metrics/mAP50-95: ${(parseFloat(map) * 0.62).toFixed(3)}`,
+    `[dim]${new Date().toTimeString().slice(0, 8)}[0m Epoch ${metric.epoch}/${total}`,
+    `  train/box_loss: ${loss}  train/cls_loss: ${(metric.loss * 0.55).toFixed(4)}  train/dfl_loss: ${(metric.loss * 0.28).toFixed(4)}`,
+    `  val/box_loss:   ${valLoss}  val/cls_loss:   ${(metric.valLoss * 0.55).toFixed(4)}  val/dfl_loss:   ${(metric.valLoss * 0.28).toFixed(4)}`,
+    `  metrics/mAP50: ${map}  metrics/mAP50-95: ${(metric.mAP * 0.62).toFixed(3)}`,
   ]
 }
 
-const STATUS_CONFIG = {
-  running: { label: '训练中', cls: 'badge-running', icon: <RefreshCw size={11} className="spinning" /> },
-  completed: { label: '已完成', cls: 'badge-completed', icon: <CheckCircle2 size={11} /> },
-  failed: { label: '训练失败', cls: 'badge-failed', icon: <XCircle size={11} /> },
-  pending: { label: '等待中', cls: 'badge-pending', icon: <Clock size={11} /> },
+const STATUS_ICONS: Record<string, React.ReactNode> = {
+  running: <RefreshCw size={11} className="spinning" />,
+  completed: <CheckCircle2 size={11} />,
+  failed: <XCircle size={11} />,
+  pending: <Clock size={11} />,
 }
 
 function ReLineChart({ data, color, height = 120 }: { data: number[]; color: string; height?: number }) {
@@ -280,14 +327,10 @@ function TaskDetail() {
   const [recall, setRecall] = useState(task.recall)
   const [logs, setLogs] = useState<Array<{ text: string; cls: string }>>([])
   const [mapHistory, setMapHistory] = useState<number[]>(
-    Array.from({ length: task.startEpoch }, (_, i) =>
-      Math.min(0.95, 0.2 + (i + 1) * 0.006 + Math.random() * 0.01)
-    )
+    () => task.epochs.map(e => e.mAP),
   )
   const [lossHistory, setLossHistory] = useState<number[]>(
-    Array.from({ length: task.startEpoch }, (_, i) =>
-      Math.max(0.3, 1.8 - (i + 1) * 0.012 + Math.random() * 0.05)
-    )
+    () => task.epochs.map(e => e.loss),
   )
   const [perfView, setPerfView] = useState<'val' | 'test'>('val')
   const logRef = useRef<HTMLDivElement>(null)
@@ -303,13 +346,7 @@ function TaskDetail() {
   const [publishErrors, setPublishErrors] = useState<Record<string, string>>({})
   const [publishSubmitting, setPublishSubmitting] = useState(false)
 
-  const SQUARE_MODELS = [
-    { id: 'sq-model-001', name: '道路缺陷检测', existingVersions: ['v2.3', 'v2.2', 'v2.1'] },
-    { id: 'sq-model-002', name: '施工安全帽检测', existingVersions: ['v1.0'] },
-    { id: 'sq-model-003', name: '人员跌倒检测', existingVersions: ['v1.0'] },
-    { id: 'sq-model-004', name: '火焰烟雾检测', existingVersions: ['v2.1', 'v2.0', 'v1.5'] },
-  ]
-  const publishSelectedModel = SQUARE_MODELS.find(m => m.id === publishModelId)
+  const publishSelectedModel = PUBLISHABLE_MODELS.find(m => m.id === publishModelId)
   const publishExistingVersions = publishSelectedModel?.existingVersions || []
 
   function openPublishModal() {
@@ -409,28 +446,36 @@ function TaskDetail() {
       setEpoch(prev => {
         if (prev >= task.totalEpochs) { clearInterval(interval); return prev }
         const next = prev + 1
-        const newMap = Math.min(0.95, 0.2 + next * 0.006 + Math.random() * 0.01)
-        const newPrec = Math.min(0.98, newMap * 1.07 + Math.random() * 0.02)
-        const newRecall = Math.min(0.96, newMap * 0.96 + Math.random() * 0.02)
-        setMAP(newMap)
+        // Build a new EpochMetric using the same deterministic curve
+        const t = next / task.totalEpochs
+        const mapProgress = 1 / (1 + Math.exp(-10 * (t - 0.3)))
+        const metric: EpochMetric = {
+          epoch: next,
+          mAP: Math.round((0.15 + (task.mAP - 0.15) * mapProgress) * 10000) / 10000,
+          loss: Math.round((2.0 - (2.0 - 0.35) * mapProgress) * 10000) / 10000,
+          valLoss: Math.round((2.1 - (2.1 - 0.4) * mapProgress) * 10000) / 10000,
+        }
+        const newPrec = Math.round((metric.mAP * 1.07) * 10000) / 10000
+        const newRecall = Math.round((metric.mAP * 0.96) * 10000) / 10000
+        setMAP(metric.mAP)
         setPrecision(newPrec)
         setRecall(newRecall)
-        setMapHistory(h => [...h, newMap])
-        setLossHistory(h => [...h, Math.max(0.3, 1.8 - next * 0.012 + Math.random() * 0.05)])
-        const newLines = generateLog(next, task.totalEpochs)
-        setLogs(prev => [...prev.slice(-60), ...newLines.map(t => ({ text: t, cls: 'log-info' }))])
+        setMapHistory(h => [...h, metric.mAP])
+        setLossHistory(h => [...h, metric.loss])
+        setLogs(prev => [...prev.slice(-60), ...generateLog(metric, task.totalEpochs).map(t => ({ text: t, cls: 'log-info' }))])
         return next
       })
     }, 1200)
     return () => clearInterval(interval)
-  }, [task.status, task.totalEpochs])
+  }, [task.status, task.totalEpochs, task.mAP])
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
   }, [logs])
 
   const progress = Math.round((epoch / task.totalEpochs) * 100)
-  const sc = STATUS_CONFIG[task.status]
+  const sc = TRAIN_STATUS[task.status]
+  const ic = STATUS_ICONS[task.status]
   const verification = VERIFICATION_RESULTS[taskId] || {
     quality: 'pass' as const,
     qualityLabel: '待评估',
@@ -456,7 +501,7 @@ function TaskDetail() {
             </div>
             <div className="flex items-center gap-3 mt-1">
               <h1 className="page-title mb-0">{task.name}</h1>
-              <span className={`badge ${sc.cls}`}>{sc.icon} {sc.label}</span>
+              <span className={`badge ${sc.cls}`}>{ic} {sc.label}</span>
             </div>
           </div>
         </div>
@@ -1054,7 +1099,7 @@ function TaskDetail() {
                     color="var(--accent-bright)"
                     selectedId={publishModelId}
                     onChange={(id) => { setPublishModelId(id); setPublishErrors({}) }}
-                    items={SQUARE_MODELS.map(m => ({
+                    items={PUBLISHABLE_MODELS.map(m => ({
                       id: m.id,
                       name: m.name,
                       subtitle: `已有版本: ${m.existingVersions.join('、')}`,

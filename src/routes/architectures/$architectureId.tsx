@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ArrowLeft, Save, Plus, X, HelpCircle, AlertCircle } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
+import { CATEGORY_OPTIONS } from '../../constants'
 
 export const Route = createFileRoute('/architectures/$architectureId')({
   component: EditArchitecture,
@@ -30,13 +31,6 @@ interface Architecture {
   isActive: boolean
   usageCount: number
 }
-
-const CATEGORIES = [
-  { value: 'object-detection', label: '目标检测' },
-  { value: 'llm', label: '大语言模型' },
-  { value: 'multimodal', label: '多模态' },
-  { value: 'other', label: '其他' },
-]
 
 // Shared data (in real app this would be a server function)
 const ARCHITECTURES: Architecture[] = [
@@ -164,7 +158,7 @@ function EditArchitecture() {
               <div className="form-group">
                 <label className="form-label">模型类别</label>
                 <select className="form-input" value={category} onChange={e => setCategory(e.target.value)}>
-                  {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  {CATEGORY_OPTIONS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </div>
             </div>

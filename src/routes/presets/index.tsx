@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Zap, Globe, Lock } from 'lucide-react'
+import { CATEGORY_MAP } from '../../constants'
 
 export const Route = createFileRoute('/presets/')({
   component: PresetList,
@@ -20,13 +21,6 @@ interface Preset {
   createdAt: string
   author: string
   usageCount: number
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  'object-detection': '目标检测',
-  'llm': '大语言模型',
-  'multimodal': '多模态',
-  'other': '其他',
 }
 
 const PRESETS: Preset[] = [
@@ -121,7 +115,7 @@ function PresetList() {
           <button className={`btn btn-sm ${filterCategory === 'all' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilterCategory('all')}>
             全部
           </button>
-          {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+          {Object.entries(CATEGORY_MAP).map(([key, label]) => (
             <button key={key} className={`btn btn-sm ${filterCategory === key ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilterCategory(key)}>
               {label}
             </button>
@@ -156,7 +150,7 @@ function PresetList() {
                     <td style={{ fontSize: 12 }}>{preset.architectureName}</td>
                     <td className="mono" style={{ fontSize: 12 }}>{preset.baseModel}</td>
                     <td>
-                      <span className="badge badge-secondary">{CATEGORY_LABELS[preset.category] || preset.category}</span>
+                      <span className="badge badge-secondary">{CATEGORY_MAP[preset.category] || preset.category}</span>
                     </td>
                     <td>
                       {preset.isActive ? (

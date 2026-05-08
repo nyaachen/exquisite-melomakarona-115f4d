@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Plus, CheckCircle2, XCircle, Clock, RefreshCw, ArrowRight, Target } from 'lucide-react'
+import { VALIDATE_STATUS } from '../../constants'
 
 export const Route = createFileRoute('/validate/')({
   component: ValidateList,
@@ -95,11 +96,11 @@ const VALIDATE_TASKS: ValidateTask[] = [
   },
 ]
 
-const STATUS_CONFIG = {
-  running: { label: '验证中', cls: 'badge-running', icon: <RefreshCw size={10} className="spinning" /> },
-  completed: { label: '已完成', cls: 'badge-completed', icon: <CheckCircle2 size={10} /> },
-  failed: { label: '验证失败', cls: 'badge-failed', icon: <XCircle size={10} /> },
-  pending: { label: '等待中', cls: 'badge-pending', icon: <Clock size={10} /> },
+const STATUS_ICONS: Record<string, React.ReactNode> = {
+  running: <RefreshCw size={10} className="spinning" />,
+  completed: <CheckCircle2 size={10} />,
+  failed: <XCircle size={10} />,
+  pending: <Clock size={10} />,
 }
 
 function ValidateList() {
@@ -135,14 +136,15 @@ function ValidateList() {
               </thead>
               <tbody>
                 {VALIDATE_TASKS.map((task) => {
-                  const sc = STATUS_CONFIG[task.status]
+                  const sc = VALIDATE_STATUS[task.status]
+                  const ic = STATUS_ICONS[task.status]
                   return (
                     <tr key={task.id}>
                       <td className="primary">{task.name}</td>
                       <td style={{ fontSize: 12 }}>{task.modelName}</td>
                       <td style={{ fontSize: 12 }}>{task.datasetName}</td>
                       <td>
-                        <span className={`badge ${sc.cls}`}>{sc.icon} {sc.label}</span>
+                        <span className={`badge ${sc.cls}`}>{ic} {sc.label}</span>
                       </td>
                       <td style={{ minWidth: 120 }}>
                         <div className="progress-bar" style={{ flex: 1 }}>

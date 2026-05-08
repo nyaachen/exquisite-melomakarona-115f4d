@@ -10,6 +10,7 @@ import {
   TrendingUp,
   RefreshCw,
 } from 'lucide-react'
+import { TRAIN_STATUS } from '../constants'
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -73,12 +74,23 @@ const STATS = [
   { label: '已发布模型', value: '5', delta: '至科宝智能体中台', icon: <Package size={16} />, color: 'var(--teal)' },
 ]
 
-const STATUS_CONFIG = {
-  running: { label: '训练中', cls: 'badge-running', icon: <RefreshCw size={10} className="spinning" /> },
-  completed: { label: '已完成', cls: 'badge-completed', icon: <CheckCircle2 size={10} /> },
-  failed: { label: '训练失败', cls: 'badge-failed', icon: <XCircle size={10} /> },
-  pending: { label: '等待中', cls: 'badge-pending', icon: <Clock size={10} /> },
+const STATUS_ICONS: Record<string, React.ReactNode> = {
+  running: <RefreshCw size={10} className="spinning" />,
+  completed: <CheckCircle2 size={10} />,
+  failed: <XCircle size={10} />,
+  pending: <Clock size={10} />,
 }
+
+const WEEKLY_STATS = [
+  { label: '训练时长', value: '38.4', unit: 'h' },
+  { label: 'GPU 使用', value: '87.2', unit: '%' },
+  { label: '数据量', value: '16.2', unit: 'k张' },
+]
+
+const LATEST_PUBLISHED = [
+  { name: '安全帽检测 v1.2', map: 0.923, target: '智能体中台·工地安全', time: '昨天 16:22' },
+  { name: '车辆检测 v3.1', map: 0.891, target: '智能体中台·交通分析', time: '4月27日' },
+]
 
 function Dashboard() {
   return (
@@ -137,7 +149,8 @@ function Dashboard() {
               </thead>
               <tbody>
                 {MOCK_TASKS.map((task) => {
-                  const sc = STATUS_CONFIG[task.status]
+                  const sc = TRAIN_STATUS[task.status]
+                  const ic = STATUS_ICONS[task.status]
                   return (
                     <tr key={task.id}>
                       <td className="primary">{task.name}</td>
@@ -145,7 +158,7 @@ function Dashboard() {
                       <td className="mono">{task.baseModel}</td>
                       <td>
                         <span className={`badge ${sc.cls}`}>
-                          {sc.icon} {sc.label}
+                          {ic} {sc.label}
                         </span>
                       </td>
                       <td style={{ minWidth: 128 }}>
@@ -189,11 +202,7 @@ function Dashboard() {
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>本周训练统计</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-              {[
-                { label: '训练时长', value: '38.4', unit: 'h' },
-                { label: 'GPU 使用', value: '87.2', unit: '%' },
-                { label: '数据量', value: '16.2', unit: 'k张' },
-              ].map((m) => (
+              {WEEKLY_STATS.map((m) => (
                 <div key={m.label} className="metric-chip">
                   <div className="metric-chip-value">{m.value}<span style={{ fontSize: 10 }}>{m.unit}</span></div>
                   <div className="metric-chip-label">{m.label}</div>
@@ -206,10 +215,7 @@ function Dashboard() {
               <Package size={14} style={{ color: 'var(--teal)' }} />
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>最新发布模型</span>
             </div>
-            {[
-              { name: '安全帽检测 v1.2', map: 0.923, target: '智能体中台·工地安全', time: '昨天 16:22' },
-              { name: '车辆检测 v3.1', map: 0.891, target: '智能体中台·交通分析', time: '4月27日' },
-            ].map((m) => (
+            {LATEST_PUBLISHED.map((m) => (
               <div key={m.name} className="data-row">
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{m.name}</div>

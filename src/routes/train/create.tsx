@@ -155,11 +155,15 @@ const SQUARE_MODELS_WITH_VERSIONS = [
   { id: 'sq-model-004', name: '火焰烟雾检测', versions: ['v2.1', 'v2.0', 'v1.5'] },
 ]
 
-const PUBLIC_MODELS = [
-  { id: 'pub-yolov8n-coco', name: 'YOLOv8n (COCO)', source: 'Ultralytics', download: '15.1M', desc: 'COCO 80类预训练' },
-  { id: 'pub-yolov8s-coco', name: 'YOLOv8s (COCO)', source: 'Ultralytics', download: '21.5M', desc: 'COCO 80类预训练' },
-  { id: 'pub-yolov8m-coco', name: 'YOLOv8m (COCO)', source: 'Ultralytics', download: '51.5M', desc: 'COCO 80类预训练' },
-  { id: 'pub-yolov8n-pothole', name: 'YOLOv8n (道路缺陷)', source: 'Roboflow', download: '3.2M', desc: '道路坑洼检测预训练' },
+const ALL_PUBLIC_MODELS = [
+  { id: 'pub-yolov8n-coco', name: 'YOLOv8n (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '6.2 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
+  { id: 'pub-yolov8s-coco', name: 'YOLOv8s (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '21.5 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
+  { id: 'pub-yolov8m-coco', name: 'YOLOv8m (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '49.7 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
+  { id: 'pub-yolov8l-coco', name: 'YOLOv8l (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '83.7 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
+  { id: 'pub-yolov8x-coco', name: 'YOLOv8x (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '130.5 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
+  { id: 'pub-yolov8n-pothole', name: 'YOLOv8n (道路缺陷)', architectureId: 'arch-yolov8', source: 'Roboflow', fileSize: '6.3 MB', desc: '道路坑洼检测预训练', inputSize: 640, numClasses: 5 },
+  { id: 'pub-qwen-7b-base', name: 'Qwen-7B-Chat (原版)', architectureId: 'arch-qwen', source: 'Alibaba', fileSize: '14.0 GB', desc: '通义千问 70亿参数预训练', inputSize: 2048, numClasses: 0 },
+  { id: 'pub-qwen-14b-base', name: 'Qwen-14B-Chat (原版)', architectureId: 'arch-qwen', source: 'Alibaba', fileSize: '28.0 GB', desc: '通义千问 140亿参数预训练', inputSize: 2048, numClasses: 0 },
 ]
 
 const STEPS = [
@@ -195,6 +199,10 @@ function CreateTask() {
   const visiblePresets = useMemo(() =>
     ALL_PRESETS.filter(p => p.visibility === 'public' || p.author === CURRENT_USER),
   [])
+
+  const visiblePublicModels = useMemo(() =>
+    ALL_PUBLIC_MODELS.filter(m => m.architectureId === architectureId),
+  [architectureId])
 
   const architecture = ARCHITECTURES.find(a => a.id === architectureId)
   const trainDs = DATASET_ENTRIES.find(d => d.id === trainDatasetId)
@@ -252,6 +260,8 @@ function CreateTask() {
   function handleArchChange(id: string) {
     setArchitectureId(id)
     setAppliedPresetId(null)
+    setStartPointId(null)
+    setStartPointVersion('')
     const arch = ARCHITECTURES.find(a => a.id === id)
     if (arch) {
       const defaults: Record<string, any> = {}
@@ -656,19 +666,26 @@ function CreateTask() {
 
               {startPointType === 'public' && (
                 <div style={{ animation: 'slideIn 0.2s ease-out', marginBottom: 16 }}>
-                  <SearchableDropdown
-                    label="选择公开预训练模型"
-                    color="var(--accent-bright)"
-                    selectedId={startPointId || ''}
-                    onChange={(id) => setStartPointId(id)}
-                    items={PUBLIC_MODELS.map(pm => ({
-                      id: pm.id,
-                      name: pm.name,
-                      subtitle: `${pm.desc} · ${pm.download}`,
-                      tags: [pm.source],
-                    }))}
-                    placeholder="选择社区预训练模型..."
-                  />
+                  {visiblePublicModels.length === 0 ? (
+                    <div style={{ padding: '14px 16px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Info size={13} style={{ color: 'var(--warning)', flexShrink: 0 }} />
+                      当前选择的架构暂无关联的公开预训练模型
+                    </div>
+                  ) : (
+                    <SearchableDropdown
+                      label="选择公开预训练模型"
+                      color="var(--accent-bright)"
+                      selectedId={startPointId || ''}
+                      onChange={(id) => setStartPointId(id)}
+                      items={visiblePublicModels.map(pm => ({
+                        id: pm.id,
+                        name: pm.name,
+                        subtitle: `${pm.desc} · ${pm.fileSize} · ${pm.numClasses}类`,
+                        tags: [pm.source, `输入${pm.inputSize}`],
+                      }))}
+                      placeholder="选择公开预训练模型..."
+                    />
+                  )}
                 </div>
               )}
 

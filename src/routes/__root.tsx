@@ -8,6 +8,8 @@ import {
   Layers,
   Sliders,
   Boxes,
+  User,
+  Globe,
 } from 'lucide-react'
 import '../styles.css'
 
@@ -74,15 +76,24 @@ function Sidebar() {
 
         <div className="nav-label">系统配置</div>
         <NavLink to="/architectures" icon={<Boxes size={15} />} label="模型模板" />
+        <NavLink to="/pretrained-models" icon={<Globe size={15} />} label="公开模型" />
       </div>
 
       <div className="sidebar-footer">
-        <div className="flex items-center gap-1.5 mb-1">
-          <div className="status-dot status-dot-success" />
-          <span>云服务器 · GPU×4 在线</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'var(--accent)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <User size={16} style={{ color: '#fff' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>张工</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>zhanggong@kebao.cn</div>
+          </div>
         </div>
-        <div className="text-xs text-muted">已连接科宝智能体中台</div>
-        <div className="text-xs text-muted">已连接科宝标注平台</div>
       </div>
     </nav>
   )

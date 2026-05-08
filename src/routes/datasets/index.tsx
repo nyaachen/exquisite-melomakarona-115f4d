@@ -67,15 +67,18 @@ function DatasetsPage() {
                     </td>
                     <td style={{ fontSize: 12 }}>{ds.images.toLocaleString()}</td>
                     <td>
-                      <Link to={`/datasets/${ds.id}`}  className="btn btn-ghost btn-sm">
-                        查看详情 <ArrowRight size={11} />
-                      </Link>
-                      <Link to="/subdatasets/create" className="btn btn-ghost btn-sm">
-                        创建子数据集 <ArrowRight size={11} />
-                      </Link>
-                      <Link to="/train/create" className="btn btn-ghost btn-sm">
-                        创建训练任务 <ArrowRight size={11} />
-                      </Link>
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 0 }}>
+                        <Link to={`/datasets/${ds.id}`}  className="btn btn-ghost btn-sm">
+                          查看详情 <ArrowRight size={11} />
+                        </Link>
+                        <Link to="/subdatasets/create" className="btn btn-ghost btn-sm">
+                          创建子数据集 <ArrowRight size={11} />
+                        </Link>
+                        <Link to="/train/create" className="btn btn-ghost btn-sm">
+                          创建训练任务 <ArrowRight size={11} />
+                        </Link>
+                  
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle } from 'lucide-react'
+import { CATEGORY_MAP } from '../../constants'
 
 export const Route = createFileRoute('/architectures/')({
   component: ArchitectureList,
@@ -30,13 +31,6 @@ interface Architecture {
   createdAt: string
   author: string
   usageCount: number
-}
-
-const CATEGORIES: Record<string, string> = {
-  'object-detection': '目标检测',
-  'llm': '大语言模型',
-  'multimodal': '多模态',
-  'other': '其他',
 }
 
 const ARCHITECTURES: Architecture[] = [
@@ -163,7 +157,7 @@ function ArchitectureList() {
           <button className={`btn btn-sm ${filterCategory === 'all' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilterCategory('all')}>
             全部
           </button>
-          {Object.entries(CATEGORIES).map(([key, label]) => (
+          {Object.entries(CATEGORY_MAP).map(([key, label]) => (
             <button key={key} className={`btn btn-sm ${filterCategory === key ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilterCategory(key)}>
               {label}
             </button>
@@ -197,7 +191,7 @@ function ArchitectureList() {
                     </td>
                     <td className="mono" style={{ fontSize: 12 }}>{arch.baseModel}</td>
                     <td>
-                      <span className="badge badge-secondary">{CATEGORIES[arch.category] || arch.category}</span>
+                      <span className="badge badge-secondary">{CATEGORY_MAP[arch.category] || arch.category}</span>
                     </td>
                     <td>
                       {arch.isActive ? (
