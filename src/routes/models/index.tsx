@@ -134,14 +134,9 @@ function SquareList() {
           <div className="breadcrumb">科宝训练平台 › 模型管理</div>
           <h1 className="page-title">模型广场</h1>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Link to="/models/manualUpload" className="btn btn-secondary">
-            <Upload size={14} /> 上传模型
-          </Link>
-          <Link to="/models/create" className="btn btn-primary">
-            <Rocket size={15} /> 新建模型
-          </Link>
-        </div>
+        <Link to="/models/manualUpload" className="btn btn-secondary">
+          <Upload size={14} /> 上传模型
+        </Link>
       </div>
 
       <div className="p-content">
@@ -224,9 +219,6 @@ function SquareList() {
                     }}
                   >
                     <Layers size={13} /> {expandedModel === model.id ? '收起版本' : `版本历史 (${model.versions.length})`}
-                  </button>
-                  <button className="btn btn-teal btn-sm" onClick={(e) => e.preventDefault()}>
-                    <TrendingUp size={13} /> 在线体验
                   </button>
                 </div>
 

@@ -28,7 +28,6 @@ import { Route as SubdatasetsCreateRouteImport } from './routes/subdatasets/crea
 import { Route as PresetsCreateRouteImport } from './routes/presets/create'
 import { Route as PresetsPresetIdRouteImport } from './routes/presets/$presetId'
 import { Route as ModelsManualUploadRouteImport } from './routes/models/manualUpload'
-import { Route as ModelsCreateRouteImport } from './routes/models/create'
 import { Route as ModelsModelIdRouteImport } from './routes/models/$modelId'
 import { Route as DatasetsDatasetIdRouteImport } from './routes/datasets/$datasetId'
 import { Route as ArchitecturesCreateRouteImport } from './routes/architectures/create'
@@ -129,11 +128,6 @@ const ModelsManualUploadRoute = ModelsManualUploadRouteImport.update({
   path: '/models/manualUpload',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ModelsCreateRoute = ModelsCreateRouteImport.update({
-  id: '/models/create',
-  path: '/models/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ModelsModelIdRoute = ModelsModelIdRouteImport.update({
   id: '/models/$modelId',
   path: '/models/$modelId',
@@ -163,7 +157,6 @@ export interface FileRoutesByFullPath {
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
-  '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
   '/presets/create': typeof PresetsCreateRoute
@@ -189,7 +182,6 @@ export interface FileRoutesByTo {
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
-  '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
   '/presets/create': typeof PresetsCreateRoute
@@ -216,7 +208,6 @@ export interface FileRoutesById {
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
-  '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
   '/presets/create': typeof PresetsCreateRoute
@@ -244,7 +235,6 @@ export interface FileRouteTypes {
     | '/architectures/create'
     | '/datasets/$datasetId'
     | '/models/$modelId'
-    | '/models/create'
     | '/models/manualUpload'
     | '/presets/$presetId'
     | '/presets/create'
@@ -270,7 +260,6 @@ export interface FileRouteTypes {
     | '/architectures/create'
     | '/datasets/$datasetId'
     | '/models/$modelId'
-    | '/models/create'
     | '/models/manualUpload'
     | '/presets/$presetId'
     | '/presets/create'
@@ -296,7 +285,6 @@ export interface FileRouteTypes {
     | '/architectures/create'
     | '/datasets/$datasetId'
     | '/models/$modelId'
-    | '/models/create'
     | '/models/manualUpload'
     | '/presets/$presetId'
     | '/presets/create'
@@ -323,7 +311,6 @@ export interface RootRouteChildren {
   ArchitecturesCreateRoute: typeof ArchitecturesCreateRoute
   DatasetsDatasetIdRoute: typeof DatasetsDatasetIdRoute
   ModelsModelIdRoute: typeof ModelsModelIdRoute
-  ModelsCreateRoute: typeof ModelsCreateRoute
   ModelsManualUploadRoute: typeof ModelsManualUploadRoute
   PresetsPresetIdRoute: typeof PresetsPresetIdRoute
   PresetsCreateRoute: typeof PresetsCreateRoute
@@ -478,13 +465,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsManualUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/models/create': {
-      id: '/models/create'
-      path: '/models/create'
-      fullPath: '/models/create'
-      preLoaderRoute: typeof ModelsCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/models/$modelId': {
       id: '/models/$modelId'
       path: '/models/$modelId'
@@ -523,7 +503,6 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitecturesCreateRoute: ArchitecturesCreateRoute,
   DatasetsDatasetIdRoute: DatasetsDatasetIdRoute,
   ModelsModelIdRoute: ModelsModelIdRoute,
-  ModelsCreateRoute: ModelsCreateRoute,
   ModelsManualUploadRoute: ModelsManualUploadRoute,
   PresetsPresetIdRoute: PresetsPresetIdRoute,
   PresetsCreateRoute: PresetsCreateRoute,

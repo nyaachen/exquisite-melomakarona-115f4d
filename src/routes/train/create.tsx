@@ -8,9 +8,9 @@ import {
   CheckCircle2,
   Info,
   Zap,
-  Upload,
   Database,
   Globe,
+  Package,
   Shuffle,
   Cpu,
   Target,
@@ -18,6 +18,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { DatasetPicker, type DatasetEntry } from '../../components/DatasetPicker'
+import { SearchableDropdown } from '../../components/SearchableDropdown'
 
 export const Route = createFileRoute('/train/create')({
   component: CreateTask,
@@ -101,18 +102,23 @@ const ARCHITECTURES: Architecture[] = [
 ]
 
 // ─── 训练预设 (Presets) ───
-const PRESETS = [
-  { id: 'preset-quick', name: '快速验证', architectureId: 'arch-yolov8', desc: '快速测试可行性', icon: '⚡',
+const CURRENT_USER = '张工'
+
+const ALL_PRESETS = [
+  { id: 'preset-quick', name: '快速验证', architectureId: 'arch-yolov8', desc: '快速测试可行性', icon: '⚡', visibility: 'public' as const, author: '张工',
     values: { variant: 's', epochs: 30, batchSize: 32, imgSize: 416, lr0: 0.02, lrf: 0.001, optimizer: 'SGD', patience: 15, useAugmentation: true, useMosaic: false, saveEvery: 10, device: 'cuda' },
   },
-  { id: 'preset-standard', name: '标准训练', architectureId: 'arch-yolov8', desc: '平衡速度与精度', icon: '⚖️',
+  { id: 'preset-standard', name: '标准训练', architectureId: 'arch-yolov8', desc: '平衡速度与精度', icon: '⚖️', visibility: 'public' as const, author: '系统管理员',
     values: { variant: 'm', epochs: 100, batchSize: 16, imgSize: 640, lr0: 0.01, lrf: 0.001, optimizer: 'SGD', patience: 20, useAugmentation: true, useMosaic: true, saveEvery: 10, device: 'cuda' },
   },
-  { id: 'preset-highacc', name: '高精度', architectureId: 'arch-yolov8', desc: '追求最佳精度', icon: '🎯',
+  { id: 'preset-highacc', name: '高精度', architectureId: 'arch-yolov8', desc: '追求最佳精度', icon: '🎯', visibility: 'public' as const, author: '李工',
     values: { variant: 'l', epochs: 150, batchSize: 8, imgSize: 1024, lr0: 0.005, lrf: 0.0005, optimizer: 'AdamW', patience: 30, useAugmentation: true, useMosaic: true, saveEvery: 5, device: 'cuda:0,1' },
   },
-  { id: 'preset-edge', name: '边缘部署', architectureId: 'arch-yolov8', desc: '适合边缘设备', icon: '📱',
+  { id: 'preset-edge', name: '边缘部署', architectureId: 'arch-yolov8', desc: '适合边缘设备', icon: '📱', visibility: 'private' as const, author: '王工',
     values: { variant: 'n', epochs: 80, batchSize: 64, imgSize: 416, lr0: 0.01, lrf: 0.001, optimizer: 'SGD', patience: 15, useAugmentation: true, useMosaic: false, saveEvery: 10, device: 'cuda' },
+  },
+  { id: 'preset-qwen-lora', name: 'Qwen LoRA 微调', architectureId: 'arch-qwen', desc: '参数高效微调', icon: '🔧', visibility: 'private' as const, author: '张工',
+    values: { baseModel: 'Qwen-7B-Chat', finetuneMode: 'lora', epochs: 3, batchSize: 8, lr0: 0.0001, maxSeqLen: 2048, useDeepSpeed: true },
   },
 ]
 
@@ -131,15 +137,22 @@ const DATASET_ENTRIES: DatasetEntry[] = [
 // Starting point
 const STARTING_POINT_TYPES = [
   { id: 'random', name: '随机起点', icon: <Shuffle size={16} />, desc: '从随机初始化权重开始训练' },
-  { id: 'existing', name: '已有训练结果', icon: <Database size={16} />, desc: '选择之前训练的模型权重继续训练' },
+  { id: 'existing_task', name: '训练任务结果', icon: <Database size={16} />, desc: '选择历史训练任务产生的结果继续训练' },
+  { id: 'existing_model', name: '模型广场模型', icon: <Package size={16} />, desc: '选择模型广场中已发布的模型作为起点' },
   { id: 'public', name: '公开预训练模型', icon: <Globe size={16} />, desc: '使用社区预训练权重' },
-  { id: 'upload', name: '手动上传', icon: <Upload size={16} />, desc: '上传自定义权重文件' },
 ]
 
 const EXISTING_TASKS = [
   { id: 'task-prev-001', name: '道路缺陷检测 v1.0', model: 'YOLOv8s', epochs: 120, bestMap: 52.3, lastEpoch: 120, status: 'completed', createdAt: '2026-04-25' },
   { id: 'task-prev-002', name: '安全帽检测实验组A', model: 'YOLOv8n', epochs: 80, bestMap: 48.7, lastEpoch: 80, status: 'completed', createdAt: '2026-04-20' },
   { id: 'task-prev-003', name: '设备异常检测 v2', model: 'YOLOv8m', epochs: 100, bestMap: 45.2, lastEpoch: 45, status: 'stopped', createdAt: '2026-04-18' },
+]
+
+const SQUARE_MODELS_WITH_VERSIONS = [
+  { id: 'sq-model-001', name: '道路缺陷检测', versions: ['v2.3', 'v2.2', 'v2.1'] },
+  { id: 'sq-model-002', name: '施工安全帽检测', versions: ['v1.0'] },
+  { id: 'sq-model-003', name: '人员跌倒检测', versions: ['v1.0'] },
+  { id: 'sq-model-004', name: '火焰烟雾检测', versions: ['v2.1', 'v2.0', 'v1.5'] },
 ]
 
 const PUBLIC_MODELS = [
@@ -174,9 +187,14 @@ function CreateTask() {
   const [paramValues, setParamValues] = useState<Record<string, any>>({})
   const [startPointType, setStartPointType] = useState('random')
   const [startPointId, setStartPointId] = useState<string | null>(null)
+  const [startPointVersion, setStartPointVersion] = useState<string>('')
 
   // Step 3: Task name
   const [taskName, setTaskName] = useState('')
+
+  const visiblePresets = useMemo(() =>
+    ALL_PRESETS.filter(p => p.visibility === 'public' || p.author === CURRENT_USER),
+  [])
 
   const architecture = ARCHITECTURES.find(a => a.id === architectureId)
   const trainDs = DATASET_ENTRIES.find(d => d.id === trainDatasetId)
@@ -188,8 +206,37 @@ function CreateTask() {
   const testImageCount = testDs ? testDs.testImages : 0
   const totalImagesForValidation = trainImageCount + valImageCount + testImageCount
 
+  // Class mismatch detection
+  const classMismatch = useMemo(() => {
+    const selected = [trainDs, valDs, testDs].filter(Boolean) as DatasetEntry[]
+    const sets = ['训练', '验证', '测试'] as const
+    const labels = ['训练数据集', '验证数据集', '测试数据集'] as const
+    const dss = [trainDs, valDs, testDs]
+    const items: { label: string; classes: string[] }[] = []
+    for (let i = 0; i < 3; i++) {
+      if (dss[i]) items.push({ label: labels[i], classes: dss[i]!.classes })
+    }
+    if (items.length < 2) return null
+
+    const allClasses = [...new Set(items.flatMap(it => it.classes))].sort()
+    const mismatched = items.some(it =>
+      it.classes.length !== allClasses.length || !allClasses.every(c => it.classes.includes(c))
+    )
+    if (!mismatched) return null
+
+    return { items, allClasses }
+  }, [trainDs, valDs, testDs])
+
+  // Warning for missing val/test (non-blocking)
+  const datasetWarnings: string[] = []
+  if (!valDatasetId) datasetWarnings.push('未选择验证数据集，建议选择一个验证集以监控训练过程中的模型表现')
+  if (!testDatasetId) datasetWarnings.push('未选择测试数据集，建议选择一个测试集以评估最终模型性能')
+
   function validateDatasets(): boolean {
     const errs: Record<string, string> = {}
+    if (!trainDatasetId || trainImageCount === 0) {
+      errs.train = '必须选择一个包含图片的训练数据集'
+    }
     if (totalImagesForValidation === 0) {
       errs.general = '至少需要选择一个包含图片的数据集或子数据集'
     }
@@ -214,7 +261,7 @@ function CreateTask() {
   }
 
   function applyPreset(presetId: string) {
-    const preset = PRESETS.find(p => p.id === presetId)
+    const preset = ALL_PRESETS.find(p => p.id === presetId)
     if (!preset) return
     setArchitectureId(preset.architectureId)
     setAppliedPresetId(presetId)
@@ -294,16 +341,24 @@ function CreateTask() {
               <SectionTitle icon={<Layers size={15} />} title="选择训练/验证/测试数据集"
                 subtitle="为每个集合独立选择数据集或子数据集" />
 
-              {datasetErrors.general && (
-                <div style={{ padding: '10px 14px', background: 'var(--error-glow)', border: '1px solid rgba(239,68,68,0.3)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--error)' }}>
-                  <AlertCircle size={14} /> {datasetErrors.general}
+              {datasetErrors.train && (
+                <div style={{ padding: '10px 14px', background: 'var(--error-glow)', border: '1px solid rgba(239,68,68,0.3)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--error)' }}>
+                  <AlertCircle size={14} /> {datasetErrors.train}
+                </div>
+              )}
+              {datasetWarnings.length > 0 && (
+                <div style={{ padding: '10px 14px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', marginBottom: 12, display: 'flex', gap: 8, fontSize: 12 }}>
+                  <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
+                  <div style={{ color: 'var(--text-secondary)' }}>
+                    {datasetWarnings.map((w, i) => <div key={i}>{w}</div>)}
+                  </div>
                 </div>
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {/* Training Dataset */}
                 <DatasetPicker
-                  label="训练数据集"
+                  label="训练数据集 *"
                   color="var(--accent-bright)"
                   selectedId={trainDatasetId}
                   onChange={setTrainDatasetId}
@@ -369,6 +424,48 @@ function CreateTask() {
                 )}
               </div>
 
+              {/* Class mismatch warning */}
+              {classMismatch && (
+                <div style={{ marginTop: 16, padding: 14, background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', gap: 10, fontSize: 12 }}>
+                  <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, color: 'var(--warning)', marginBottom: 6 }}>类别不一致警告</div>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
+                      所选数据集的类别标签不完全一致，可能导致训练/验证/测试之间的标签不匹配，影响训练效果。
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {classMismatch.items.map(item => (
+                        <div key={item.label} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                          <span style={{ color: 'var(--text-muted)', flexShrink: 0, minWidth: 80 }}>{item.label}：</span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                            {item.classes.map(cls => (
+                              <span key={cls} style={{
+                                fontSize: 10, padding: '1px 5px',
+                                background: classMismatch.allClasses.includes(cls) ? 'var(--bg-elevated)' : 'rgba(239,68,68,0.1)',
+                                color: 'var(--text-secondary)',
+                                border: '1px solid var(--border-dim)',
+                              }}>
+                                {cls}
+                              </span>
+                            ))}
+                            {classMismatch.allClasses.filter(c => !item.classes.includes(c)).map(cls => (
+                              <span key={cls} style={{
+                                fontSize: 10, padding: '1px 5px',
+                                background: 'rgba(239,68,68,0.08)',
+                                color: 'var(--error)',
+                                border: '1px solid rgba(239,68,68,0.2)',
+                              }}>
+                                缺 {cls}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(27,107,239,0.06)', border: '1px solid rgba(27,107,239,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                 <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
                 <span>可以从父数据集或已创建的子数据集中选择。直接选择父数据集将使用全部图片，选择子数据集将使用已划分好的图片子集。</span>
@@ -405,21 +502,19 @@ function CreateTask() {
                 ))}
               </div>
 
-              <SectionTitle icon={<Zap size={15} />} title="快速设置参数" subtitle="应用训练预设快速填充参数（可选）" />
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 24 }}>
-                {PRESETS.filter(p => p.architectureId === architectureId).map(preset => (
-                  <div key={preset.id} className="select-card" style={{ textAlign: 'center', padding: 14, borderColor: appliedPresetId === preset.id ? 'var(--accent)' : undefined, background: appliedPresetId === preset.id ? 'var(--accent-glow)' : undefined }} onClick={() => applyPreset(preset.id)}>
-                    <div style={{ fontSize: 22, marginBottom: 6 }}>{preset.icon}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{preset.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{preset.desc}</div>
-                    {appliedPresetId === preset.id && <CheckCircle2 size={14} color="var(--accent-bright)" style={{ marginTop: 6 }} />}
-                  </div>
-                ))}
-                {PRESETS.filter(p => p.architectureId === architectureId).length === 0 && (
-                  <div style={{ gridColumn: '1 / -1', padding: 16, textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-                    该架构暂无可用预设，请手动配置参数
-                  </div>
-                )}
+              <div style={{ marginBottom: 24 }}>
+                <SearchableDropdown
+                  label="快速设置参数（可选）"
+                  color="var(--teal)"
+                  selectedId={appliedPresetId || ''}
+                  onChange={(id) => id && applyPreset(id)}
+                  items={visiblePresets.filter(p => p.architectureId === architectureId).map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    subtitle: p.desc,
+                  }))}
+                  placeholder={visiblePresets.filter(p => p.architectureId === architectureId).length === 0 ? '该架构暂无可用预设' : '选择训练预设快速填充参数...'}
+                />
               </div>
 
               {architecture && (
@@ -445,11 +540,43 @@ function CreateTask() {
                                 <option value="false">否</option>
                               </select>
                             ) : param.type === 'range' ? (
-                              <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: 13, fontWeight: 600, color: 'var(--accent-bright)' }}>{val}</span>
-                                </div>
-                                <input type="range" min={param.min || 0} max={param.max || 1} step={param.step || 0.001} value={Number(val)} onChange={e => setParamValue(param.key, parseFloat(e.target.value))} />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <input
+                                  className="form-input"
+                                  type="number"
+                                  value={val}
+                                  min={param.min}
+                                  max={param.max}
+                                  step={param.step}
+                                  style={{ width: 90, fontFamily: 'JetBrains Mono', fontSize: 13, fontWeight: 600, textAlign: 'center', flexShrink: 0 }}
+                                  onChange={e => {
+                                    const raw = e.target.value
+                                    if (raw === '' || raw === '-') { setParamValue(param.key, raw); return }
+                                    const v = parseFloat(raw)
+                                    if (!isNaN(v)) setParamValue(param.key, v)
+                                  }}
+                                  onBlur={e => {
+                                    const v = parseFloat(e.target.value)
+                                    const min = param.min ?? 0
+                                    const max = param.max ?? 1
+                                    if (isNaN(v)) { setParamValue(param.key, param.defaultValue); return }
+                                    if (v < min) setParamValue(param.key, min)
+                                    else if (v > max) setParamValue(param.key, max)
+                                    else setParamValue(param.key, v)
+                                  }}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                                  }}
+                                />
+                                <input
+                                  type="range"
+                                  min={param.min || 0}
+                                  max={param.max || 1}
+                                  step={param.step || 0.001}
+                                  value={isNaN(Number(val)) ? param.defaultValue as number : Number(val)}
+                                  onChange={e => setParamValue(param.key, parseFloat(e.target.value))}
+                                  style={{ flex: 1 }}
+                                />
                               </div>
                             ) : (
                               <input className="form-input" type={param.type === 'number' ? 'number' : 'text'} value={String(val)} min={param.min} max={param.max} step={param.step}
@@ -467,7 +594,7 @@ function CreateTask() {
               <SectionTitle icon={<Target size={15} />} title="训练起点" subtitle="选择训练的初始权重来源" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
                 {STARTING_POINT_TYPES.map(sp => (
-                  <div key={sp.id} className="select-card" style={{ borderColor: startPointType === sp.id ? 'var(--accent)' : undefined, background: startPointType === sp.id ? 'var(--accent-glow)' : undefined, display: 'flex', alignItems: 'center', gap: 14 }} onClick={() => { setStartPointType(sp.id); setStartPointId(null) }}>
+                  <div key={sp.id} className="select-card" style={{ borderColor: startPointType === sp.id ? 'var(--accent)' : undefined, background: startPointType === sp.id ? 'var(--accent-glow)' : undefined, display: 'flex', alignItems: 'center', gap: 14 }} onClick={() => { setStartPointType(sp.id); setStartPointId(null); setStartPointVersion('') }}>
                     <div style={{ width: 36, height: 36, background: startPointType === sp.id ? 'var(--accent)' : 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: startPointType === sp.id ? 'white' : 'var(--text-secondary)' }}>{sp.icon}</div>
                     <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{sp.name}</div><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{sp.desc}</div></div>
                     {startPointType === sp.id && <CheckCircle2 size={18} color="var(--accent-bright)" />}
@@ -475,38 +602,73 @@ function CreateTask() {
                 ))}
               </div>
 
+              {startPointType === 'existing_task' && (
+                <div style={{ animation: 'slideIn 0.2s ease-out', marginBottom: 16 }}>
+                  <SearchableDropdown
+                    label="选择训练任务"
+                    color="var(--accent-bright)"
+                    selectedId={startPointId || ''}
+                    onChange={(id) => setStartPointId(id)}
+                    items={EXISTING_TASKS.map(t => ({
+                      id: t.id,
+                      name: t.name,
+                      subtitle: `模型: ${t.model} · ${t.epochs} 轮 · 最佳 mAP: ${t.bestMap}%`,
+                      count: t.lastEpoch,
+                      countLabel: `第 ${t.lastEpoch} 轮`,
+                    }))}
+                    placeholder="选择历史训练任务..."
+                  />
+                </div>
+              )}
+
+              {startPointType === 'existing_model' && (
+                <div style={{ animation: 'slideIn 0.2s ease-out', marginBottom: 16 }}>
+                  <SearchableDropdown
+                    label="选择模型广场模型"
+                    color="var(--accent-bright)"
+                    selectedId={startPointId || ''}
+                    onChange={(id) => { setStartPointId(id); setStartPointVersion('') }}
+                    items={SQUARE_MODELS_WITH_VERSIONS.map(m => ({
+                      id: m.id,
+                      name: m.name,
+                      subtitle: `版本: ${m.versions.join('、')}`,
+                      tags: m.versions,
+                    }))}
+                    placeholder="选择模型广场中已发布的模型..."
+                  />
+                  {startPointId && (
+                    <div style={{ marginTop: 12 }}>
+                      <SearchableDropdown
+                        label="选择版本"
+                        color="var(--teal)"
+                        selectedId={startPointVersion}
+                        onChange={(v) => setStartPointVersion(v)}
+                        items={(SQUARE_MODELS_WITH_VERSIONS.find(m => m.id === startPointId)?.versions || []).map(v => ({
+                          id: v,
+                          name: v,
+                        }))}
+                        placeholder="选择模型版本..."
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
               {startPointType === 'public' && (
                 <div style={{ animation: 'slideIn 0.2s ease-out', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {PUBLIC_MODELS.map(pm => (
-                      <div key={pm.id} className="select-card" style={{ borderColor: startPointId === pm.id ? 'var(--accent)' : undefined, background: startPointId === pm.id ? 'var(--accent-glow)' : undefined, display: 'flex', alignItems: 'center', gap: 12 }} onClick={() => setStartPointId(pm.id)}>
-                        <div style={{ flex: 1 }}><div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}><span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{pm.name}</span><span style={{ fontSize: 10, padding: '2px 6px', background: 'rgba(27,107,239,0.1)', color: 'var(--accent-bright)' }}>{pm.source}</span></div><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{pm.desc} · {pm.download}</div></div>
-                        {startPointId === pm.id && <CheckCircle2 size={16} color="var(--accent-bright)" />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {startPointType === 'existing' && (
-                <div style={{ animation: 'slideIn 0.2s ease-out', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {EXISTING_TASKS.map(task => (
-                      <div key={task.id} className="select-card" style={{ borderColor: startPointId === task.id ? 'var(--accent)' : undefined, background: startPointId === task.id ? 'var(--accent-glow)' : undefined, display: 'flex', alignItems: 'center', gap: 12 }} onClick={() => setStartPointId(task.id)}>
-                        <div style={{ flex: 1 }}><div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{task.name}</span><span style={{ fontSize: 10, padding: '2px 6px', background: task.status === 'completed' ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)', color: task.status === 'completed' ? 'var(--success)' : 'var(--warning)' }}>{task.status === 'completed' ? '已完成' : '已停止'}</span></div><div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>模型: {task.model} · {task.epochs} 轮 · 最佳 mAP: {task.bestMap}%</div><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>创建于 {task.createdAt} · 最后在第 {task.lastEpoch} 轮</div></div>
-                        {startPointId === task.id && <CheckCircle2 size={16} color="var(--accent-bright)" />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {startPointType === 'upload' && (
-                <div className="upload-area" style={{ padding: 32, textAlign: 'center', marginBottom: 16 }}>
-                  <Upload size={36} style={{ color: 'var(--text-muted)', marginBottom: 12 }} />
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>点击或拖拽上传权重文件</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>支持 .pt, .pth, .onnx 格式，最大 500MB</div>
-                  <button className="btn btn-secondary">选择文件</button>
+                  <SearchableDropdown
+                    label="选择公开预训练模型"
+                    color="var(--accent-bright)"
+                    selectedId={startPointId || ''}
+                    onChange={(id) => setStartPointId(id)}
+                    items={PUBLIC_MODELS.map(pm => ({
+                      id: pm.id,
+                      name: pm.name,
+                      subtitle: `${pm.desc} · ${pm.download}`,
+                      tags: [pm.source],
+                    }))}
+                    placeholder="选择社区预训练模型..."
+                  />
                 </div>
               )}
 

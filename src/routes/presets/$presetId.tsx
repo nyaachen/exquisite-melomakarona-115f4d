@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
-import { ArrowLeft, Save, Info, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Save, Info, AlertCircle, Globe, Lock } from 'lucide-react'
 
 export const Route = createFileRoute('/presets/$presetId')({
   component: EditPreset,
@@ -40,6 +40,7 @@ interface Preset {
   description: string
   paramValues: Record<string, number | string | boolean>
   isActive: boolean
+  visibility: 'public' | 'private'
   usageCount: number
   createdAt: string
 }
@@ -75,21 +76,21 @@ const ARCHITECTURES: Architecture[] = [
 const PRESETS: Preset[] = [
   {
     id: 'preset-standard', name: '标准训练', architectureId: 'arch-yolov8', architectureName: 'YOLOv8 目标检测',
-    baseModel: 'YOLOv8m', category: 'object-detection', isActive: true, usageCount: 56,
+    baseModel: 'YOLOv8m', category: 'object-detection', isActive: true, visibility: 'public', usageCount: 56,
     description: '平衡训练速度与模型精度',
     paramValues: { variant: 'm', epochs: 100, batchSize: 16, imgSize: 640, lr0: 0.01, optimizer: 'SGD', useMosaic: true },
     createdAt: '2026-04-18',
   },
   {
     id: 'preset-quick', name: '快速验证', architectureId: 'arch-yolov8', architectureName: 'YOLOv8 目标检测',
-    baseModel: 'YOLOv8s', category: 'object-detection', isActive: true, usageCount: 34,
+    baseModel: 'YOLOv8s', category: 'object-detection', isActive: true, visibility: 'public', usageCount: 34,
     description: '快速测试模型可行性',
     paramValues: { variant: 's', epochs: 30, batchSize: 32, imgSize: 416, lr0: 0.02, optimizer: 'SGD', useMosaic: false },
     createdAt: '2026-04-20',
   },
   {
     id: 'preset-qwen-lora', name: 'Qwen LoRA 标准微调', architectureId: 'arch-qwen', architectureName: 'Qwen 大语言模型微调',
-    baseModel: 'Qwen-7B-Chat', category: 'llm', isActive: true, usageCount: 9,
+    baseModel: 'Qwen-7B-Chat', category: 'llm', isActive: true, visibility: 'private', usageCount: 9,
     description: 'LoRA 参数高效微调标准配置',
     paramValues: { baseModel: 'Qwen-7B-Chat', finetuneMode: 'lora', epochs: 3, batchSize: 8, lr0: 0.0001, maxSeqLen: 2048 },
     createdAt: '2026-04-28',
@@ -106,6 +107,7 @@ function EditPreset() {
   const [description, setDescription] = useState(data.description)
   const [architectureId, setArchitectureId] = useState(data.architectureId)
   const [isActive, setIsActive] = useState(data.isActive)
+  const [isPublic, setIsPublic] = useState(data.visibility === 'public')
   const [values, setValues] = useState<Record<string, number | string | boolean>>(data.paramValues || {})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -191,6 +193,27 @@ function EditPreset() {
               <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
               启用状态
             </label>
+          </div>
+
+          <div className="form-section">
+            <label className="form-label">可见性</label>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                className={`btn btn-sm ${isPublic ? 'btn-teal' : 'btn-secondary'}`}
+                onClick={() => setIsPublic(true)}
+              >
+                <Globe size={13} /> 公开
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${!isPublic ? 'btn-teal' : 'btn-secondary'}`}
+                onClick={() => setIsPublic(false)}
+              >
+                <Lock size={13} /> 私有
+              </button>
+            </div>
+            <div className="form-hint">{isPublic ? '所有用户可见和使用此预设' : '仅创建者可见和使用此预设'}</div>
           </div>
 
           {architecture && (

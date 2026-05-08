@@ -386,15 +386,6 @@ function ModelDetail() {
                     >
                       <ImageIcon size={14} /> 测试集图片
                     </button>
-                    <button
-                      className={`btn ${imageSource === 'dataset' ? 'btn-primary' : 'btn-secondary'}`}
-                      onClick={() => {
-                        setImageSource('dataset')
-                        setSelectedDataset(DATASETS[0]?.id || '')
-                      }}
-                    >
-                      <Database size={14} /> 标注平台数据集
-                    </button>
                   </div>
 
                   {imageSource === 'upload' && (
@@ -442,51 +433,6 @@ function ModelDetail() {
                             <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 6 }}>{img.name}</div>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {imageSource === 'dataset' && (
-                    <div style={{ marginTop: 20 }}>
-                      <SearchableDropdown
-                        label="选择数据集"
-                        color="var(--success)"
-                        selectedId={selectedDataset}
-                        onChange={(id) => {
-                          setSelectedDataset(id)
-                          const ds = DATASETS.find(d => d.id === id)
-                          if (ds?.imagesList?.[0]) setSelectedImage(ds.imagesList[0])
-                          setPredictions([])
-                        }}
-                        items={DATASETS.map(ds => ({
-                          id: ds.id,
-                          name: ds.name,
-                          count: ds.images,
-                          countLabel: '张',
-                        }))}
-                        placeholder="选择数据集..."
-                      />
-
-                      <div style={{ marginTop: 16 }}>
-                        <label className="form-label">数据集图片</label>
-                        <div className="image-select-grid">
-                          {availableImages.map(img => (
-                            <div
-                              key={img.id}
-                              className={`select-card${selectedImage?.id === img.id ? '' : ''}`}
-                              style={{ cursor: 'pointer', padding: 8, borderColor: selectedImage?.id === img.id ? 'var(--accent)' : undefined }}
-                              onClick={() => {
-                                setSelectedImage(img)
-                                setPredictions([])
-                              }}
-                            >
-                              <div className="image-placeholder">
-                                <ImageIcon size={20} style={{ color: 'var(--text-muted)' }} />
-                              </div>
-                              <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 6 }}>{img.name}</div>
-                            </div>
-                          ))}
-                        </div>
                       </div>
                     </div>
                   )}
@@ -636,12 +582,12 @@ function ModelDetail() {
             <div className="card card-padded" style={{ marginTop: 24 }}>
               <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>快速操作</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <button
+                <Link
+                  to="/validate/create"
                   className="btn btn-teal"
-                  onClick={() => {}}
                 >
-                  <TrendingUp size={14} /> 在线验证模型
-                </button>
+                  <Package size={14} /> 用数据集验证模型
+                </Link>
                 <Link
                   to="/models/manualUpload"
                   className="btn btn-secondary"

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
-import { ArrowLeft, Save, Info } from 'lucide-react'
+import { ArrowLeft, Save, Info, Globe, Lock } from 'lucide-react'
 
 export const Route = createFileRoute('/presets/create')({
   component: CreatePreset,
@@ -79,6 +79,7 @@ function CreatePreset() {
   const [description, setDescription] = useState('')
   const [architectureId, setArchitectureId] = useState('arch-yolov8')
   const [values, setValues] = useState<Record<string, number | string | boolean>>({})
+  const [isPublic, setIsPublic] = useState(true)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -160,6 +161,27 @@ function CreatePreset() {
           <div className="form-section">
             <label className="form-label">预设描述</label>
             <textarea className="form-input" rows={2} value={description} onChange={e => setDescription(e.target.value)} placeholder="描述该预设的适用场景" />
+          </div>
+
+          <div className="form-section">
+            <label className="form-label">可见性</label>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                className={`btn btn-sm ${isPublic ? 'btn-teal' : 'btn-secondary'}`}
+                onClick={() => setIsPublic(true)}
+              >
+                <Globe size={13} /> 公开
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${!isPublic ? 'btn-teal' : 'btn-secondary'}`}
+                onClick={() => setIsPublic(false)}
+              >
+                <Lock size={13} /> 私有
+              </button>
+            </div>
+            <div className="form-hint">{isPublic ? '所有用户可见和使用此预设' : '仅创建者可见和使用此预设'}</div>
           </div>
 
           {architecture && (

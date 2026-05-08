@@ -72,7 +72,7 @@ function Sidebar() {
         <NavLink to="/validate" icon={<Package size={15} />} label="验证任务" />
         <NavLink to="/presets" icon={<Sliders size={15} />} label="训练预设" />
 
-        <div className="nav-label">系统</div>
+        <div className="nav-label">系统配置</div>
         <NavLink to="/architectures" icon={<Boxes size={15} />} label="模型模板" />
       </div>
 
