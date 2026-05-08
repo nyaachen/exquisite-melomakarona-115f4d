@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Zap,
 } from 'lucide-react'
+import { SearchableDropdown } from '../../components/SearchableDropdown'
 
 export const Route = createFileRoute('/models/$modelId')({
   component: ModelDetail,
@@ -447,23 +448,24 @@ function ModelDetail() {
 
                   {imageSource === 'dataset' && (
                     <div style={{ marginTop: 20 }}>
-                      <label className="form-label">选择数据集</label>
-                      <select
-                        className="form-input"
-                        value={selectedDataset}
-                        onChange={e => {
-                          setSelectedDataset(e.target.value)
-                          const ds = DATASETS.find(d => d.id === e.target.value)
-                          if (ds?.imagesList?.[0]) {
-                            setSelectedImage(ds.imagesList[0])
-                          }
+                      <SearchableDropdown
+                        label="选择数据集"
+                        color="var(--success)"
+                        selectedId={selectedDataset}
+                        onChange={(id) => {
+                          setSelectedDataset(id)
+                          const ds = DATASETS.find(d => d.id === id)
+                          if (ds?.imagesList?.[0]) setSelectedImage(ds.imagesList[0])
                           setPredictions([])
                         }}
-                      >
-                        {DATASETS.map(ds => (
-                          <option key={ds.id} value={ds.id}>{ds.name} ({ds.images} 张)</option>
-                        ))}
-                      </select>
+                        items={DATASETS.map(ds => ({
+                          id: ds.id,
+                          name: ds.name,
+                          count: ds.images,
+                          countLabel: '张',
+                        }))}
+                        placeholder="选择数据集..."
+                      />
 
                       <div style={{ marginTop: 16 }}>
                         <label className="form-label">数据集图片</label>

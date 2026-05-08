@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm c:/Users/nyaachen/Documents/VSCode/exquisite-melomakarona-115f4d/src/routes/tasks/index.tsx c:/Users/nyaachen/Documents/VSCode/exquisite-melomakarona-115f4d/src/routes/tasks/create.tsx \"c:/Users/nyaachen/Documents/VSCode/exquisite-melomakarona-115f4d/src/routes/tasks/\\\\$taskId.tsx\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\nyaachen\\Documents\\VSCode\\exquisite-melomakarona-115f4d\\src\\routes\\tasks"
+    ]
+  }
+}

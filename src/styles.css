@@ -1156,3 +1156,305 @@ input[type="range"]::-webkit-slider-thumb:hover {
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
+
+/* ═══════════════════════════════════════════
+   Search & Filter
+   ═══════════════════════════════════════════ */
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 0 12px;
+  min-width: 240px;
+}
+.search-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+.search-input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+}
+.search-input-field::placeholder { color: var(--text-muted); }
+
+.filter-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 0 12px;
+}
+.filter-select:focus-within {
+  border-color: var(--accent);
+}
+.filter-select-field {
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+/* ═══════════════════════════════════════════
+   Empty State
+   ═══════════════════════════════════════════ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+}
+.empty-state-icon {
+  color: var(--text-muted);
+  opacity: 0.4;
+  margin-bottom: 12px;
+}
+.empty-state-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.empty-state-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════
+   Form Section
+   ═══════════════════════════════════════════ */
+.form-section {
+  margin-bottom: 20px;
+}
+.form-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+.form-group .form-label {
+  margin-bottom: 6px;
+}
+
+/* ═══════════════════════════════════════════
+   Step Indicator (Wizard Step Circle)
+   ═══════════════════════════════════════════ */
+.step-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  font-family: 'JetBrains Mono', monospace;
+}
+.step-active {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  color: var(--accent-bright);
+}
+
+/* ═══════════════════════════════════════════
+   Confirm List (Review Step)
+   ═══════════════════════════════════════════ */
+.confirm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.confirm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-dim);
+}
+.confirm-item:last-child { border-bottom: none; }
+.confirm-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.confirm-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ═══════════════════════════════════════════
+   Split Bar Variants
+   ═══════════════════════════════════════════ */
+.split-bar-train {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(27,107,239,0.4);
+  transition: flex 0.3s ease;
+}
+.split-bar-val {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,184,158,0.35);
+  transition: flex 0.3s ease;
+}
+.split-bar-test {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245,166,35,0.3);
+  transition: flex 0.3s ease;
+}
+.split-bar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ═══════════════════════════════════════════
+   Badge Variants
+   ═══════════════════════════════════════════ */
+.badge-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+}
+.badge-success {
+  background: var(--success-glow);
+  color: var(--success);
+  border-color: rgba(16,185,129,0.3);
+}
+.badge-error {
+  background: var(--error-glow);
+  color: var(--error);
+  border-color: rgba(239,68,68,0.3);
+}
+.badge-teal {
+  background: var(--teal-glow);
+  color: var(--teal);
+  border-color: rgba(13,148,136,0.3);
+}
+.badge-archived {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border-color: var(--border-dim);
+}
+
+/* ═══════════════════════════════════════════
+   Card Variants
+   ═══════════════════════════════════════════ */
+.card-error {
+  background: var(--error-glow);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+/* ═══════════════════════════════════════════
+   Data Label
+   ═══════════════════════════════════════════ */
+.data-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   Spinner
+   ═══════════════════════════════════════════ */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ═══════════════════════════════════════════
+   Log Line Variants
+   ═══════════════════════════════════════════ */
+.log-warning { color: var(--warning); }
+.log-default { color: var(--text-muted); }
+.log-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════
+   Content Padded
+   ═══════════════════════════════════════════ */
+.content-padded {
+  padding: 24px 32px;
+}
+
+/* ═══════════════════════════════════════════
+   Error Text
+   ═══════════════════════════════════════════ */
+.error-text {
+  font-size: 12px;
+  color: var(--error);
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════
+   Metric Chip Icon
+   ═══════════════════════════════════════════ */
+.metric-chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  color: var(--accent-bright);
+}
+
+/* ═══════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════ */
+@keyframes slideFade {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-fade {
+  animation: slideFade 0.25s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

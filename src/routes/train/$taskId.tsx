@@ -12,7 +12,6 @@ import {
   Package,
   AlertTriangle,
   Cpu,
-  Eye,
   TrendingUp,
   Award,
   Target,
@@ -381,26 +380,21 @@ function TaskDetail() {
     <div className="slide-in">
       {/* Header */}
       <div className="page-header">
-        <div>
-          <div className="breadcrumb">
-            <Link to="/">科宝训练平台</Link> ›
-            <Link to="/train">训练任务</Link> ›
-            <span>{task.name}</span>
-          </div>
-          <div className="flex items-center gap-3 mt-1">
-            <h1 className="page-title mb-0">{task.name}</h1>
-            <span className={`badge ${sc.cls}`}>{sc.icon} {sc.label}</span>
-          </div>
-        </div>
-        <div className="flex gap-3">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button className="btn btn-secondary btn-sm" onClick={() => navigate({ to: '/train' })}>
             <ArrowLeft size={14} /> 返回列表
           </button>
-          {task.status === 'completed' && (
-            <Link to="/validate/create" className="btn btn-success btn-sm">
-              <FlaskConical size={14} /> 创建验证任务
-            </Link>
-          )}
+          <div>
+            <div className="breadcrumb">
+              <Link to="/">科宝训练平台</Link> ›
+              <Link to="/train">训练任务</Link> ›
+              <span>{task.name}</span>
+            </div>
+            <div className="flex items-center gap-3 mt-1">
+              <h1 className="page-title mb-0">{task.name}</h1>
+              <span className={`badge ${sc.cls}`}>{sc.icon} {sc.label}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -419,12 +413,11 @@ function TaskDetail() {
         {/* Verification Results - only for completed tasks */}
         {task.status === 'completed' && (
           <>
-            {/* 发布状态 */}
+            {/* 训练结果状态 */}
             <div className="card card-padded mb-5">
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{
                   width: 56, height: 56,
-                  borderRadius: 12,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: task.published ? 'rgba(18,217,122,0.1)' : 'rgba(245,158,11,0.1)'
                 }}>
@@ -434,7 +427,7 @@ function TaskDetail() {
                     <Clock size={28} style={{ color: 'var(--warning)' }} />
                   )}
                 </div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 4 }}>
                     训练结果状态
                   </div>
@@ -451,24 +444,22 @@ function TaskDetail() {
                     )}
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                    {task.published 
+                    {task.published
                       ? `发布时间: ${task.publishedAt}`
                       : '训练任务产生的结果初始处于未发布状态，只有发布后才会出现在模型广场'
                     }
                   </div>
                 </div>
-                <div className="flex-1" />
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Link to="/visual/$modelId" params={{ modelId: `model-${taskId.split('-')[1]}` }} className="btn btn-secondary btn-sm">
-                    <Eye size={13} /> 可视化分析
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <Link to="/validate/create" className="btn btn-success btn-sm">
+                    <FlaskConical size={14} /> 创建验证任务
                   </Link>
-                  {!task.published && (
+                  {!task.published ? (
                     <Link to="/models/create" className="btn btn-teal btn-sm">
                       <Package size={13} /> 发布模型
                     </Link>
-                  )}
-                  {task.published && (
-                    <Link to="/models" className="btn btn-primary btn-sm">
+                  ) : (
+                    <Link to="/models/$modelId" params={{ modelId: 'model-001' }} className="btn btn-primary btn-sm">
                       <Package size={13} /> 查看模型
                     </Link>
                   )}
@@ -847,7 +838,9 @@ function TaskDetail() {
         {/* Training Log (collapsible) */}
         <div className="card">
           <button 
-            className="w-full p-4 flex items-center justify-between hover:bg-bg-hover transition-colors"
+            style={{ width: '100%', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', background: 'transparent', transition: 'background 0.15s' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
             onClick={() => setLogExpanded(!logExpanded)}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

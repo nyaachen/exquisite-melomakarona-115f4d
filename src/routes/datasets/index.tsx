@@ -221,10 +221,10 @@ function DatasetsPage() {
                       <Link to={`/datasets/${ds.id}`}  className="btn btn-ghost btn-sm">
                         查看详情 <ArrowRight size={11} />
                       </Link>
-                      <Link to="/split/create" className="btn btn-ghost btn-sm">
-                        创建划分 <ArrowRight size={11} />
+                      <Link to="/subdatasets/create" className="btn btn-ghost btn-sm">
+                        创建子数据集 <ArrowRight size={11} />
                       </Link>
-                      <Link to="/tasks/create" className="btn btn-ghost btn-sm">
+                      <Link to="/train/create" className="btn btn-ghost btn-sm">
                         创建训练任务 <ArrowRight size={11} />
                       </Link>
                     </td>

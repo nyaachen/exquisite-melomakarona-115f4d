@@ -3,10 +3,11 @@ import {
   LayoutDashboard,
   Cpu,
   Package,
-  PlusCircle,
   Activity,
   ChevronRight,
   Layers,
+  Sliders,
+  Boxes,
 } from 'lucide-react'
 import '../styles.css'
 
@@ -64,16 +65,15 @@ function Sidebar() {
 
         <div className="nav-label">数据</div>
         <NavLink to="/datasets" icon={<Layers size={15} />} label="数据集" />
+        <NavLink to="/subdatasets" icon={<Layers size={15} />} label="子数据集" />
 
         <div className="nav-label">训练</div>
-        <NavLink to="/split" icon={<Layers size={15} />} label="split" />
-        <NavLink to="/template" icon={<Activity size={15} />} label="训练预设" />
         <NavLink to="/train" icon={<Cpu size={15} />} label="训练任务" />
         <NavLink to="/validate" icon={<Package size={15} />} label="验证任务" />
+        <NavLink to="/presets" icon={<Sliders size={15} />} label="训练预设" />
 
         <div className="nav-label">系统</div>
-        <NavLink to="/template" icon={<Activity size={15} />} label="模型模板" />
-        <NavLink to="/monitor" icon={<Activity size={15} />} label="资源监控" />
+        <NavLink to="/architectures" icon={<Boxes size={15} />} label="模型模板" />
       </div>
 
       <div className="sidebar-footer">

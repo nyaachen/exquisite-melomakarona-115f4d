@@ -13,26 +13,26 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ValidateIndexRouteImport } from './routes/validate/index'
 import { Route as TrainIndexRouteImport } from './routes/train/index'
-import { Route as TemplateIndexRouteImport } from './routes/template/index'
-import { Route as TasksIndexRouteImport } from './routes/tasks/index'
-import { Route as SplitIndexRouteImport } from './routes/split/index'
+import { Route as SubdatasetsIndexRouteImport } from './routes/subdatasets/index'
+import { Route as PresetsIndexRouteImport } from './routes/presets/index'
 import { Route as MonitorIndexRouteImport } from './routes/monitor/index'
 import { Route as ModelsIndexRouteImport } from './routes/models/index'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets/index'
+import { Route as ArchitecturesIndexRouteImport } from './routes/architectures/index'
 import { Route as ValidateCreateRouteImport } from './routes/validate/create'
 import { Route as ValidateTaskIdRouteImport } from './routes/validate/$taskId'
 import { Route as TrainCreateRouteImport } from './routes/train/create'
 import { Route as TrainTaskIdRouteImport } from './routes/train/$taskId'
-import { Route as TemplateCreateRouteImport } from './routes/template/create'
-import { Route as TemplateTemplateIdRouteImport } from './routes/template/$templateId'
-import { Route as TasksCreateRouteImport } from './routes/tasks/create'
-import { Route as TasksTaskIdRouteImport } from './routes/tasks/$taskId'
 import { Route as SystemUserRouteImport } from './routes/system/user'
-import { Route as SplitCreateRouteImport } from './routes/split/create'
+import { Route as SubdatasetsCreateRouteImport } from './routes/subdatasets/create'
+import { Route as PresetsCreateRouteImport } from './routes/presets/create'
+import { Route as PresetsPresetIdRouteImport } from './routes/presets/$presetId'
 import { Route as ModelsManualUploadRouteImport } from './routes/models/manualUpload'
 import { Route as ModelsCreateRouteImport } from './routes/models/create'
 import { Route as ModelsModelIdRouteImport } from './routes/models/$modelId'
 import { Route as DatasetsDatasetIdRouteImport } from './routes/datasets/$datasetId'
+import { Route as ArchitecturesCreateRouteImport } from './routes/architectures/create'
+import { Route as ArchitecturesArchitectureIdRouteImport } from './routes/architectures/$architectureId'
 
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
@@ -54,19 +54,14 @@ const TrainIndexRoute = TrainIndexRouteImport.update({
   path: '/train/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TemplateIndexRoute = TemplateIndexRouteImport.update({
-  id: '/template/',
-  path: '/template/',
+const SubdatasetsIndexRoute = SubdatasetsIndexRouteImport.update({
+  id: '/subdatasets/',
+  path: '/subdatasets/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TasksIndexRoute = TasksIndexRouteImport.update({
-  id: '/tasks/',
-  path: '/tasks/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SplitIndexRoute = SplitIndexRouteImport.update({
-  id: '/split/',
-  path: '/split/',
+const PresetsIndexRoute = PresetsIndexRouteImport.update({
+  id: '/presets/',
+  path: '/presets/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MonitorIndexRoute = MonitorIndexRouteImport.update({
@@ -82,6 +77,11 @@ const ModelsIndexRoute = ModelsIndexRouteImport.update({
 const DatasetsIndexRoute = DatasetsIndexRouteImport.update({
   id: '/datasets/',
   path: '/datasets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchitecturesIndexRoute = ArchitecturesIndexRouteImport.update({
+  id: '/architectures/',
+  path: '/architectures/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ValidateCreateRoute = ValidateCreateRouteImport.update({
@@ -104,34 +104,24 @@ const TrainTaskIdRoute = TrainTaskIdRouteImport.update({
   path: '/train/$taskId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TemplateCreateRoute = TemplateCreateRouteImport.update({
-  id: '/template/create',
-  path: '/template/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TemplateTemplateIdRoute = TemplateTemplateIdRouteImport.update({
-  id: '/template/$templateId',
-  path: '/template/$templateId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TasksCreateRoute = TasksCreateRouteImport.update({
-  id: '/tasks/create',
-  path: '/tasks/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TasksTaskIdRoute = TasksTaskIdRouteImport.update({
-  id: '/tasks/$taskId',
-  path: '/tasks/$taskId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SystemUserRoute = SystemUserRouteImport.update({
   id: '/system/user',
   path: '/system/user',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SplitCreateRoute = SplitCreateRouteImport.update({
-  id: '/split/create',
-  path: '/split/create',
+const SubdatasetsCreateRoute = SubdatasetsCreateRouteImport.update({
+  id: '/subdatasets/create',
+  path: '/subdatasets/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresetsCreateRoute = PresetsCreateRouteImport.update({
+  id: '/presets/create',
+  path: '/presets/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresetsPresetIdRoute = PresetsPresetIdRouteImport.update({
+  id: '/presets/$presetId',
+  path: '/presets/$presetId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsManualUploadRoute = ModelsManualUploadRouteImport.update({
@@ -154,56 +144,67 @@ const DatasetsDatasetIdRoute = DatasetsDatasetIdRouteImport.update({
   path: '/datasets/$datasetId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArchitecturesCreateRoute = ArchitecturesCreateRouteImport.update({
+  id: '/architectures/create',
+  path: '/architectures/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchitecturesArchitectureIdRoute =
+  ArchitecturesArchitectureIdRouteImport.update({
+    id: '/architectures/$architectureId',
+    path: '/architectures/$architectureId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/faq': typeof FaqRoute
+  '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
+  '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
   '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
-  '/split/create': typeof SplitCreateRoute
+  '/presets/$presetId': typeof PresetsPresetIdRoute
+  '/presets/create': typeof PresetsCreateRoute
+  '/subdatasets/create': typeof SubdatasetsCreateRoute
   '/system/user': typeof SystemUserRoute
-  '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/tasks/create': typeof TasksCreateRoute
-  '/template/$templateId': typeof TemplateTemplateIdRoute
-  '/template/create': typeof TemplateCreateRoute
   '/train/$taskId': typeof TrainTaskIdRoute
   '/train/create': typeof TrainCreateRoute
   '/validate/$taskId': typeof ValidateTaskIdRoute
   '/validate/create': typeof ValidateCreateRoute
+  '/architectures/': typeof ArchitecturesIndexRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
-  '/split/': typeof SplitIndexRoute
-  '/tasks/': typeof TasksIndexRoute
-  '/template/': typeof TemplateIndexRoute
+  '/presets/': typeof PresetsIndexRoute
+  '/subdatasets/': typeof SubdatasetsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/faq': typeof FaqRoute
+  '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
+  '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
   '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
-  '/split/create': typeof SplitCreateRoute
+  '/presets/$presetId': typeof PresetsPresetIdRoute
+  '/presets/create': typeof PresetsCreateRoute
+  '/subdatasets/create': typeof SubdatasetsCreateRoute
   '/system/user': typeof SystemUserRoute
-  '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/tasks/create': typeof TasksCreateRoute
-  '/template/$templateId': typeof TemplateTemplateIdRoute
-  '/template/create': typeof TemplateCreateRoute
   '/train/$taskId': typeof TrainTaskIdRoute
   '/train/create': typeof TrainCreateRoute
   '/validate/$taskId': typeof ValidateTaskIdRoute
   '/validate/create': typeof ValidateCreateRoute
+  '/architectures': typeof ArchitecturesIndexRoute
   '/datasets': typeof DatasetsIndexRoute
   '/models': typeof ModelsIndexRoute
   '/monitor': typeof MonitorIndexRoute
-  '/split': typeof SplitIndexRoute
-  '/tasks': typeof TasksIndexRoute
-  '/template': typeof TemplateIndexRoute
+  '/presets': typeof PresetsIndexRoute
+  '/subdatasets': typeof SubdatasetsIndexRoute
   '/train': typeof TrainIndexRoute
   '/validate': typeof ValidateIndexRoute
 }
@@ -211,26 +212,26 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/faq': typeof FaqRoute
+  '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
+  '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
   '/models/$modelId': typeof ModelsModelIdRoute
   '/models/create': typeof ModelsCreateRoute
   '/models/manualUpload': typeof ModelsManualUploadRoute
-  '/split/create': typeof SplitCreateRoute
+  '/presets/$presetId': typeof PresetsPresetIdRoute
+  '/presets/create': typeof PresetsCreateRoute
+  '/subdatasets/create': typeof SubdatasetsCreateRoute
   '/system/user': typeof SystemUserRoute
-  '/tasks/$taskId': typeof TasksTaskIdRoute
-  '/tasks/create': typeof TasksCreateRoute
-  '/template/$templateId': typeof TemplateTemplateIdRoute
-  '/template/create': typeof TemplateCreateRoute
   '/train/$taskId': typeof TrainTaskIdRoute
   '/train/create': typeof TrainCreateRoute
   '/validate/$taskId': typeof ValidateTaskIdRoute
   '/validate/create': typeof ValidateCreateRoute
+  '/architectures/': typeof ArchitecturesIndexRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
-  '/split/': typeof SplitIndexRoute
-  '/tasks/': typeof TasksIndexRoute
-  '/template/': typeof TemplateIndexRoute
+  '/presets/': typeof PresetsIndexRoute
+  '/subdatasets/': typeof SubdatasetsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
 }
@@ -239,78 +240,78 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/faq'
+    | '/architectures/$architectureId'
+    | '/architectures/create'
     | '/datasets/$datasetId'
     | '/models/$modelId'
     | '/models/create'
     | '/models/manualUpload'
-    | '/split/create'
+    | '/presets/$presetId'
+    | '/presets/create'
+    | '/subdatasets/create'
     | '/system/user'
-    | '/tasks/$taskId'
-    | '/tasks/create'
-    | '/template/$templateId'
-    | '/template/create'
     | '/train/$taskId'
     | '/train/create'
     | '/validate/$taskId'
     | '/validate/create'
+    | '/architectures/'
     | '/datasets/'
     | '/models/'
     | '/monitor/'
-    | '/split/'
-    | '/tasks/'
-    | '/template/'
+    | '/presets/'
+    | '/subdatasets/'
     | '/train/'
     | '/validate/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/faq'
+    | '/architectures/$architectureId'
+    | '/architectures/create'
     | '/datasets/$datasetId'
     | '/models/$modelId'
     | '/models/create'
     | '/models/manualUpload'
-    | '/split/create'
+    | '/presets/$presetId'
+    | '/presets/create'
+    | '/subdatasets/create'
     | '/system/user'
-    | '/tasks/$taskId'
-    | '/tasks/create'
-    | '/template/$templateId'
-    | '/template/create'
     | '/train/$taskId'
     | '/train/create'
     | '/validate/$taskId'
     | '/validate/create'
+    | '/architectures'
     | '/datasets'
     | '/models'
     | '/monitor'
-    | '/split'
-    | '/tasks'
-    | '/template'
+    | '/presets'
+    | '/subdatasets'
     | '/train'
     | '/validate'
   id:
     | '__root__'
     | '/'
     | '/faq'
+    | '/architectures/$architectureId'
+    | '/architectures/create'
     | '/datasets/$datasetId'
     | '/models/$modelId'
     | '/models/create'
     | '/models/manualUpload'
-    | '/split/create'
+    | '/presets/$presetId'
+    | '/presets/create'
+    | '/subdatasets/create'
     | '/system/user'
-    | '/tasks/$taskId'
-    | '/tasks/create'
-    | '/template/$templateId'
-    | '/template/create'
     | '/train/$taskId'
     | '/train/create'
     | '/validate/$taskId'
     | '/validate/create'
+    | '/architectures/'
     | '/datasets/'
     | '/models/'
     | '/monitor/'
-    | '/split/'
-    | '/tasks/'
-    | '/template/'
+    | '/presets/'
+    | '/subdatasets/'
     | '/train/'
     | '/validate/'
   fileRoutesById: FileRoutesById
@@ -318,26 +319,26 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FaqRoute: typeof FaqRoute
+  ArchitecturesArchitectureIdRoute: typeof ArchitecturesArchitectureIdRoute
+  ArchitecturesCreateRoute: typeof ArchitecturesCreateRoute
   DatasetsDatasetIdRoute: typeof DatasetsDatasetIdRoute
   ModelsModelIdRoute: typeof ModelsModelIdRoute
   ModelsCreateRoute: typeof ModelsCreateRoute
   ModelsManualUploadRoute: typeof ModelsManualUploadRoute
-  SplitCreateRoute: typeof SplitCreateRoute
+  PresetsPresetIdRoute: typeof PresetsPresetIdRoute
+  PresetsCreateRoute: typeof PresetsCreateRoute
+  SubdatasetsCreateRoute: typeof SubdatasetsCreateRoute
   SystemUserRoute: typeof SystemUserRoute
-  TasksTaskIdRoute: typeof TasksTaskIdRoute
-  TasksCreateRoute: typeof TasksCreateRoute
-  TemplateTemplateIdRoute: typeof TemplateTemplateIdRoute
-  TemplateCreateRoute: typeof TemplateCreateRoute
   TrainTaskIdRoute: typeof TrainTaskIdRoute
   TrainCreateRoute: typeof TrainCreateRoute
   ValidateTaskIdRoute: typeof ValidateTaskIdRoute
   ValidateCreateRoute: typeof ValidateCreateRoute
+  ArchitecturesIndexRoute: typeof ArchitecturesIndexRoute
   DatasetsIndexRoute: typeof DatasetsIndexRoute
   ModelsIndexRoute: typeof ModelsIndexRoute
   MonitorIndexRoute: typeof MonitorIndexRoute
-  SplitIndexRoute: typeof SplitIndexRoute
-  TasksIndexRoute: typeof TasksIndexRoute
-  TemplateIndexRoute: typeof TemplateIndexRoute
+  PresetsIndexRoute: typeof PresetsIndexRoute
+  SubdatasetsIndexRoute: typeof SubdatasetsIndexRoute
   TrainIndexRoute: typeof TrainIndexRoute
   ValidateIndexRoute: typeof ValidateIndexRoute
 }
@@ -372,25 +373,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/template/': {
-      id: '/template/'
-      path: '/template'
-      fullPath: '/template/'
-      preLoaderRoute: typeof TemplateIndexRouteImport
+    '/subdatasets/': {
+      id: '/subdatasets/'
+      path: '/subdatasets'
+      fullPath: '/subdatasets/'
+      preLoaderRoute: typeof SubdatasetsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tasks/': {
-      id: '/tasks/'
-      path: '/tasks'
-      fullPath: '/tasks/'
-      preLoaderRoute: typeof TasksIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/split/': {
-      id: '/split/'
-      path: '/split'
-      fullPath: '/split/'
-      preLoaderRoute: typeof SplitIndexRouteImport
+    '/presets/': {
+      id: '/presets/'
+      path: '/presets'
+      fullPath: '/presets/'
+      preLoaderRoute: typeof PresetsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/monitor/': {
@@ -412,6 +406,13 @@ declare module '@tanstack/react-router' {
       path: '/datasets'
       fullPath: '/datasets/'
       preLoaderRoute: typeof DatasetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/architectures/': {
+      id: '/architectures/'
+      path: '/architectures'
+      fullPath: '/architectures/'
+      preLoaderRoute: typeof ArchitecturesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/validate/create': {
@@ -442,34 +443,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainTaskIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/template/create': {
-      id: '/template/create'
-      path: '/template/create'
-      fullPath: '/template/create'
-      preLoaderRoute: typeof TemplateCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/template/$templateId': {
-      id: '/template/$templateId'
-      path: '/template/$templateId'
-      fullPath: '/template/$templateId'
-      preLoaderRoute: typeof TemplateTemplateIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tasks/create': {
-      id: '/tasks/create'
-      path: '/tasks/create'
-      fullPath: '/tasks/create'
-      preLoaderRoute: typeof TasksCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tasks/$taskId': {
-      id: '/tasks/$taskId'
-      path: '/tasks/$taskId'
-      fullPath: '/tasks/$taskId'
-      preLoaderRoute: typeof TasksTaskIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/system/user': {
       id: '/system/user'
       path: '/system/user'
@@ -477,11 +450,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SystemUserRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/split/create': {
-      id: '/split/create'
-      path: '/split/create'
-      fullPath: '/split/create'
-      preLoaderRoute: typeof SplitCreateRouteImport
+    '/subdatasets/create': {
+      id: '/subdatasets/create'
+      path: '/subdatasets/create'
+      fullPath: '/subdatasets/create'
+      preLoaderRoute: typeof SubdatasetsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presets/create': {
+      id: '/presets/create'
+      path: '/presets/create'
+      fullPath: '/presets/create'
+      preLoaderRoute: typeof PresetsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presets/$presetId': {
+      id: '/presets/$presetId'
+      path: '/presets/$presetId'
+      fullPath: '/presets/$presetId'
+      preLoaderRoute: typeof PresetsPresetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/models/manualUpload': {
@@ -512,32 +499,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DatasetsDatasetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/architectures/create': {
+      id: '/architectures/create'
+      path: '/architectures/create'
+      fullPath: '/architectures/create'
+      preLoaderRoute: typeof ArchitecturesCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/architectures/$architectureId': {
+      id: '/architectures/$architectureId'
+      path: '/architectures/$architectureId'
+      fullPath: '/architectures/$architectureId'
+      preLoaderRoute: typeof ArchitecturesArchitectureIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FaqRoute: FaqRoute,
+  ArchitecturesArchitectureIdRoute: ArchitecturesArchitectureIdRoute,
+  ArchitecturesCreateRoute: ArchitecturesCreateRoute,
   DatasetsDatasetIdRoute: DatasetsDatasetIdRoute,
   ModelsModelIdRoute: ModelsModelIdRoute,
   ModelsCreateRoute: ModelsCreateRoute,
   ModelsManualUploadRoute: ModelsManualUploadRoute,
-  SplitCreateRoute: SplitCreateRoute,
+  PresetsPresetIdRoute: PresetsPresetIdRoute,
+  PresetsCreateRoute: PresetsCreateRoute,
+  SubdatasetsCreateRoute: SubdatasetsCreateRoute,
   SystemUserRoute: SystemUserRoute,
-  TasksTaskIdRoute: TasksTaskIdRoute,
-  TasksCreateRoute: TasksCreateRoute,
-  TemplateTemplateIdRoute: TemplateTemplateIdRoute,
-  TemplateCreateRoute: TemplateCreateRoute,
   TrainTaskIdRoute: TrainTaskIdRoute,
   TrainCreateRoute: TrainCreateRoute,
   ValidateTaskIdRoute: ValidateTaskIdRoute,
   ValidateCreateRoute: ValidateCreateRoute,
+  ArchitecturesIndexRoute: ArchitecturesIndexRoute,
   DatasetsIndexRoute: DatasetsIndexRoute,
   ModelsIndexRoute: ModelsIndexRoute,
   MonitorIndexRoute: MonitorIndexRoute,
-  SplitIndexRoute: SplitIndexRoute,
-  TasksIndexRoute: TasksIndexRoute,
-  TemplateIndexRoute: TemplateIndexRoute,
+  PresetsIndexRoute: PresetsIndexRoute,
+  SubdatasetsIndexRoute: SubdatasetsIndexRoute,
   TrainIndexRoute: TrainIndexRoute,
   ValidateIndexRoute: ValidateIndexRoute,
 }

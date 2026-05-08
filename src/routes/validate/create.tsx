@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ArrowLeft, CheckCircle2, Package, Target, AlertCircle } from 'lucide-react'
+import { SearchableDropdown } from '../../components/SearchableDropdown'
 
 export const Route = createFileRoute('/validate/create')({
   component: CreateValidate,
@@ -108,44 +109,21 @@ function CreateValidate() {
           </div>
 
           <div style={{ marginBottom: 24 }}>
-            <label className="form-label">选择模型</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-              {MODELS.map(m => (
-                <div
-                  key={m.id}
-                  className="select-card"
-                  style={{
-                    padding: 14,
-                    cursor: 'pointer',
-                    borderColor: selectedModel === m.id ? 'var(--accent)' : undefined,
-                  }}
-                  onClick={() => {
-                    setSelectedModel(m.id)
-                    setErrors({})
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      background: 'var(--accent-glow)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                      <Target size={18} style={{ color: 'var(--accent)' }} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {m.baseModel} · mAP: {m.mAP.toFixed(3)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <SearchableDropdown
+              label="选择模型"
+              color="var(--accent-bright)"
+              selectedId={selectedModel}
+              onChange={(id) => { setSelectedModel(id); setErrors({}) }}
+              items={MODELS.map(m => ({
+                id: m.id,
+                name: m.name,
+                subtitle: `${m.baseModel}`,
+                tags: m.classes,
+                count: m.mAP,
+                countLabel: 'mAP',
+              }))}
+              placeholder="选择要验证的模型..."
+            />
             {errors.selectedModel && (
               <div style={{ fontSize: 12, color: 'var(--error)', marginTop: 4 }}>{errors.selectedModel}</div>
             )}
@@ -183,45 +161,20 @@ function CreateValidate() {
           )}
 
           <div style={{ marginBottom: 24 }}>
-            <label className="form-label">选择验证数据集</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-              {DATASETS.map(ds => (
-                <div
-                  key={ds.id}
-                  className="select-card"
-                  style={{
-                    padding: 14,
-                    cursor: 'pointer',
-                    background: selectedDataset === ds.id ? 'var(--accent)' : undefined,
-                    borderColor: selectedDataset === ds.id ? 'var(--accent)' : (hasClassMismatch && selectedDataset === ds.id ? 'var(--warning)' : undefined),
-                  }}
-                  onClick={() => {
-                    setSelectedDataset(ds.id)
-                    setErrors({})
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      background: 'var(--success-glow)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                      <Package size={18} style={{ color: 'var(--success)' }} />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{ds.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {ds.images} 张图片 · {ds.classes.length} 类
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <SearchableDropdown
+              label="选择验证数据集"
+              color="var(--success)"
+              selectedId={selectedDataset}
+              onChange={(id) => { setSelectedDataset(id); setErrors({}) }}
+              items={DATASETS.map(ds => ({
+                id: ds.id,
+                name: ds.name,
+                tags: ds.classes,
+                count: ds.images,
+                countLabel: '张',
+              }))}
+              placeholder="选择验证数据集..."
+            />
             {errors.selectedDataset && (
               <div style={{ fontSize: 12, color: 'var(--error)', marginTop: 4 }}>{errors.selectedDataset}</div>
             )}

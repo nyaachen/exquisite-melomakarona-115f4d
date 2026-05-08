@@ -92,7 +92,7 @@ function Dashboard() {
           </div>
           <h1 className="page-title">训练概览</h1>
         </div>
-        <Link to="/tasks/create" className="btn btn-primary">
+        <Link to="/train/create" className="btn btn-primary">
           <Plus size={15} />
           创建训练任务
         </Link>
@@ -117,7 +117,7 @@ function Dashboard() {
         <div className="card">
           <div className="card-header">
             <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>最近训练任务</span>
-            <Link to="/tasks" style={{ fontSize: 12, color: 'var(--accent-bright)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Link to="/train" style={{ fontSize: 12, color: 'var(--accent-bright)', display: 'flex', alignItems: 'center', gap: 4 }}>
               查看全部 <ArrowRight size={12} />
             </Link>
           </div>
@@ -167,7 +167,7 @@ function Dashboard() {
                       <td style={{ fontSize: 12 }}>{task.createdAt}</td>
                       <td>
                         <Link
-                          to="/tasks/$taskId"
+                          to="/train/$taskId"
                           params={{ taskId: task.id }}
                           className="btn btn-ghost btn-sm"
                         >

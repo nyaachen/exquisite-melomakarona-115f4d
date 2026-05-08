@@ -101,7 +101,7 @@ function PublishModel() {
       : newModelName
 
     alert(`模型「${publishedModelName}」${version} 发布成功！`)
-    navigate({ to: '/square' })
+    navigate({ to: '/models' })
   }
 
   return (
@@ -110,12 +110,12 @@ function PublishModel() {
         <div>
           <div className="breadcrumb">
             <Link to="/">科宝训练平台</Link> ›
-            <Link to="/square">模型广场</Link> ›
+            <Link to="/models">模型广场</Link> ›
             <span>发布模型</span>
           </div>
           <h1 className="page-title">发布模型到广场</h1>
         </div>
-        <Link to="/square" className="btn btn-secondary">
+        <Link to="/models" className="btn btn-secondary">
           <ArrowLeft size={14} /> 返回列表
         </Link>
       </div>
