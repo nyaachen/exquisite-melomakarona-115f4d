@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { ArrowLeft, CheckCircle2, XCircle, RefreshCw, AlertCircle, Award, Target, Zap, Clock } from 'lucide-react'
+import { NotFound } from '../../components/NotFound'
 
 export const Route = createFileRoute('/validate/$taskId')({
   component: ValidateDetail,
@@ -133,7 +134,8 @@ const VALIDATE_RESULTS: Record<string, ValidateTask> = {
 
 function ValidateDetail() {
   const { taskId } = Route.useParams()
-  const task = VALIDATE_RESULTS[taskId] || VALIDATE_RESULTS['val-001']
+  const task = VALIDATE_RESULTS[taskId]
+  if (!task) return <NotFound />
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {

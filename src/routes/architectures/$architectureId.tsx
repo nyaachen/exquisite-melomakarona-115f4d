@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ArrowLeft, Save, Plus, X, HelpCircle, AlertCircle } from 'lucide-react'
+import { NotFound } from '../../components/NotFound'
 
 export const Route = createFileRoute('/architectures/$architectureId')({
   component: EditArchitecture,
@@ -74,7 +75,8 @@ function EditArchitecture() {
   const { architectureId } = Route.useParams()
   const navigate = useNavigate()
 
-  const data = ARCHITECTURES.find(a => a.id === architectureId) || ARCHITECTURES[0]
+  const data = ARCHITECTURES.find(a => a.id === architectureId)
+  if (!data) return <NotFound />
 
   const [name, setName] = useState(data.name)
   const [category, setCategory] = useState(data.category)

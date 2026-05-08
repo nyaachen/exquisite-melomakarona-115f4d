@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
 import { ArrowLeft, Save, Info, AlertCircle, Globe, Lock } from 'lucide-react'
+import { NotFound } from '../../components/NotFound'
 
 export const Route = createFileRoute('/presets/$presetId')({
   component: EditPreset,
@@ -101,7 +102,8 @@ function EditPreset() {
   const { presetId } = Route.useParams()
   const navigate = useNavigate()
 
-  const data = PRESETS.find(p => p.id === presetId) || PRESETS[0]
+  const data = PRESETS.find(p => p.id === presetId)
+  if (!data) return <NotFound />
 
   const [name, setName] = useState(data.name)
   const [description, setDescription] = useState(data.description)

@@ -9,13 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as FaqRouteImport } from './routes/faq'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ValidateIndexRouteImport } from './routes/validate/index'
 import { Route as TrainIndexRouteImport } from './routes/train/index'
 import { Route as SubdatasetsIndexRouteImport } from './routes/subdatasets/index'
 import { Route as PresetsIndexRouteImport } from './routes/presets/index'
-import { Route as MonitorIndexRouteImport } from './routes/monitor/index'
 import { Route as ModelsIndexRouteImport } from './routes/models/index'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets/index'
 import { Route as ArchitecturesIndexRouteImport } from './routes/architectures/index'
@@ -33,11 +31,6 @@ import { Route as DatasetsDatasetIdRouteImport } from './routes/datasets/$datase
 import { Route as ArchitecturesCreateRouteImport } from './routes/architectures/create'
 import { Route as ArchitecturesArchitectureIdRouteImport } from './routes/architectures/$architectureId'
 
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -61,11 +54,6 @@ const SubdatasetsIndexRoute = SubdatasetsIndexRouteImport.update({
 const PresetsIndexRoute = PresetsIndexRouteImport.update({
   id: '/presets/',
   path: '/presets/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MonitorIndexRoute = MonitorIndexRouteImport.update({
-  id: '/monitor/',
-  path: '/monitor/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsIndexRoute = ModelsIndexRouteImport.update({
@@ -152,7 +140,6 @@ const ArchitecturesArchitectureIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/faq': typeof FaqRoute
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
@@ -169,7 +156,6 @@ export interface FileRoutesByFullPath {
   '/architectures/': typeof ArchitecturesIndexRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
-  '/monitor/': typeof MonitorIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/subdatasets/': typeof SubdatasetsIndexRoute
   '/train/': typeof TrainIndexRoute
@@ -177,7 +163,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/faq': typeof FaqRoute
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
@@ -194,7 +179,6 @@ export interface FileRoutesByTo {
   '/architectures': typeof ArchitecturesIndexRoute
   '/datasets': typeof DatasetsIndexRoute
   '/models': typeof ModelsIndexRoute
-  '/monitor': typeof MonitorIndexRoute
   '/presets': typeof PresetsIndexRoute
   '/subdatasets': typeof SubdatasetsIndexRoute
   '/train': typeof TrainIndexRoute
@@ -203,7 +187,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/faq': typeof FaqRoute
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
@@ -220,7 +203,6 @@ export interface FileRoutesById {
   '/architectures/': typeof ArchitecturesIndexRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/models/': typeof ModelsIndexRoute
-  '/monitor/': typeof MonitorIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/subdatasets/': typeof SubdatasetsIndexRoute
   '/train/': typeof TrainIndexRoute
@@ -230,7 +212,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/faq'
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
@@ -247,7 +228,6 @@ export interface FileRouteTypes {
     | '/architectures/'
     | '/datasets/'
     | '/models/'
-    | '/monitor/'
     | '/presets/'
     | '/subdatasets/'
     | '/train/'
@@ -255,7 +235,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/faq'
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
@@ -272,7 +251,6 @@ export interface FileRouteTypes {
     | '/architectures'
     | '/datasets'
     | '/models'
-    | '/monitor'
     | '/presets'
     | '/subdatasets'
     | '/train'
@@ -280,7 +258,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/faq'
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
@@ -297,7 +274,6 @@ export interface FileRouteTypes {
     | '/architectures/'
     | '/datasets/'
     | '/models/'
-    | '/monitor/'
     | '/presets/'
     | '/subdatasets/'
     | '/train/'
@@ -306,7 +282,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  FaqRoute: typeof FaqRoute
   ArchitecturesArchitectureIdRoute: typeof ArchitecturesArchitectureIdRoute
   ArchitecturesCreateRoute: typeof ArchitecturesCreateRoute
   DatasetsDatasetIdRoute: typeof DatasetsDatasetIdRoute
@@ -323,7 +298,6 @@ export interface RootRouteChildren {
   ArchitecturesIndexRoute: typeof ArchitecturesIndexRoute
   DatasetsIndexRoute: typeof DatasetsIndexRoute
   ModelsIndexRoute: typeof ModelsIndexRoute
-  MonitorIndexRoute: typeof MonitorIndexRoute
   PresetsIndexRoute: typeof PresetsIndexRoute
   SubdatasetsIndexRoute: typeof SubdatasetsIndexRoute
   TrainIndexRoute: typeof TrainIndexRoute
@@ -332,13 +306,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -372,13 +339,6 @@ declare module '@tanstack/react-router' {
       path: '/presets'
       fullPath: '/presets/'
       preLoaderRoute: typeof PresetsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/monitor/': {
-      id: '/monitor/'
-      path: '/monitor'
-      fullPath: '/monitor/'
-      preLoaderRoute: typeof MonitorIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/models/': {
@@ -498,7 +458,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  FaqRoute: FaqRoute,
   ArchitecturesArchitectureIdRoute: ArchitecturesArchitectureIdRoute,
   ArchitecturesCreateRoute: ArchitecturesCreateRoute,
   DatasetsDatasetIdRoute: DatasetsDatasetIdRoute,
@@ -515,7 +474,6 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitecturesIndexRoute: ArchitecturesIndexRoute,
   DatasetsIndexRoute: DatasetsIndexRoute,
   ModelsIndexRoute: ModelsIndexRoute,
-  MonitorIndexRoute: MonitorIndexRoute,
   PresetsIndexRoute: PresetsIndexRoute,
   SubdatasetsIndexRoute: SubdatasetsIndexRoute,
   TrainIndexRoute: TrainIndexRoute,

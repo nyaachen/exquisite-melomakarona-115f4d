@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
+import { NotFound } from '../../components/NotFound'
 import {
   ArrowLeft,
   RefreshCw,
@@ -269,7 +270,8 @@ function ReLineChart({ data, color, height = 120 }: { data: number[]; color: str
 
 function TaskDetail() {
   const { taskId } = Route.useParams()
-  const task = TASK_DATA[taskId] ?? TASK_DATA['task-001']
+  const task = TASK_DATA[taskId]
+  if (!task) return <NotFound />
   const navigate = useNavigate()
 
   const [epoch, setEpoch] = useState(task.startEpoch)

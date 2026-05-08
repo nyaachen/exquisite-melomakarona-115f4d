@@ -23,31 +23,52 @@ A YOLO model training management platform built with TanStack Start, deployed on
 ```
 src/
 ├── routes/
-│   ├── __root.tsx          # Root layout: sidebar nav + Outlet
-│   ├── index.tsx           # Dashboard (training overview, stats, recent tasks)
-│   ├── tasks/
-│   │   ├── index.tsx       # All training tasks list table
-│   │   ├── create.tsx      # 4-step wizard (split → base model → params → review)
-│   │   └── $taskId.tsx     # Task detail: live metrics, training log, validate/publish
+│   ├── __root.tsx             # Root layout: sidebar nav + Outlet
+│   ├── index.tsx              # Dashboard (training overview, stats, recent tasks)
+│   ├── train/
+│   │   ├── index.tsx          # All training tasks list table
+│   │   ├── create.tsx         # 3-step wizard (datasets → model/params → review)
+│   │   └── $taskId.tsx        # Task detail: live metrics, charts, log, publish
+│   ├── architectures/
+│   │   ├── index.tsx          # Model architecture templates list
+│   │   ├── create.tsx         # Create architecture with dynamic params
+│   │   └── $architectureId.tsx # Edit architecture template
 │   ├── models/
-│   │   └── index.tsx       # Model grid: validation report modal, publish modal
+│   │   ├── index.tsx          # Published model grid with version history
+│   │   ├── $modelId.tsx       # Model detail: metrics, prediction, version switcher
+│   │   └── manualUpload.tsx   # Manual .pt model file upload
+│   ├── presets/
+│   │   ├── index.tsx          # Training presets list (public/private)
+│   │   ├── create.tsx         # Create preset from architecture template
+│   │   └── $presetId.tsx      # Edit preset parameters and visibility
 │   ├── datasets/
-│   │   └── index.tsx       # Dataset sync from 科宝标注平台
-│   └── monitor/
-│       └── index.tsx       # Real-time GPU usage monitoring
-├── styles.css              # All styling: CSS variables, component classes, animations
-└── router.tsx              # TanStack Router setup
+│   │   ├── index.tsx          # Dataset sync from 科宝标注平台
+│   │   └── $datasetId.tsx     # Dataset detail: labels, image preview, bounding boxes
+│   ├── subdatasets/
+│   │   ├── index.tsx          # Pre-split subdatasets list
+│   │   └── create.tsx         # Auto/manual train/val/test split creation
+│   ├── validate/
+│   │   ├── index.tsx          # Validation tasks list
+│   │   ├── create.tsx         # Create validation task (model + dataset)
+│   │   └── $taskId.tsx        # Validation detail: per-class metrics, grading
+│   └── system/
+│       └── user.tsx           # User profile page (stub)
+├── components/
+│   ├── DatasetPicker.tsx      # Reusable dataset picker with grouping
+│   └── SearchableDropdown.tsx # Searchable dropdown with keyboard nav
+├── styles.css                 # All styling: CSS variables, component classes, animations
+└── router.tsx                 # TanStack Router setup
 ```
 
 ## Architecture Decisions
 
 ### Styling Approach
 
-All styles are in `src/styles.css` using plain CSS classes — **not Tailwind utility classes** (except `@import "tailwindcss"`). The design uses a CSS variable system for the dark tech theme. Component-specific class names (`.card`, `.btn`, `.badge`, `.nav-link`, etc.) are defined there. This makes it easy to maintain a cohesive visual system without class pollution.
+All styles are in `src/styles.css` using plain CSS classes — **not Tailwind utility classes** (except `@import "tailwindcss"`). The design uses a CSS variable system for the light theme. Component-specific class names (`.card`, `.btn`, `.badge`, `.nav-link`, etc.) are defined there. This makes it easy to maintain a cohesive visual system without class pollution.
 
 ### Color System
 
-CSS variables define the entire palette (see `:root` in `styles.css`). The theme is dark navy (`--bg-base: #030912`) with electric blue (`--accent`) and teal (`--teal`) accents. All status colors (running, completed, failed, pending, published) have dedicated variables.
+CSS variables define the entire palette (see `:root` in `styles.css`). The theme is light (`--bg-base: #ffffff`) with blue (`--accent: #1d4ed8`) and teal (`--teal: #0d9488`) accents. All status colors (running, completed, failed, pending, published) have dedicated variables.
 
 ### Mock Data
 
@@ -55,7 +76,7 @@ All data is currently **in-memory mock data** defined directly in each route fil
 
 ### Real-time Simulation
 
-`tasks/$taskId.tsx` uses `useEffect` with `setInterval` to simulate live training progress when `status === 'running'`. The interval fires every 1200ms, incrementing epoch count and updating metrics/logs.
+`train/$taskId.tsx` uses `useEffect` with `setInterval` to simulate live training progress when `status === 'running'`. The interval fires every 1200ms, incrementing epoch count and updating metrics/logs.
 
 ### Root Layout
 

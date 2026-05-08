@@ -11,6 +11,7 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react'
+import { NotFound } from '../../components/NotFound'
 
 export const Route = createFileRoute('/datasets/$datasetId')({
   component: DatasetDetail,
@@ -99,7 +100,8 @@ const DATASETS = [
 function DatasetDetail() {
   const params = Route.useParams()
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const dataset = DATASETS.find(d => d.id === params.datasetId) || DATASETS[0]
+  const dataset = DATASETS.find(d => d.id === params.datasetId)
+  if (!dataset) return <NotFound />
 
   return (
     <div>

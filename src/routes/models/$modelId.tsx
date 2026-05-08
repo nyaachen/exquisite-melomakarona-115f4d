@@ -19,6 +19,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
+import { NotFound } from '../../components/NotFound'
 
 export const Route = createFileRoute('/models/$modelId')({
   component: ModelDetail,
@@ -192,9 +193,12 @@ interface Prediction {
 
 function ModelDetail() {
   const { modelId } = Route.useParams()
-  const model = SQUARE_MODELS.find(m => m.id === modelId) || SQUARE_MODELS[0]
-  
-  const sortedVersions = [...model.versions].sort((a, b) => 
+  const model = SQUARE_MODELS.find(m => m.id === modelId)
+  if (!model) return <NotFound />
+
+  const modelClasses = model.classes
+
+  const sortedVersions = [...model.versions].sort((a, b) =>
     new Date(b.trainedAt).getTime() - new Date(a.trainedAt).getTime()
   )
   
@@ -225,9 +229,9 @@ function ModelDetail() {
     const mockPredictions: Prediction[] = []
     const numBoxes = Math.floor(Math.random() * 3) + 1
     for (let i = 0; i < numBoxes; i++) {
-      const classIndex = Math.floor(Math.random() * model.classes.length)
+      const classIndex = Math.floor(Math.random() * modelClasses.length)
       mockPredictions.push({
-        className: model.classes[classIndex],
+        className: modelClasses[classIndex],
         confidence: 0.75 + Math.random() * 0.24,
         bbox: {
           x: 50 + Math.random() * 200,
