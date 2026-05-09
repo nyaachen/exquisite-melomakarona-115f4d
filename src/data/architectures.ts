@@ -2,30 +2,30 @@
 
 /** 架构参数定义 */
 export interface ArchitectureParam {
-  name: string
-  key: string
-  type: 'number' | 'string' | 'select' | 'boolean' | 'range'
-  defaultValue: number | string | boolean
-  min?: number
-  max?: number
-  step?: number
-  options?: { label: string; value: string | number }[]
-  required: boolean
-  description: string
+  name: string // 参数显示名称
+  key: string // 参数键名（对应训练脚本参数）
+  type: 'number' | 'string' | 'select' | 'boolean' | 'range' // 参数控件类型
+  defaultValue: number | string | boolean // 默认值
+  min?: number // 最小值（number / range 类型）
+  max?: number // 最大值（number / range 类型）
+  step?: number // 步长（range 类型）
+  options?: { label: string; value: string | number }[] // 选项列表（select 类型）
+  required: boolean // 是否必填
+  description: string // 参数说明
 }
 
 /** 模型架构模板 */
 export interface Architecture {
-  id: string
-  name: string
-  category: string
-  baseModel: string
-  description: string
-  params: ArchitectureParam[]
-  isActive: boolean
-  createdAt: string
-  author: string
-  usageCount: number
+  id: string // 架构唯一标识
+  name: string // 架构名称
+  category: string // 架构类别
+  baseModel: string // 基础模型
+  description: string // 架构描述
+  params: ArchitectureParam[] // 可配置参数列表
+  isActive: boolean // 是否启用
+  createdAt: string // 创建时间
+  author: string // 作者
+  usageCount: number // 使用次数
 }
 
 /** 模型架构模板列表 */

@@ -2,85 +2,85 @@
 
 /** 单轮训练指标 */
 export interface EpochMetric {
-  epoch: number
-  mAP: number
-  loss: number
-  valLoss: number
+  epoch: number // 当前轮次
+  mAP: number // mAP@0.5
+  loss: number // 训练损失
+  valLoss: number // 验证损失
 }
 
 /** 训练任务列表项（用于训练任务列表页） */
 export interface TrainingTaskSummary {
-  id: string
-  name: string
-  dataset: string
-  images: number
-  baseModel: string
-  status: 'running' | 'completed' | 'failed' | 'pending'
-  progress: number
-  epoch: string
-  mAP: number
-  createdAt: string
-  gpu: string
-  eta: string
+  id: string // 任务唯一标识
+  name: string // 任务名称
+  dataset: string // 数据集名称
+  images: number // 图片数量
+  baseModel: string // 基础模型架构
+  status: 'running' | 'completed' | 'failed' | 'pending' // 任务状态
+  progress: number // 训练进度百分比
+  epoch: string // 当前轮次 / 总轮次
+  mAP: number // mAP@0.5
+  createdAt: string // 创建时间
+  gpu: string // 使用的 GPU 资源
+  eta: string // 预计完成时间
 }
 
 /** 训练任务详情（用于训练任务详情页） */
 export interface TrainingTaskDetail {
-  name: string
-  dataset: string
-  baseModel: string
-  status: 'running' | 'completed' | 'failed' | 'pending'
-  totalEpochs: number
-  startEpoch: number
-  mAP: number
-  precision: number
-  recall: number
-  batchSize: number
-  imgSize: number
-  optimizer: string
-  device: string
-  createdAt: string
-  classes: string[]
-  trainImages: number
-  valImages: number
-  epochs: EpochMetric[]
-  errorMsg?: string
-  published: boolean
-  modelName?: string
-  modelVersion?: string
-  publishedAt?: string
+  name: string // 任务名称
+  dataset: string // 数据集名称
+  baseModel: string // 基础模型架构
+  status: 'running' | 'completed' | 'failed' | 'pending' // 任务状态
+  totalEpochs: number // 总训练轮数
+  startEpoch: number // 当前训练轮数
+  mAP: number // mAP@0.5
+  precision: number // 精确率
+  recall: number // 召回率
+  batchSize: number // 批次大小
+  imgSize: number // 图像输入尺寸
+  optimizer: string // 优化器
+  device: string // 训练设备
+  createdAt: string // 创建时间
+  classes: string[] // 检测类别列表
+  trainImages: number // 训练集图片数
+  valImages: number // 验证集图片数
+  epochs: EpochMetric[] // 逐轮训练指标
+  errorMsg?: string // 错误信息（训练失败时）
+  published: boolean // 是否已发布到模型广场
+  modelName?: string // 发布的模型名称
+  modelVersion?: string // 发布的版本号
+  publishedAt?: string // 发布时间
 }
 
 /** 验证指标项 */
 export interface VerificationDetail {
-  label: string
-  value: string
-  status: 'pass' | 'warn' | 'fail'
+  label: string // 指标名称
+  value: string // 指标值
+  status: 'pass' | 'warn' | 'fail' // 达标状态
 }
 
 /** 模型验证结论（用于训练完成后的验证评估面板） */
 export interface VerificationResult {
-  quality: 'excellent' | 'good' | 'pass' | 'improve'
-  qualityLabel: string
-  summary: string
-  highlights: string[]
-  suggestions: string[]
-  details: VerificationDetail[]
+  quality: 'excellent' | 'good' | 'pass' | 'improve' // 质量等级
+  qualityLabel: string // 质量等级文本
+  summary: string // 验证总结
+  highlights: string[] // 优势亮点列表
+  suggestions: string[] // 改进建议列表
+  details: VerificationDetail[] // 逐项指标详情
 }
 
 /** 可发布的已有模型（用于发布模型弹窗） */
 export interface PublishableModel {
-  id: string
-  name: string
-  existingVersions: string[]
+  id: string // 模型唯一标识
+  name: string // 模型名称
+  existingVersions: string[] // 已有版本号列表
 }
 
 /** 测试集图片（用于模型验证面板） */
 export interface TestImage {
-  id: string
-  name: string
-  width: number
-  height: number
+  id: string // 图片唯一标识
+  name: string // 图片文件名
+  width: number // 图片宽度
+  height: number // 图片高度
 }
 
 // ─── 辅助函数 ───

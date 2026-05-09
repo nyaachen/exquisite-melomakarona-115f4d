@@ -2,38 +2,38 @@
 
 /** 模型版本 */
 export interface ModelVersion {
-  version: string
-  fileUrl: string
-  fileSize: string
-  fileFormat: 'pt' | 'onnx' | 'safetensors' | 'bin'
-  inputSize: number
-  metrics?: {
-    mAP: number
-    precision: number
-    recall: number
-    f1: number
+  version: string // 版本号
+  fileUrl: string // 模型文件下载地址
+  fileSize: string // 文件大小
+  fileFormat: 'pt' | 'onnx' | 'safetensors' | 'bin' // 文件格式
+  inputSize: number // 输入尺寸
+  metrics?: { // 模型指标
+    mAP: number // mAP@0.5
+    precision: number // 精确率
+    recall: number // 召回率
+    f1: number // F1 分数
   }
-  sourceTaskId?: string
-  uploadedBy: string
-  createdAt: string
+  sourceTaskId?: string // 来源训练任务 ID
+  uploadedBy: string // 上传人
+  createdAt: string // 创建时间
 }
 
 /** 模型广场完整模型（含多版本历史、分类颜色、架构来源） */
 export interface PlazaModel {
-  id: string
-  name: string
-  description: string
-  coverImage: string
-  classes: string[]
-  classColors: string[]
-  architectureId: string
-  architectureName: string
-  source: 'platform' | 'public'
-  sourceLabel?: string
-  createdAt: string
-  author: string
-  isActive?: boolean
-  versions: ModelVersion[]
+  id: string // 模型唯一标识
+  name: string // 模型名称
+  description: string // 模型描述
+  coverImage: string // 封面图 URL
+  classes: string[] // 检测类别列表
+  classColors: string[] // 各类别对应颜色
+  architectureId: string // 模型架构 ID，对照架构实体
+  architectureName: string // 模型架构名称
+  source: 'platform' | 'public' // 模型来源（平台训练 / 公开预训练）
+  sourceLabel?: string // 来源标签
+  createdAt: string // 创建时间
+  author: string // 作者
+  isActive?: boolean // 是否启用
+  versions: ModelVersion[] // 版本列表
 }
 
 /** 模型广场完整模型列表 */

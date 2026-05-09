@@ -2,31 +2,31 @@
 
 /** 单张 GPU 卡 */
 export interface GpuCard {
-  id: string
-  index: number
-  model: string
-  memory: string
+  id: string // GPU 卡唯一标识
+  index: number // 卡位序号
+  model: string // GPU 型号
+  memory: string // 显存容量
 }
 
 /** 分配在该服务器上的训练/验证任务 */
 export interface AssignedTask {
-  taskId: string
-  taskName: string
-  taskType: 'train' | 'validate'
-  startedAt: number // Date.now()
-  epoch: number
-  totalEpochs: number
-  etaMinutes: number
+  taskId: string // 任务 ID
+  taskName: string // 任务名称
+  taskType: 'train' | 'validate' // 任务类型（训练 / 验证）
+  startedAt: number // 任务启动时间戳（Date.now()）
+  epoch: number // 当前训练轮数
+  totalEpochs: number // 总训练轮数
+  etaMinutes: number // 预计剩余时间（分钟）
 }
 
 /** GPU 服务器节点 */
 export interface GpuServer {
-  id: string
-  name: string
-  spec: string
-  status: 'online' | 'offline' | 'maintenance'
-  gpus: GpuCard[]
-  assignedTask: AssignedTask | null
+  id: string // 服务器唯一标识
+  name: string // 服务器名称
+  spec: string // 硬件规格
+  status: 'online' | 'offline' | 'maintenance' // 运行状态
+  gpus: GpuCard[] // GPU 卡列表
+  assignedTask: AssignedTask | null // 当前分配的任务
 }
 
 function generateEta(): number {

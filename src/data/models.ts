@@ -2,17 +2,17 @@
 
 /** 模型广场卡片 */
 export interface SquareModel {
-  id: string
-  name: string
-  description: string
-  category: string
-  baseModel: string
-  classes: string[]
-  createdAt: string
-  author: string
-  source: 'platform' | 'public'
-  sourceLabel?: string
-  coverImage: string
+  id: string // 模型唯一标识
+  name: string // 模型名称
+  description: string // 模型描述
+  category: string // 模型类别
+  baseModel: string // 基础模型架构
+  classes: string[] // 检测类别列表
+  createdAt: string // 创建时间
+  author: string // 作者
+  source: 'platform' | 'public' // 模型来源（平台训练 / 公开预训练）
+  sourceLabel?: string // 来源标签
+  coverImage: string // 封面图 URL
 }
 
 /** 根据类别和名称生成模型封面图 URL */
