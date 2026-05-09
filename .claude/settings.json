@@ -14,7 +14,9 @@
       "Bash(grep -E 'train/create|datasets/$datasetId')",
       "Bash(grep -E 'train/$taskId|train/create|datasets/$datasetId')",
       "Bash(grep 'models/$modelId')",
-      "Bash(sed -i 's/versions: \\\\[.*/versions: [{ precision: 0.831, recall: 0.748 }],/' src/routes/models/\\\\$modelId.tsx *)"
+      "Bash(sed -i 's/versions: \\\\[.*/versions: [{ precision: 0.831, recall: 0.748 }],/' src/routes/models/\\\\$modelId.tsx *)",
+      "Bash(grep 'datasets/$datasetId')",
+      "Bash(grep -E 'datasets/$datasetId|models/$modelId|validate/create|models/manualUpload')"
     ],
     "additionalDirectories": [
       "c:\\Users\\nyaachen\\.claude\\projects\\c--Users-nyaachen-Documents-VSCode-exquisite-melomakarona-115f4d\\memory",

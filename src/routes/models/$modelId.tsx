@@ -136,30 +136,7 @@ const TEST_IMAGES = [
   { id: 'test-005', name: 'test_0005.jpg', width: 640, height: 480 },
 ]
 
-const DATASETS = [
-  {
-    id: 'ds-001',
-    name: '道路缺陷检测数据集 v2.3',
-    images: 4872,
-    imagesList: [
-      { id: 'ds-img-001', name: 'img_0001.jpg', width: 640, height: 480 },
-      { id: 'ds-img-002', name: 'img_0002.jpg', width: 640, height: 480 },
-      { id: 'ds-img-003', name: 'img_0003.jpg', width: 640, height: 480 },
-    ],
-  },
-  {
-    id: 'ds-002',
-    name: '施工安全帽检测集',
-    images: 2391,
-    imagesList: [
-      { id: 'ds-img-004', name: 'img_0004.jpg', width: 640, height: 480 },
-      { id: 'ds-img-005', name: 'img_0005.jpg', width: 640, height: 480 },
-      { id: 'ds-img-006', name: 'img_0006.jpg', width: 640, height: 480 },
-    ],
-  },
-]
-
-type ImageSource = 'upload' | 'testset' | 'dataset'
+type ImageSource = 'upload' | 'testset'
 
 interface Prediction {
   className: string
@@ -175,15 +152,10 @@ function ModelDetail() {
   const modelClasses = model.classes
 
   const [imageSource, setImageSource] = useState<ImageSource>('testset')
-  const [selectedDataset, setSelectedDataset] = useState(DATASETS[0]?.id || '')
   const [selectedImage, setSelectedImage] = useState(TEST_IMAGES[0])
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [predictions, setPredictions] = useState<Prediction[]>([])
   const [isPredicting, setIsPredicting] = useState(false)
-
-  const availableImages = imageSource === 'testset'
-    ? TEST_IMAGES
-    : DATASETS.find(d => d.id === selectedDataset)?.imagesList || []
 
   const currentImage = imageSource === 'upload' && uploadedImage
     ? { name: '上传的图片', width: 640, height: 480 }
@@ -227,19 +199,20 @@ function ModelDetail() {
 
   return (
     <div className="slide-in">
-      <div className="page-header" style={{ alignItems: 'flex-start' }}>
-        <Link to="/models" className="btn btn-ghost btn-sm">
-          <ArrowLeft size={14} /> 返回
-        </Link>
-        <div>
-          <div className="breadcrumb">
-            <Link to="/">科宝训练平台</Link> ›
-            <Link to="/models">模型管理</Link> ›
-            <span>{model.name}</span>
+      <div className="page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link to="/models" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={14} /> 返回
+          </Link>
+          <div>
+            <div className="breadcrumb">
+              <Link to="/">科宝训练平台</Link> ›
+              <Link to="/models">模型管理</Link> ›
+              <span>{model.name}</span>
+            </div>
+            <h1 className="page-title">{model.name}</h1>
           </div>
-          <h1 className="page-title">{model.name}</h1>
         </div>
-        <div />
       </div>
 
       <div className="p-content">

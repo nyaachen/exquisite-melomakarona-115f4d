@@ -88,19 +88,20 @@ function CreateValidate() {
 
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
-      <div className="page-header" style={{ alignItems: 'flex-start' }}>
-        <Link to="/validate" className="btn btn-ghost btn-sm">
-          <ArrowLeft size={14} /> 返回
-        </Link>
-        <div>
-          <div className="breadcrumb">
-            <Link to="/">科宝训练平台</Link> ›
-            <Link to="/validate">验证任务</Link> ›
-            <span>创建验证任务</span>
+      <div className="page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link to="/validate" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={14} /> 返回
+          </Link>
+          <div>
+            <div className="breadcrumb">
+              <Link to="/">科宝训练平台</Link> ›
+              <Link to="/validate">验证任务</Link> ›
+              <span>创建验证任务</span>
+            </div>
+            <h1 className="page-title">创建验证任务</h1>
           </div>
-          <h1 className="page-title">创建验证任务</h1>
         </div>
-        <div />
       </div>
 
       <div style={{ padding: '24px 32px', maxWidth: 800 }}>

@@ -108,19 +108,20 @@ function ManualUploadModel() {
 
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
-      <div className="page-header" style={{ alignItems: 'flex-start' }}>
-        <Link to="/models" className="btn btn-ghost btn-sm">
-          <ArrowLeft size={14} /> 返回
-        </Link>
-        <div>
-          <div className="breadcrumb">
-            <Link to="/">科宝训练平台</Link> ›
-            <Link to="/models">模型管理</Link> ›
-            <span>手动上传模型</span>
+      <div className="page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link to="/models" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={14} /> 返回
+          </Link>
+          <div>
+            <div className="breadcrumb">
+              <Link to="/">科宝训练平台</Link> ›
+              <Link to="/models">模型管理</Link> ›
+              <span>手动上传模型</span>
+            </div>
+            <h1 className="page-title">上传本地模型</h1>
           </div>
-          <h1 className="page-title">上传本地模型</h1>
         </div>
-        <div />
       </div>
 
       <div style={{ padding: '24px 32px', maxWidth: 600 }}>

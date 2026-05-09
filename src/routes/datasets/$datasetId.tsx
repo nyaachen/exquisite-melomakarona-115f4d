@@ -1,5 +1,5 @@
-import { createFileRoute, useParams, Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState, useMemo } from 'react'
 import {
   ArrowLeft,
   Tag,
@@ -7,19 +7,18 @@ import {
   Calendar,
   User,
   MapPin,
-  ZoomIn,
   X,
-  ChevronRight,
   Settings2,
   AlertCircle,
+  BarChart3,
 } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { NotFound } from '../../components/NotFound'
 
 export const Route = createFileRoute('/datasets/$datasetId')({
   component: DatasetDetail,
 })
 
-// ─── Mock dataset data ──
 const DATASETS = [
   {
     id: 'ds-001',
@@ -108,40 +107,56 @@ function DatasetDetail() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [showSplitModal, setShowSplitModal] = useState(false)
   const [splitForm, setSplitForm] = useState({ train: 70, val: 15, test: 15 })
-  const dataset = DATASETS.find(d => d.id === params.datasetId)
+  const dataset = DATASETS.find(ds => ds.id === params.datasetId)
   if (!dataset) return <NotFound />
 
-  function openSplitModal() {
-    setSplitForm({ ...dataset.split })
-    setShowSplitModal(true)
-  }
-  function handleSplitSave() {
-    dataset.split = { ...splitForm }
+  const trainCount = Math.round(dataset.annotationCount * dataset.split.train / 100)
+  const valCount = Math.round(dataset.annotationCount * dataset.split.val / 100)
+  const testCount = dataset.annotationCount - trainCount - valCount
+
+  const handleSplitSave = () => {
+    dataset!.split = { ...splitForm }
     setShowSplitModal(false)
   }
+  const openSplitModal = () => {
+    setSplitForm({ ...dataset!.split })
+    setShowSplitModal(true)
+  }
+
+  // Per-class distribution (mock)
+  const classDistribution = useMemo(() => {
+    const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h) }
+    return dataset.contentTags.map(cls => {
+      const h = hash(cls)
+      const base = 100 + (h % 600)
+      const t = Math.round(base * (dataset.split.train / 100))
+      const v = Math.round(base * (dataset.split.val / 100))
+      return { name: cls, 训练集: t, 验证集: v, 测试集: Math.max(0, base - t - v) }
+    })
+  }, [dataset])
 
   return (
     <div>
-      {/* Page Header */}
       <div className="page-header">
-        <div className="breadcrumb">
-          <Link to="/">科宝训练平台</Link> ›
-          <Link to="/datasets">数据集管理</Link> ›
-          <span>{dataset.name}</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-          <h1 className="page-title">{dataset.name}</h1>
-          <Link to="/datasets" className="btn btn-secondary">
-            <ArrowLeft size={15} /> 返回列表
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Link to="/datasets" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={14} /> 返回
           </Link>
+          <div>
+            <div className="breadcrumb">
+              <Link to="/">科宝训练平台</Link> ›
+              <Link to="/datasets">数据集管理</Link> ›
+              <span>{dataset.name}</span>
+            </div>
+            <h1 className="page-title">{dataset.name}</h1>
+          </div>
         </div>
       </div>
 
-      <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
+      <div className="content-padded" style={{ maxWidth: 1200, margin: '0 auto' }}>
         {/* Dataset Info Cards */}
         <div className="card" style={{ padding: 24, marginBottom: 24 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24 }}>
-            {/* Left Column - Stats */}
             <div>
               <div style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>标注数据数量</div>
@@ -149,7 +164,6 @@ function DatasetDetail() {
                   {dataset.annotationCount.toLocaleString()}
                 </div>
               </div>
-
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <User size={16} style={{ color: 'var(--text-muted)' }} />
@@ -159,14 +173,8 @@ function DatasetDetail() {
                   <Calendar size={16} style={{ color: 'var(--text-muted)' }} />
                   <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>创建时间: {dataset.createdAt}</span>
                 </div>
-                {/* <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <MapPin size={16} style={{ color: 'var(--text-muted)' }} />
-                  <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>来源: {dataset.source}</span>
-                </div> */}
               </div>
             </div>
-
-            {/* Right Column - Description */}
             <div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>数据集备注</div>
               <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: '1.6' }}>
@@ -199,8 +207,28 @@ function DatasetDetail() {
             </div>
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            训练 {Math.round(dataset.annotationCount * dataset.split.train / 100).toLocaleString()} 张 · 验证 {Math.round(dataset.annotationCount * dataset.split.val / 100).toLocaleString()} 张 · 测试 {Math.round(dataset.annotationCount * dataset.split.test / 100).toLocaleString()} 张
+            训练 {trainCount.toLocaleString()} 张 · 验证 {valCount.toLocaleString()} 张 · 测试 {testCount.toLocaleString()} 张
           </div>
+        </div>
+
+        {/* Per-class distribution chart */}
+        <div className="card" style={{ padding: 16, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+            <BarChart3 size={14} style={{ color: 'var(--accent-bright)' }} />
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>各类别数据分布</span>
+          </div>
+          <ResponsiveContainer width="100%" height={Math.max(180, classDistribution.length * 36)}>
+            <BarChart data={classDistribution} layout="vertical" margin={{ top: 0, right: 0, left: 60, bottom: 0 }}
+              barGap={0} barCategoryGap="20%">
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-dim)" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={{ stroke: 'var(--border-dim)' }} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-secondary)', fontFamily: 'JetBrains Mono' }} width={60} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 4, fontSize: 12 }} cursor={{ fill: 'var(--bg-hover)' }} />
+              <Bar dataKey="训练集" fill="#409eff" radius={[0, 3, 3, 0]} />
+              <Bar dataKey="验证集" fill="#10b981" radius={[0, 3, 3, 0]} />
+              <Bar dataKey="测试集" fill="#f59e0b" radius={[0, 3, 3, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Tags Section */}
@@ -212,23 +240,12 @@ function DatasetDetail() {
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {dataset.contentTags.map(tag => (
-                <span
-                  key={tag}
-                  style={{
-                    background: 'rgba(64, 158, 255,0.1)',
-                    color: 'var(--accent-bright)',
-                    fontSize: 12,
-                    padding: '4px 12px',
-                    borderRadius: 20,
-                    fontWeight: 500,
-                  }}
-                >
+                <span key={tag} style={{ background: 'rgba(64,158,255,0.1)', color: 'var(--accent-bright)', fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 500 }}>
                   {tag}
                 </span>
               ))}
             </div>
           </div>
-
           <div className="card" style={{ padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
               <MapPin size={14} style={{ color: 'var(--teal)' }} />
@@ -236,17 +253,7 @@ function DatasetDetail() {
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {dataset.sceneTags.map(tag => (
-                <span
-                  key={tag}
-                  style={{
-                    background: 'rgba(64, 158, 255,0.1)',
-                    color: 'var(--teal)',
-                    fontSize: 12,
-                    padding: '4px 12px',
-                    borderRadius: 20,
-                    fontWeight: 500,
-                  }}
-                >
+                <span key={tag} style={{ background: 'rgba(64,158,255,0.1)', color: 'var(--teal)', fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 500 }}>
                   {tag}
                 </span>
               ))}
@@ -256,84 +263,22 @@ function DatasetDetail() {
 
         {/* Image Preview Section */}
         <div className="card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContents: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Images size={16} style={{ color: 'var(--accent-bright)' }} />
               <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>标注数据预览</span>
             </div>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              共 {dataset.images.length} 张预览图
-            </span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>共 {dataset.images.length} 张预览图</span>
           </div>
-
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
             {dataset.images.map((img, index) => (
-              <div
-                key={img.id}
-                className="select-card"
-                style={{
-                  padding: 0,
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  position: 'relative',
-                }}
-                onClick={() => setSelectedImage(img.id)}
-              >
+              <div key={img.id} className="select-card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', position: 'relative' }}
+                onClick={() => setSelectedImage(img.id)}>
                 <div style={{ position: 'relative', aspectRatio: '4/3' }}>
-                  <img
-                    src={img.url}
-                    alt={`预览图 ${index + 1}`}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  {/* Bounding Box Overlay */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: `${(img.bbox.x / 400) * 100}%`,
-                      top: `${(img.bbox.y / 300) * 100}%`,
-                      width: `${(img.bbox.width / 400) * 100}%`,
-                      height: `${(img.bbox.height / 300) * 100}%`,
-                      border: '2px solid var(--accent)',
-                      backgroundColor: 'rgba(64, 158, 255,0.2)',
-                    }}
-                  />
-                  {/* Label */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: `${(img.bbox.x / 400) * 100}%`,
-                      top: `${(img.bbox.y / 300) * 100 - 24}%`,
-                      background: 'var(--accent)',
-                      color: 'white',
-                      fontSize: 11,
-                      padding: '2px 8px',
-                      borderRadius: 4,
-                      fontWeight: 500,
-                    }}
-                  >
+                  <img src={img.url} alt={`预览图 ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', left: `${(img.bbox.x / 400) * 100}%`, top: `${(img.bbox.y / 300) * 100}%`, width: `${(img.bbox.width / 400) * 100}%`, height: `${(img.bbox.height / 300) * 100}%`, border: '3px solid #409eff', backgroundColor: 'rgba(0, 85, 213, 0.2)' }} />
+                  <div style={{ position: 'absolute', top: `${(img.bbox.y / 300) * 100 - 24}px`, left: `${(img.bbox.x / 400) * 100}%`, color: 'white', fontSize: 10, padding: '2px 6px', background: '#0055d5', borderRadius: 2, whiteSpace: 'nowrap' }}>
                     {img.label}
-                  </div>
-                  {/* Zoom Icon */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: 8,
-                      right: 8,
-                      width: 28,
-                      height: 28,
-                      background: 'rgba(0,0,0,0.6)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <ZoomIn size={14} color="white" />
-                  </div>
-                </div>
-                <div style={{ padding: 12, borderTop: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    预览图 {index + 1}
                   </div>
                 </div>
               </div>
@@ -342,95 +287,28 @@ function DatasetDetail() {
         </div>
       </div>
 
-      {/* Image Preview Modal */}
-      {selectedImage && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            animation: 'fadeIn 0.2s ease-out',
-          }}
-          onClick={() => setSelectedImage(null)}
-        >
-          <button
-            style={{
-              position: 'absolute',
-              top: 20,
-              right: 20,
-              width: 40,
-              height: 40,
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              borderRadius: '50%',
-              color: 'white',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onClick={() => setSelectedImage(null)}
-          >
-            <X size={20} />
-          </button>
-
-          {(() => {
-            const img = dataset.images.find(i => i.id === selectedImage)
-            if (!img) return null
-            return (
-              <div
-                style={{
-                  maxWidth: '90vw',
-                  maxHeight: '90vh',
-                  position: 'relative',
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                <img
-                  src={img.url}
-                  alt="预览"
-                  style={{ maxWidth: '100%', maxHeight: '85vh', borderRadius: 8 }}
-                />
-                {/* Bounding Box */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: `${(img.bbox.x / 400) * 100}%`,
-                    top: `${(img.bbox.y / 300) * 100}%`,
-                    width: `${(img.bbox.width / 400) * 100}%`,
-                    height: `${(img.bbox.height / 300) * 100}%`,
-                    border: '3px solid #409eff',
-                    backgroundColor: 'rgba(64, 158, 255,0.2)',
-                  }}
-                />
-                {/* Label */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: `${(img.bbox.x / 400) * 100}%`,
-                    top: `${(img.bbox.y / 300) * 100 - 30}%`,
-                    background: '#409eff',
-                    color: 'white',
-                    fontSize: 14,
-                    padding: '4px 12px',
-                    borderRadius: 6,
-                    fontWeight: 600,
-                  }}
-                >
-                  {img.label}
-                </div>
+      {/* Image zoom modal */}
+      {selectedImage && (() => {
+        const img = dataset.images.find(i => i.id === selectedImage)
+        if (!img) return null
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, animation: 'fadeIn 0.2s ease-out' }}
+            onClick={() => setSelectedImage(null)}>
+            <button style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onClick={() => setSelectedImage(null)}>
+              <X size={20} />
+            </button>
+            <div style={{ position: 'relative', maxWidth: '80vw', maxHeight: '80vh' }}>
+              <img src={img.url} alt={img.label} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <div style={{ position: 'absolute', left: `${(img.bbox.x / 400) * 100}%`, top: `${(img.bbox.y / 300) * 100}%`, width: `${(img.bbox.width / 400) * 100}%`, height: `${(img.bbox.height / 300) * 100}%`, border: '3px solid #409eff', backgroundColor: 'rgba(0,85,213,0.15)' }} />
+              <div style={{ position: 'absolute', top: `${(img.bbox.y / 300) * 100 - 28}px`, left: `${(img.bbox.x / 400) * 100}%`, color: 'white', fontSize: 14, padding: '4px 12px', background: '#0055d5', borderRadius: 6, fontWeight: 600 }}>
+                {img.label}
               </div>
-            )
-          })()}
-        </div>
-      )}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Split edit modal */}
       {showSplitModal && (
         <div className="modal-backdrop" onClick={() => setShowSplitModal(false)}>
@@ -440,46 +318,40 @@ function DatasetDetail() {
               <button className="btn btn-ghost btn-sm" onClick={() => setShowSplitModal(false)}>✕</button>
             </div>
 
-            <div style={{
-              padding: 12, background: 'var(--warning-glow)', border: '1px solid rgba(230,162,60,0.25)', borderRadius: 4,
-              marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)',
-            }}>
+            <div style={{ padding: 12, background: 'var(--warning-glow)', border: '1px solid rgba(230,162,60,0.25)', borderRadius: 4, marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
               <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
-              <span>调整划分将<strong style={{ color: 'var(--warning)' }}>影响后续所有训练任务</strong>使用的数据集划分。已创建的任务不受影响。</span>
+              调整划分将<strong style={{ color: 'var(--warning)' }}>影响后续所有训练任务</strong>使用的数据集划分。已创建的任务不受影响。
             </div>
 
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <label className="form-label" style={{ marginBottom: 0 }}>训练集</label>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: '#409eff' }}>{splitForm.train}%</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#409eff', marginBottom: 4, fontWeight: 600 }}>训练集</div>
+                <input type="number" className="form-input" value={splitForm.train}
+                  style={{ textAlign: 'center', fontFamily: 'JetBrains Mono' }}
+                  onChange={e => {
+                    const t = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
+                    const r = 100 - t
+                    setSplitForm({ train: t, val: Math.round(r * 0.6), test: r - Math.round(r * 0.6) })
+                  }} />
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{Math.round(dataset.annotationCount * splitForm.train / 100).toLocaleString()} 张</div>
               </div>
-              <input type="range" min={10} max={90} value={splitForm.train} onChange={e => {
-                const t = parseInt(e.target.value)
-                const remaining = 100 - t
-                setSplitForm({ train: t, val: Math.round(remaining * 0.6), test: Math.round(remaining * 0.4) })
-              }} />
-            </div>
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <label className="form-label" style={{ marginBottom: 0 }}>验证集</label>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: '#10b981' }}>{splitForm.val}%</span>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#10b981', marginBottom: 4, fontWeight: 600 }}>验证集</div>
+                <input type="number" className="form-input" value={splitForm.val}
+                  style={{ textAlign: 'center', fontFamily: 'JetBrains Mono' }}
+                  onChange={e => {
+                    const v = Math.max(0, Math.min(100 - splitForm.train, parseInt(e.target.value) || 0))
+                    setSplitForm({ ...splitForm, val: v, test: 100 - splitForm.train - v })
+                  }} />
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{Math.round(dataset.annotationCount * splitForm.val / 100).toLocaleString()} 张</div>
               </div>
-              <input type="range" min={1} max={50} value={splitForm.val} onChange={e => {
-                const v = parseInt(e.target.value)
-                const remaining = 100 - v
-                setSplitForm({ train: Math.round(remaining * 0.7), val: v, test: remaining - Math.round(remaining * 0.7) })
-              }} />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <label className="form-label" style={{ marginBottom: 0 }}>测试集</label>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: '#f59e0b' }}>{splitForm.test}%</span>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 4, fontWeight: 600 }}>测试集</div>
+                <input type="number" className="form-input" value={splitForm.test}
+                  style={{ textAlign: 'center', fontFamily: 'JetBrains Mono' }}
+                  disabled />
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{Math.round(dataset.annotationCount * splitForm.test / 100).toLocaleString()} 张</div>
               </div>
-              <input type="range" min={1} max={50} value={splitForm.test} onChange={e => {
-                const t = parseInt(e.target.value)
-                const remaining = 100 - t
-                setSplitForm({ train: Math.round(remaining * 0.7), val: remaining - Math.round(remaining * 0.7), test: t })
-              }} />
             </div>
 
             <div className="split-bar" style={{ marginBottom: 20 }}>
@@ -496,9 +368,7 @@ function DatasetDetail() {
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button className="btn btn-secondary" onClick={() => setShowSplitModal(false)}>取消</button>
-              <button className="btn btn-primary" onClick={handleSplitSave}>
-                确认调整
-              </button>
+              <button className="btn btn-primary" onClick={handleSplitSave}>确认调整</button>
             </div>
           </div>
         </div>

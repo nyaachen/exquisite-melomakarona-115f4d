@@ -491,9 +491,9 @@ function TaskDetail() {
       {/* Header */}
       <div className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="btn btn-secondary btn-sm" onClick={() => navigate({ to: '/train' })}>
-            <ArrowLeft size={14} /> 返回列表
-          </button>
+          <Link to="/train" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={14} /> 返回
+          </Link>
           <div>
             <div className="breadcrumb">
               <Link to="/">科宝训练平台</Link> ›
