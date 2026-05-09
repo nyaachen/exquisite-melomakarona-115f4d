@@ -11,8 +11,13 @@ import {
   Save,
   Filter,
   AlertCircle,
+  Plus,
+  CheckCircle2,
+  XCircle,
+  Power,
 } from 'lucide-react'
 import { PLAZA_MODELS, type PlazaModel } from '../../data/plaza-models'
+import { ARCHITECTURES } from '../../data/architectures'
 
 export const Route = createFileRoute('/model-management/')({
   component: ModelManagement,
@@ -27,11 +32,6 @@ function ModelManagement() {
   const [filterArch, setFilterArch] = useState('all')
   const [editing, setEditing] = useState<PlazaModel | null>(null)
   const [editForm, setEditForm] = useState({ name: '', description: '', architectureId: '', coverImage: '' })
-
-  const architectures = [...new Set(models.map(m => m.architectureId))].map(id => {
-    const m = models.find(x => x.architectureId === id)
-    return { id, name: m?.architectureName || id }
-  })
 
   const filtered = models.filter(m => {
     if (activeTab !== 'all' && m.source !== activeTab) return false
@@ -61,28 +61,43 @@ function ModelManagement() {
 
   function handleSave() {
     if (!editing) return
+    const arch = ARCHITECTURES.find(a => a.id === editForm.architectureId)
     setModels(prev => prev.map(m =>
       m.id === editing.id ? {
         ...m,
         name: editForm.name,
         description: editForm.description,
         architectureId: editForm.architectureId,
-        architectureName: architectures.find(a => a.id === editForm.architectureId)?.name || m.architectureName,
+        architectureName: arch?.name || m.architectureName,
         coverImage: editForm.coverImage,
       } : m
     ))
     setEditing(null)
   }
 
+  function toggleActive(id: string) {
+    setModels(prev => prev.map(m =>
+      m.id === id ? { ...m, isActive: !m.isActive } : m
+    ))
+  }
+
   return (
     <div className="slide-in">
       <div className="page-header">
         <div>
-          <div className="breadcrumb">科宝训练平台 › 模型</div>
+          <div className="breadcrumb">科宝训练平台 › 模型管理</div>
           <h1 className="page-title">模型管理</h1>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-            管理平台模型与公开模型的版本、权重及基础信息
+            管理平台模型与公开模型的版本、权重、启用状态及基础信息
           </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link to="/model-management/upload" className="btn btn-secondary">
+            <Upload size={14} /> 上传权重
+          </Link>
+          <Link to="/model-management/upload" className="btn btn-primary">
+            <Plus size={14} /> 新建模型
+          </Link>
         </div>
       </div>
 
@@ -139,7 +154,7 @@ function ModelManagement() {
               onChange={(e) => setFilterArch(e.target.value)}
             >
               <option value="all">全部架构</option>
-              {architectures.map(arch => (
+              {ARCHITECTURES.map(arch => (
                 <option key={arch.id} value={arch.id}>{arch.name}</option>
               ))}
             </select>
@@ -162,9 +177,10 @@ function ModelManagement() {
                   <th>标签</th>
                   <th>版本</th>
                   <th>指标</th>
+                  <th>状态</th>
                   <th>作者</th>
                   <th>创建日期</th>
-                  <th style={{ width: 160 }}>操作</th>
+                  <th style={{ width: 180 }}>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,6 +246,17 @@ function ModelManagement() {
                           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>—</span>
                         )}
                       </td>
+                      <td>
+                        {model.isActive !== false ? (
+                          <span className="badge badge-success" style={{ fontSize: 10 }}>
+                            <CheckCircle2 size={9} /> 启用
+                          </span>
+                        ) : (
+                          <span className="badge badge-archived" style={{ fontSize: 10 }}>
+                            <XCircle size={9} /> 停用
+                          </span>
+                        )}
+                      </td>
                       <td style={{ fontSize: 12 }}>{model.author}</td>
                       <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{model.createdAt}</td>
                       <td>
@@ -240,6 +267,13 @@ function ModelManagement() {
                             title="编辑基本信息"
                           >
                             <Edit3 size={12} />
+                          </button>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => toggleActive(model.id)}
+                            title={model.isActive !== false ? '停用模型' : '启用模型'}
+                          >
+                            <Power size={12} style={{ color: model.isActive !== false ? 'var(--success)' : 'var(--text-muted)' }} />
                           </button>
                           {model.source === 'public' ? (
                             <button
@@ -260,7 +294,7 @@ function ModelManagement() {
                             </Link>
                           )}
                           <Link
-                            to="/models/manualUpload"
+                            to="/model-management/upload"
                             className="btn btn-ghost btn-sm"
                             title={model.source === 'public' ? '上传权重文件（管理员）' : '上传新权重版本'}
                           >
@@ -291,6 +325,7 @@ function ModelManagement() {
             <div style={{ fontWeight: 600, marginBottom: 2 }}>模型管理规则</div>
             <div>平台模型：支持上传权重文件 或 从已完成的训练任务发布新版本。</div>
             <div>公开模型：仅限管理员上传权重文件，不支持从训练任务发布。</div>
+            <div>启用/停用：停用的模型在创建训练任务时不会出现在可选列表中。</div>
           </div>
         </div>
       </div>
@@ -331,7 +366,7 @@ function ModelManagement() {
                 value={editForm.architectureId}
                 onChange={e => setEditForm(prev => ({ ...prev, architectureId: e.target.value }))}
               >
-                {architectures.map(arch => (
+                {ARCHITECTURES.map(arch => (
                   <option key={arch.id} value={arch.id}>{arch.name}</option>
                 ))}
               </select>

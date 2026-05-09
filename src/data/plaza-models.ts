@@ -1,3 +1,6 @@
+// 模型广场 — 完整模型接口与 mock 数据，含版本历史（用于模型详情页）
+
+/** 模型版本 */
 export interface ModelVersion {
   version: string
   fileUrl: string
@@ -15,6 +18,7 @@ export interface ModelVersion {
   createdAt: string
 }
 
+/** 模型广场完整模型（含多版本历史、分类颜色、架构来源） */
 export interface PlazaModel {
   id: string
   name: string
@@ -28,9 +32,11 @@ export interface PlazaModel {
   sourceLabel?: string
   createdAt: string
   author: string
+  isActive?: boolean
   versions: ModelVersion[]
 }
 
+/** 模型广场完整模型列表 */
 export const PLAZA_MODELS: PlazaModel[] = [
   {
     id: 'plaza-001',
@@ -45,6 +51,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: '训练任务 task-001',
     createdAt: '2026-03-15',
     author: '张工',
+    isActive: true,
     versions: [
       {
         version: 'v2.3',
@@ -94,6 +101,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: '训练任务 task-002',
     createdAt: '2026-04-20',
     author: '李工',
+    isActive: true,
     versions: [
       {
         version: 'v1.0',
@@ -121,6 +129,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: '训练任务 task-003',
     createdAt: '2026-04-18',
     author: '王工',
+    isActive: true,
     versions: [
       {
         version: 'v1.0',
@@ -148,6 +157,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: '训练任务 task-004',
     createdAt: '2026-04-05',
     author: '赵工',
+    isActive: true,
     versions: [
       {
         version: 'v2.1',
@@ -197,6 +207,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: '手动上传',
     createdAt: '2026-05-02',
     author: '张工',
+    isActive: true,
     versions: [
       {
         version: 'v1.0',
@@ -223,6 +234,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: 'Ultralytics',
     createdAt: '2026-04-10',
     author: 'Ultralytics',
+    isActive: true,
     versions: [
       {
         version: 'v8.2.0',
@@ -248,6 +260,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: 'Ultralytics',
     createdAt: '2026-04-10',
     author: 'Ultralytics',
+    isActive: true,
     versions: [
       {
         version: 'v8.2.0',
@@ -273,6 +286,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: 'Ultralytics',
     createdAt: '2026-04-10',
     author: 'Ultralytics',
+    isActive: true,
     versions: [
       {
         version: 'v8.2.0',
@@ -298,6 +312,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: 'Ultralytics',
     createdAt: '2026-04-10',
     author: 'Ultralytics',
+    isActive: true,
     versions: [
       {
         version: 'v8.2.0',
@@ -323,6 +338,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: 'Ultralytics',
     createdAt: '2026-04-10',
     author: 'Ultralytics',
+    isActive: true,
     versions: [
       {
         version: 'v8.2.0',
@@ -348,6 +364,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: 'Roboflow',
     createdAt: '2026-04-22',
     author: 'Roboflow',
+    isActive: true,
     versions: [
       {
         version: 'v1.0',
@@ -373,6 +390,7 @@ export const PLAZA_MODELS: PlazaModel[] = [
     sourceLabel: 'Roboflow',
     createdAt: '2026-04-25',
     author: 'Roboflow',
+    isActive: true,
     versions: [
       {
         version: 'v1.0',

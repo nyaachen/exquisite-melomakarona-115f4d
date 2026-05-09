@@ -12,19 +12,11 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { TRAIN_STATUS } from '../../constants'
+import { ALL_TASKS } from '../../data/train-tasks'
 
 export const Route = createFileRoute('/train/')({
   component: TasksList,
 })
-
-const ALL_TASKS = [
-  { id: 'task-001', name: '道路缺陷检测 v2.3', dataset: '道路缺陷标注集', images: 4872, baseModel: 'YOLOv8m', status: 'running' as const, progress: 47, epoch: '47/100', mAP: 0.782, createdAt: '2026-04-29 09:14', gpu: 'A100×2', eta: '预计 2小时15分' },
-  { id: 'task-002', name: '施工人员安全帽检测', dataset: '安全帽标注集', images: 2391, baseModel: 'YOLOv8s', status: 'completed' as const, progress: 100, epoch: '80/80', mAP: 0.923, createdAt: '2026-04-28 14:30', gpu: 'A100×1', eta: '-' },
-  { id: 'task-003', name: '车牌识别增强版', dataset: '车牌数据集', images: 7840, baseModel: 'YOLOv8l', status: 'failed' as const, progress: 23, epoch: '23/120', mAP: 0, createdAt: '2026-04-27 22:05', gpu: 'A100×4', eta: '-' },
-  { id: 'task-004', name: '工厂设备异常检测', dataset: '设备标注集', images: 1628, baseModel: 'YOLOv8n', status: 'pending' as const, progress: 0, epoch: '0/60', mAP: 0, createdAt: '2026-04-29 10:47', gpu: 'A100×1', eta: '排队中' },
-  { id: 'task-005', name: '人员跌倒检测 v1.0', dataset: '跌倒行为数据集', images: 3210, baseModel: 'YOLOv8s', status: 'completed' as const, progress: 100, epoch: '100/100', mAP: 0.887, createdAt: '2026-04-26 11:20', gpu: 'A100×2', eta: '-' },
-  { id: 'task-006', name: '火焰烟雾检测', dataset: '火焰烟雾标注集', images: 5601, baseModel: 'YOLOv8m', status: 'completed' as const, progress: 100, epoch: '120/120', mAP: 0.911, createdAt: '2026-04-25 08:00', gpu: 'A100×2', eta: '-' },
-]
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   running: <RefreshCw size={10} className="spinning" />,

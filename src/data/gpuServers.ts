@@ -1,3 +1,6 @@
+// GPU 服务器 — 集群资源接口与 mock 数据（用于训练任务的 GPU 分配）
+
+/** 单张 GPU 卡 */
 export interface GpuCard {
   id: string
   index: number
@@ -5,6 +8,7 @@ export interface GpuCard {
   memory: string
 }
 
+/** 分配在该服务器上的训练/验证任务 */
 export interface AssignedTask {
   taskId: string
   taskName: string
@@ -15,6 +19,7 @@ export interface AssignedTask {
   etaMinutes: number
 }
 
+/** GPU 服务器节点 */
 export interface GpuServer {
   id: string
   name: string
@@ -28,6 +33,7 @@ function generateEta(): number {
   return Math.round(15 + Math.random() * 120)
 }
 
+/** GPU 服务器集群列表 */
 export const GPU_SERVERS: GpuServer[] = [
   {
     id: 'gpu-001', name: '训练节点-A', spec: '512GB RAM', status: 'online',

@@ -1,3 +1,6 @@
+// 模型广场 — 模型卡片接口与 mock 数据（用于模型广场列表页面）
+
+/** 模型广场卡片 */
 export interface SquareModel {
   id: string
   name: string
@@ -12,6 +15,7 @@ export interface SquareModel {
   coverImage: string
 }
 
+/** 根据类别和名称生成模型封面图 URL */
 export function modelCover(category: string, name: string): string {
   const prompts: Record<string, string> = {
     '缺陷检测': 'road surface crack pothole defect detection photography',
@@ -26,6 +30,7 @@ export function modelCover(category: string, name: string): string {
   return `https://neeko-copilot.bytedance.net/api/text2image?prompt=${encodeURIComponent(prompt)}&image_size=landscape_4_3`
 }
 
+/** 模型广场卡片列表（含平台自训练 + 公开预训练模型） */
 export const SQUARE_MODELS: SquareModel[] = [
   {
     id: 'sq-model-001',

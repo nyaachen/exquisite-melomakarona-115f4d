@@ -7,13 +7,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react'
-
-interface TestImage {
-  id: string
-  name: string
-  width: number
-  height: number
-}
+import type { TestImage } from '../../data/train-tasks'
 
 interface Prediction {
   className: string

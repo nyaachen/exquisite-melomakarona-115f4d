@@ -7,21 +7,7 @@ import {
   Target,
   Award,
 } from 'lucide-react'
-
-interface VerificationDetail {
-  label: string
-  value: string
-  status: 'pass' | 'warn' | 'fail'
-}
-
-interface VerificationResult {
-  quality: 'excellent' | 'good' | 'pass' | 'improve'
-  qualityLabel: string
-  summary: string
-  highlights: string[]
-  suggestions: string[]
-  details: VerificationDetail[]
-}
+import type { VerificationResult } from '../../data/train-tasks'
 
 export function CompletedTaskPanel({
   published,

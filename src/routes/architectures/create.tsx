@@ -2,23 +2,11 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ArrowLeft, Save, Plus, X, HelpCircle } from 'lucide-react'
 import { CATEGORY_OPTIONS } from '../../constants'
+import { ArchitectureParam } from '../../data/architectures'
 
 export const Route = createFileRoute('/architectures/create')({
   component: CreateArchitecture,
 })
-
-interface Param {
-  name: string
-  key: string
-  type: 'number' | 'string' | 'select' | 'boolean' | 'range'
-  defaultValue: number | string | boolean
-  min?: number
-  max?: number
-  step?: number
-  options?: { label: string; value: string | number }[]
-  required: boolean
-  description: string
-}
 
 function CreateArchitecture() {
   const navigate = useNavigate()
@@ -26,7 +14,7 @@ function CreateArchitecture() {
   const [category, setCategory] = useState('object-detection')
   const [baseModel, setBaseModel] = useState('')
   const [description, setDescription] = useState('')
-  const [params, setParams] = useState<Param[]>([])
+  const [params, setParams] = useState<ArchitectureParam[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -38,7 +26,7 @@ function CreateArchitecture() {
     setParams(params.filter((_, i) => i !== index))
   }
 
-  function updateParam(index: number, field: keyof Param, value: unknown) {
+  function updateParam(index: number, field: keyof ArchitectureParam, value: unknown) {
     const next = [...params]
     next[index] = { ...next[index], [field]: value }
     setParams(next)

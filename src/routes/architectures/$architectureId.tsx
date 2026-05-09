@@ -3,67 +3,11 @@ import { useState } from 'react'
 import { ArrowLeft, Save, Plus, X, HelpCircle, AlertCircle } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
 import { CATEGORY_OPTIONS } from '../../constants'
+import { ARCHITECTURES, ArchitectureParam } from '../../data/architectures'
 
 export const Route = createFileRoute('/architectures/$architectureId')({
   component: EditArchitecture,
 })
-
-interface Param {
-  name: string
-  key: string
-  type: 'number' | 'string' | 'select' | 'boolean' | 'range'
-  defaultValue: number | string | boolean
-  min?: number
-  max?: number
-  step?: number
-  options?: { label: string; value: string | number }[]
-  required: boolean
-  description: string
-}
-
-interface Architecture {
-  id: string
-  name: string
-  category: string
-  baseModel: string
-  description: string
-  params: Param[]
-  isActive: boolean
-  usageCount: number
-}
-
-// Shared data (in real app this would be a server function)
-const ARCHITECTURES: Architecture[] = [
-  {
-    id: 'arch-yolov8', name: 'YOLOv8 目标检测', category: 'object-detection', baseModel: 'YOLOv8m',
-    description: 'YOLOv8 系列目标检测模型架构', isActive: true, params: [
-      { name: '模型尺寸', key: 'variant', type: 'select', defaultValue: 'm', required: true, description: '模型尺寸变体', options: [{ label: 'YOLOv8n', value: 'n' }, { label: 'YOLOv8s', value: 's' }, { label: 'YOLOv8m', value: 'm' }, { label: 'YOLOv8l', value: 'l' }, { label: 'YOLOv8x', value: 'x' }] },
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 100, min: 1, max: 1000, required: true, description: '模型训练的总轮数' },
-      { name: '批次大小', key: 'batchSize', type: 'number', defaultValue: 16, min: 1, max: 128, required: true, description: '每批次训练的样本数量' },
-      { name: '输入尺寸', key: 'imgSize', type: 'select', defaultValue: 640, required: true, description: '模型输入图片尺寸', options: [{ label: '416×416', value: 416 }, { label: '640×640', value: 640 }, { label: '1024×1024', value: 1024 }] },
-      { name: '初始学习率', key: 'lr0', type: 'range', defaultValue: 0.01, min: 0.0001, max: 0.1, step: 0.0001, required: true, description: '初始学习率' },
-    ],
-    usageCount: 47,
-  },
-  {
-    id: 'arch-qwen', name: 'Qwen 大语言模型微调', category: 'llm', baseModel: 'Qwen-7B-Chat',
-    description: 'Qwen 系列大语言模型的 LoRA/全参数微调架构', isActive: true, params: [
-      { name: '模型版本', key: 'baseModel', type: 'select', defaultValue: 'Qwen-7B-Chat', required: true, description: '预训练模型版本', options: [{ label: 'Qwen-7B-Chat', value: 'Qwen-7B-Chat' }, { label: 'Qwen-14B-Chat', value: 'Qwen-14B-Chat' }] },
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 3, min: 1, max: 20, required: true, description: '训练轮数' },
-      { name: '批次大小', key: 'batchSize', type: 'number', defaultValue: 8, min: 1, max: 64, required: true, description: '批次大小' },
-      { name: '学习率', key: 'lr0', type: 'range', defaultValue: 0.0001, min: 0.00001, max: 0.001, step: 0.00001, required: true, description: '学习率' },
-    ],
-    usageCount: 18,
-  },
-  {
-    id: 'arch-llama', name: 'LLaMA 大语言模型微调', category: 'llm', baseModel: 'LLaMA-2-7B-Chat',
-    description: 'LLaMA-2 系列大语言模型的 LoRA 微调架构', isActive: true, params: [
-      { name: '模型版本', key: 'baseModel', type: 'select', defaultValue: 'LLaMA-2-7B-Chat', required: true, description: '预训练模型版本', options: [{ label: 'LLaMA-2-7B-Chat', value: 'LLaMA-2-7B-Chat' }, { label: 'LLaMA-2-13B-Chat', value: 'LLaMA-2-13B-Chat' }] },
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 3, min: 1, max: 20, required: true, description: '训练轮数' },
-    ],
-    usageCount: 8,
-  },
-]
 
 function EditArchitecture() {
   const { architectureId } = Route.useParams()
@@ -77,7 +21,7 @@ function EditArchitecture() {
   const [baseModel, setBaseModel] = useState(data.baseModel)
   const [description, setDescription] = useState(data.description)
   const [isActive, setIsActive] = useState(data.isActive)
-  const [params, setParams] = useState<Param[]>(data.params)
+  const [params, setParams] = useState<ArchitectureParam[]>(data.params)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -89,7 +33,7 @@ function EditArchitecture() {
     setParams(params.filter((_, i) => i !== index))
   }
 
-  function updateParam(index: number, field: keyof Param, value: unknown) {
+  function updateParam(index: number, field: keyof ArchitectureParam, value: unknown) {
     const next = [...params]
     next[index] = { ...next[index], [field]: value }
     setParams(next)

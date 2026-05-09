@@ -1,77 +1,11 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
 import { ArrowLeft, Save, Info, Globe, Lock } from 'lucide-react'
+import { ARCHITECTURES } from '../../data/architectures'
 
 export const Route = createFileRoute('/presets/create')({
   component: CreatePreset,
 })
-
-interface Param {
-  name: string
-  key: string
-  type: 'number' | 'string' | 'select' | 'boolean' | 'range'
-  defaultValue: number | string | boolean
-  min?: number
-  max?: number
-  step?: number
-  options?: { label: string; value: string | number }[]
-  required: boolean
-  description: string
-}
-
-interface Architecture {
-  id: string
-  name: string
-  category: string
-  baseModel: string
-  description: string
-  params: Param[]
-  isActive: boolean
-  usageCount: number
-}
-
-const ARCHITECTURES: Architecture[] = [
-  {
-    id: 'arch-yolov8', name: 'YOLOv8 目标检测', category: 'object-detection', baseModel: 'YOLOv8m',
-    description: 'YOLOv8 系列目标检测模型架构', isActive: true, usageCount: 47,
-    params: [
-      { name: '模型尺寸', key: 'variant', type: 'select', defaultValue: 'm', required: true, description: '模型尺寸变体', options: [{ label: 'YOLOv8n (Nano)', value: 'n' }, { label: 'YOLOv8s (Small)', value: 's' }, { label: 'YOLOv8m (Medium)', value: 'm' }, { label: 'YOLOv8l (Large)', value: 'l' }, { label: 'YOLOv8x (XLarge)', value: 'x' }] },
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 100, min: 1, max: 1000, required: true, description: '模型训练的总轮数' },
-      { name: '批次大小', key: 'batchSize', type: 'number', defaultValue: 16, min: 1, max: 128, required: true, description: '每批次训练的样本数量' },
-      { name: '输入尺寸', key: 'imgSize', type: 'select', defaultValue: 640, required: true, description: '模型输入图片尺寸', options: [{ label: '416×416', value: 416 }, { label: '512×512', value: 512 }, { label: '640×640', value: 640 }, { label: '800×800', value: 800 }, { label: '1024×1024', value: 1024 }] },
-      { name: '初始学习率', key: 'lr0', type: 'range', defaultValue: 0.01, min: 0.0001, max: 0.1, step: 0.0001, required: true, description: '初始学习率' },
-      { name: '最终学习率', key: 'lrf', type: 'number', defaultValue: 0.001, min: 0.00001, max: 0.01, required: false, description: '余弦退火终止学习率' },
-      { name: '优化器', key: 'optimizer', type: 'select', defaultValue: 'SGD', required: true, description: '优化器类型', options: [{ label: 'SGD（推荐）', value: 'SGD' }, { label: 'Adam', value: 'Adam' }, { label: 'AdamW', value: 'AdamW' }, { label: 'RMSProp', value: 'RMSProp' }] },
-      { name: '权重衰减', key: 'weightDecay', type: 'number', defaultValue: 0.0005, min: 0, max: 0.01, required: false, description: '权重衰减系数' },
-      { name: '早停轮数', key: 'patience', type: 'number', defaultValue: 10, min: 0, max: 50, required: false, description: '无改善等待轮数' },
-      { name: '数据增强策略', key: 'augment', type: 'select', defaultValue: 'default', required: false, description: '数据增强策略', options: [{ label: '默认', value: 'default' }, { label: '强增强', value: 'strong' }, { label: '保守', value: 'conservative' }] },
-      { name: '启用 Mosaic', key: 'useMosaic', type: 'boolean', defaultValue: true, required: false, description: 'Mosaic 4图拼接增强' },
-      { name: '保存检查点间隔', key: 'saveEvery', type: 'number', defaultValue: 10, min: 1, max: 50, required: false, description: '保存间隔轮数' },
-    ],
-  },
-  {
-    id: 'arch-qwen', name: 'Qwen 大语言模型微调', category: 'llm', baseModel: 'Qwen-7B-Chat',
-    description: 'Qwen 系列大语言模型的 LoRA/全参数微调架构', isActive: true, usageCount: 18,
-    params: [
-      { name: '模型版本', key: 'baseModel', type: 'select', defaultValue: 'Qwen-7B-Chat', required: true, description: '预训练模型版本', options: [{ label: 'Qwen-7B-Chat', value: 'Qwen-7B-Chat' }, { label: 'Qwen-14B-Chat', value: 'Qwen-14B-Chat' }, { label: 'Qwen-72B-Chat', value: 'Qwen-72B-Chat' }] },
-      { name: '微调方式', key: 'finetuneMode', type: 'select', defaultValue: 'lora', required: true, description: '微调方式', options: [{ label: 'LoRA', value: 'lora' }, { label: '全参数', value: 'full' }] },
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 3, min: 1, max: 20, required: true, description: '训练轮数' },
-      { name: '批次大小', key: 'batchSize', type: 'number', defaultValue: 8, min: 1, max: 64, required: true, description: '批次大小' },
-      { name: '学习率', key: 'lr0', type: 'range', defaultValue: 0.0001, min: 0.00001, max: 0.001, step: 0.00001, required: true, description: '学习率' },
-      { name: '最大序列长度', key: 'maxSeqLen', type: 'number', defaultValue: 2048, min: 512, max: 8192, required: true, description: '最大序列长度' },
-    ],
-  },
-  {
-    id: 'arch-llama', name: 'LLaMA 大语言模型微调', category: 'llm', baseModel: 'LLaMA-2-7B-Chat',
-    description: 'LLaMA-2 系列大语言模型的 LoRA 微调架构', isActive: true, usageCount: 8,
-    params: [
-      { name: '模型版本', key: 'baseModel', type: 'select', defaultValue: 'LLaMA-2-7B-Chat', required: true, description: '模型版本', options: [{ label: 'LLaMA-2-7B-Chat', value: 'LLaMA-2-7B-Chat' }, { label: 'LLaMA-2-13B-Chat', value: 'LLaMA-2-13B-Chat' }] },
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 3, min: 1, max: 20, required: true, description: '训练轮数' },
-      { name: '批次大小', key: 'batchSize', type: 'number', defaultValue: 8, min: 1, max: 64, required: true, description: '批次大小' },
-      { name: '学习率', key: 'lr0', type: 'range', defaultValue: 0.0001, min: 0.00001, max: 0.001, step: 0.00001, required: true, description: '学习率' },
-    ],
-  },
-]
 
 function CreatePreset() {
   const navigate = useNavigate()

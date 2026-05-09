@@ -5,12 +5,7 @@ import {
   Copy,
 } from 'lucide-react'
 import { SearchableDropdown } from '../SearchableDropdown'
-
-interface PublishableModel {
-  id: string
-  name: string
-  existingVersions: string[]
-}
+import type { PublishableModel } from '../../data/train-tasks'
 
 export function PublishModelModal({
   show,
