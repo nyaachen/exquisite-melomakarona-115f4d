@@ -10,6 +10,8 @@ import {
   ZoomIn,
   X,
   ChevronRight,
+  Settings2,
+  AlertCircle,
 } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
 
@@ -26,6 +28,7 @@ const DATASETS = [
     contentTags: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物'],
     sceneTags: ['城市道路', '高速公路', '乡村道路', '桥梁隧道'],
     annotationCount: 4872,
+    split: { train: 70, val: 15, test: 15 },
     annotatedBy: '张工',
     createdAt: '2026-04-29',
     source: '科宝标注平台',
@@ -45,6 +48,7 @@ const DATASETS = [
     contentTags: ['安全帽', '无安全帽', '人员'],
     sceneTags: ['建筑工地', '高空作业', '隧道施工', '厂房作业'],
     annotationCount: 2391,
+    split: { train: 80, val: 10, test: 10 },
     annotatedBy: '李工',
     createdAt: '2026-04-28',
     source: '科宝标注平台',
@@ -64,6 +68,7 @@ const DATASETS = [
     contentTags: ['正常设备', '异常设备', '待检修'],
     sceneTags: ['工厂车间', '生产线', '仓库设备', '机械设备'],
     annotationCount: 1628,
+    split: { train: 70, val: 20, test: 10 },
     annotatedBy: '王工',
     createdAt: '2026-04-29',
     source: '科宝标注平台',
@@ -83,6 +88,7 @@ const DATASETS = [
     contentTags: ['车牌', '遮挡车牌', '模糊车牌'],
     sceneTags: ['城市道路', '停车场', '高速公路', '小区出入口'],
     annotationCount: 7840,
+    split: { train: 75, val: 15, test: 10 },
     annotatedBy: '赵工',
     createdAt: '2026-04-27',
     source: '科宝标注平台',
@@ -100,8 +106,19 @@ const DATASETS = [
 function DatasetDetail() {
   const params = Route.useParams()
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [showSplitModal, setShowSplitModal] = useState(false)
+  const [splitForm, setSplitForm] = useState({ train: 70, val: 15, test: 15 })
   const dataset = DATASETS.find(d => d.id === params.datasetId)
   if (!dataset) return <NotFound />
+
+  function openSplitModal() {
+    setSplitForm({ ...dataset.split })
+    setShowSplitModal(true)
+  }
+  function handleSplitSave() {
+    dataset.split = { ...splitForm }
+    setShowSplitModal(false)
+  }
 
   return (
     <div>
@@ -156,6 +173,33 @@ function DatasetDetail() {
                 {dataset.description}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Split Section */}
+        <div className="card" style={{ padding: 20, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Settings2 size={14} style={{ color: 'var(--accent-bright)' }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>数据划分</span>
+            </div>
+            <button className="btn btn-secondary btn-sm" onClick={openSplitModal}>
+              <Settings2 size={12} /> 调整划分
+            </button>
+          </div>
+          <div className="split-bar" style={{ marginBottom: 10 }}>
+            <div className="split-bar-train" style={{ flex: dataset.split.train }}>
+              <span className="split-bar-label" style={{ color: '#409eff' }}>训练 {dataset.split.train}%</span>
+            </div>
+            <div className="split-bar-val" style={{ flex: dataset.split.val }}>
+              <span className="split-bar-label" style={{ color: '#10b981' }}>验证 {dataset.split.val}%</span>
+            </div>
+            <div className="split-bar-test" style={{ flex: dataset.split.test }}>
+              <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 {dataset.split.test}%</span>
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            训练 {Math.round(dataset.annotationCount * dataset.split.train / 100).toLocaleString()} 张 · 验证 {Math.round(dataset.annotationCount * dataset.split.val / 100).toLocaleString()} 张 · 测试 {Math.round(dataset.annotationCount * dataset.split.test / 100).toLocaleString()} 张
           </div>
         </div>
 
@@ -385,6 +429,78 @@ function DatasetDetail() {
               </div>
             )
           })()}
+        </div>
+      )}
+      {/* Split edit modal */}
+      {showSplitModal && (
+        <div className="modal-backdrop" onClick={() => setShowSplitModal(false)}>
+          <div className="modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>调整数据划分</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowSplitModal(false)}>✕</button>
+            </div>
+
+            <div style={{
+              padding: 12, background: 'var(--warning-glow)', border: '1px solid rgba(230,162,60,0.25)', borderRadius: 4,
+              marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)',
+            }}>
+              <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
+              <span>调整划分将<strong style={{ color: 'var(--warning)' }}>影响后续所有训练任务</strong>使用的数据集划分。已创建的任务不受影响。</span>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>训练集</label>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: '#409eff' }}>{splitForm.train}%</span>
+              </div>
+              <input type="range" min={10} max={90} value={splitForm.train} onChange={e => {
+                const t = parseInt(e.target.value)
+                const remaining = 100 - t
+                setSplitForm({ train: t, val: Math.round(remaining * 0.6), test: Math.round(remaining * 0.4) })
+              }} />
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>验证集</label>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: '#10b981' }}>{splitForm.val}%</span>
+              </div>
+              <input type="range" min={1} max={50} value={splitForm.val} onChange={e => {
+                const v = parseInt(e.target.value)
+                const remaining = 100 - v
+                setSplitForm({ train: Math.round(remaining * 0.7), val: v, test: remaining - Math.round(remaining * 0.7) })
+              }} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>测试集</label>
+                <span style={{ fontFamily: 'JetBrains Mono', fontSize: 12, color: '#f59e0b' }}>{splitForm.test}%</span>
+              </div>
+              <input type="range" min={1} max={50} value={splitForm.test} onChange={e => {
+                const t = parseInt(e.target.value)
+                const remaining = 100 - t
+                setSplitForm({ train: Math.round(remaining * 0.7), val: remaining - Math.round(remaining * 0.7), test: t })
+              }} />
+            </div>
+
+            <div className="split-bar" style={{ marginBottom: 20 }}>
+              <div className="split-bar-train" style={{ flex: splitForm.train }}>
+                <span className="split-bar-label" style={{ color: '#409eff' }}>{splitForm.train}%</span>
+              </div>
+              <div className="split-bar-val" style={{ flex: splitForm.val }}>
+                <span className="split-bar-label" style={{ color: '#10b981' }}>{splitForm.val}%</span>
+              </div>
+              <div className="split-bar-test" style={{ flex: splitForm.test }}>
+                <span className="split-bar-label" style={{ color: '#f59e0b' }}>{splitForm.test}%</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button className="btn btn-secondary" onClick={() => setShowSplitModal(false)}>取消</button>
+              <button className="btn btn-primary" onClick={handleSplitSave}>
+                确认调整
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

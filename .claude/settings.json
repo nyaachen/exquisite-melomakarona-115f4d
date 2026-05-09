@@ -10,11 +10,16 @@
       "Bash(grep -oE '#[0-9a-fA-F]{3,8}|rgba?\\\\\\([^\\)]+\\\\\\)|var\\\\\\(--[^\\)]+\\\\\\)')",
       "Bash(curl -sL --connect-timeout 10 --max-time 15 \"https://ai.gxtri.cn/data-annotation-platform/dataAnnotation\")",
       "Bash(grep -oE '<style[^>]*>.*?</style>|var\\\\\\(--[^\\)]+\\\\\\)|#[0-9a-fA-F]{3,8}')",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(grep -E 'train/create|datasets/$datasetId')",
+      "Bash(grep -E 'train/$taskId|train/create|datasets/$datasetId')",
+      "Bash(grep 'models/$modelId')",
+      "Bash(sed -i 's/versions: \\\\[.*/versions: [{ precision: 0.831, recall: 0.748 }],/' src/routes/models/\\\\$modelId.tsx *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\nyaachen\\.claude\\projects\\c--Users-nyaachen-Documents-VSCode-exquisite-melomakarona-115f4d\\memory",
-      "c:\\Users\\nyaachen\\.claude\\projects\\c--Users-nyaachen-Documents-VSCode-exquisite-melomakarona-115f4d"
+      "c:\\Users\\nyaachen\\.claude\\projects\\c--Users-nyaachen-Documents-VSCode-exquisite-melomakarona-115f4d",
+      "C:\\Users\\nyaachen\\Documents\\VSCode\\exquisite-melomakarona-115f4d\\src\\routes\\models"
     ]
   }
 }

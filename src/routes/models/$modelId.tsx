@@ -5,36 +5,19 @@ import {
   Tag,
   Clock,
   CheckCircle2,
-  TrendingUp,
   ArrowLeft,
-  ChevronDown,
-  ChevronUp,
   User,
   Layers,
-  Archive,
   Upload,
   ImageIcon,
-  Database,
   AlertCircle,
   Zap,
 } from 'lucide-react'
-import { SearchableDropdown } from '../../components/SearchableDropdown'
 import { NotFound } from '../../components/NotFound'
 
 export const Route = createFileRoute('/models/$modelId')({
   component: ModelDetail,
 })
-
-interface ModelVersion {
-  version: string
-  mAP: number
-  precision: number
-  recall: number
-  f1: number
-  trainedAt: string
-  taskId: string
-  status: 'published' | 'archived'
-}
 
 interface SquareModel {
   id: string
@@ -49,9 +32,10 @@ interface SquareModel {
   latestVersion: string
   latestMAP: number
   latestF1: number
+  latestPrecision: number
+  latestRecall: number
   createdAt: string
   author: string
-  versions: ModelVersion[]
   size?: string
   imgSize?: number
   valImages?: number
@@ -71,16 +55,13 @@ const SQUARE_MODELS: SquareModel[] = [
     latestVersion: 'v2.3',
     latestMAP: 0.782,
     latestF1: 0.788,
+    latestPrecision: 0.831,
+    latestRecall: 0.748,
     createdAt: '2026-03-15',
     author: '张工',
     size: '51.7 MB',
     imgSize: 640,
     valImages: 975,
-    versions: [
-      { version: 'v2.3', mAP: 0.782, precision: 0.831, recall: 0.748, f1: 0.788, trainedAt: '2026-04-29 11:30', taskId: 'task-001', status: 'published' },
-      { version: 'v2.2', mAP: 0.751, precision: 0.812, recall: 0.701, f1: 0.752, trainedAt: '2026-04-10 09:15', taskId: 'task-old-001', status: 'published' },
-      { version: 'v2.1', mAP: 0.698, precision: 0.765, recall: 0.652, f1: 0.704, trainedAt: '2026-03-28 14:20', taskId: 'task-old-002', status: 'archived' },
-    ],
   },
   {
     id: 'sq-model-002',
@@ -95,14 +76,13 @@ const SQUARE_MODELS: SquareModel[] = [
     latestVersion: 'v1.0',
     latestMAP: 0.923,
     latestF1: 0.924,
+    latestPrecision: 0.941,
+    latestRecall: 0.908,
     createdAt: '2026-04-20',
     author: '李工',
     size: '22.4 MB',
     imgSize: 640,
     valImages: 478,
-    versions: [
-      { version: 'v1.0', mAP: 0.923, precision: 0.941, recall: 0.908, f1: 0.924, trainedAt: '2026-04-28 18:12', taskId: 'task-002', status: 'published' },
-    ],
   },
   {
     id: 'sq-model-003',
@@ -117,14 +97,13 @@ const SQUARE_MODELS: SquareModel[] = [
     latestVersion: 'v1.0',
     latestMAP: 0.887,
     latestF1: 0.888,
+    latestPrecision: 0.912,
+    latestRecall: 0.865,
     createdAt: '2026-04-18',
     author: '王工',
     size: '22.1 MB',
     imgSize: 640,
     valImages: 642,
-    versions: [
-      { version: 'v1.0', mAP: 0.887, precision: 0.912, recall: 0.865, f1: 0.888, trainedAt: '2026-04-26 17:40', taskId: 'task-005', status: 'published' },
-    ],
   },
   {
     id: 'sq-model-004',
@@ -139,16 +118,13 @@ const SQUARE_MODELS: SquareModel[] = [
     latestVersion: 'v2.1',
     latestMAP: 0.911,
     latestF1: 0.912,
+    latestPrecision: 0.928,
+    latestRecall: 0.897,
     createdAt: '2026-04-05',
     author: '赵工',
     size: '51.2 MB',
     imgSize: 640,
     valImages: 856,
-    versions: [
-      { version: 'v2.1', mAP: 0.911, precision: 0.928, recall: 0.897, f1: 0.912, trainedAt: '2026-04-25 14:03', taskId: 'task-006', status: 'published' },
-      { version: 'v2.0', mAP: 0.875, precision: 0.895, recall: 0.858, f1: 0.876, trainedAt: '2026-04-12 10:30', taskId: 'task-old-003', status: 'published' },
-      { version: 'v1.5', mAP: 0.812, precision: 0.834, recall: 0.791, f1: 0.812, trainedAt: '2026-03-30 16:45', taskId: 'task-old-004', status: 'archived' },
-    ],
   },
 ]
 
@@ -198,15 +174,6 @@ function ModelDetail() {
 
   const modelClasses = model.classes
 
-  const sortedVersions = [...model.versions].sort((a, b) =>
-    new Date(b.trainedAt).getTime() - new Date(a.trainedAt).getTime()
-  )
-  
-  const [selectedVersion, setSelectedVersion] = useState<string>(model.latestVersion)
-  const [showVersionDropdown, setShowVersionDropdown] = useState(false)
-  
-  const currentVersion = sortedVersions.find(v => v.version === selectedVersion) || sortedVersions[0]
-
   const [imageSource, setImageSource] = useState<ImageSource>('testset')
   const [selectedDataset, setSelectedDataset] = useState(DATASETS[0]?.id || '')
   const [selectedImage, setSelectedImage] = useState(TEST_IMAGES[0])
@@ -214,18 +181,18 @@ function ModelDetail() {
   const [predictions, setPredictions] = useState<Prediction[]>([])
   const [isPredicting, setIsPredicting] = useState(false)
 
-  const availableImages = imageSource === 'testset' 
-    ? TEST_IMAGES 
+  const availableImages = imageSource === 'testset'
+    ? TEST_IMAGES
     : DATASETS.find(d => d.id === selectedDataset)?.imagesList || []
 
-  const currentImage = imageSource === 'upload' && uploadedImage 
-    ? { name: '上传的图片', width: 640, height: 480 } 
+  const currentImage = imageSource === 'upload' && uploadedImage
+    ? { name: '上传的图片', width: 640, height: 480 }
     : selectedImage
 
   async function runPrediction() {
     setIsPredicting(true)
     await new Promise(r => setTimeout(r, 1500))
-    
+
     const mockPredictions: Prediction[] = []
     const numBoxes = Math.floor(Math.random() * 3) + 1
     for (let i = 0; i < numBoxes; i++) {
@@ -260,7 +227,10 @@ function ModelDetail() {
 
   return (
     <div className="slide-in">
-      <div className="page-header">
+      <div className="page-header" style={{ alignItems: 'flex-start' }}>
+        <Link to="/models" className="btn btn-ghost btn-sm">
+          <ArrowLeft size={14} /> 返回
+        </Link>
         <div>
           <div className="breadcrumb">
             <Link to="/">科宝训练平台</Link> ›
@@ -269,11 +239,7 @@ function ModelDetail() {
           </div>
           <h1 className="page-title">{model.name}</h1>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Link to="/models" className="btn btn-secondary">
-            <ArrowLeft size={14} /> 返回列表
-          </Link>
-        </div>
+        <div />
       </div>
 
       <div className="p-content">
@@ -313,42 +279,13 @@ function ModelDetail() {
               </div>
 
               <div style={{ marginTop: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                  <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>当前版本: {selectedVersion}</span>
-                  
-                  <div style={{ position: 'relative' }}>
-                    <button
-                      className="btn btn-sm btn-secondary"
-                      onClick={() => setShowVersionDropdown(!showVersionDropdown)}
-                    >
-                      切换版本
-                      {showVersionDropdown ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                    </button>
-                    
-                    {showVersionDropdown && (
-                      <VersionDropdown
-                        versions={sortedVersions}
-                        selectedVersion={selectedVersion}
-                        onSelect={(v) => {
-                          setSelectedVersion(v)
-                          setShowVersionDropdown(false)
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>最新版本 {model.latestVersion} · 评估指标</div>
                 <div className="card card-padded">
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 16 }}>版本 {selectedVersion} 评估指标</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-                    <MetricCard label="mAP@0.5" value={currentVersion.mAP.toFixed(3)} color="var(--accent-bright)" />
-                    <MetricCard label="Precision" value={currentVersion.precision.toFixed(3)} color="var(--teal)" />
-                    <MetricCard label="Recall" value={currentVersion.recall.toFixed(3)} color="var(--warning)" />
-                    <MetricCard label="F1 Score" value={currentVersion.f1.toFixed(3)} color="var(--success)" />
-                  </div>
-                  <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border-dim)', display: 'flex', gap: 24, fontSize: 10, color: 'var(--text-muted)' }}>
-                    <span>训练时间: <span style={{ color: 'var(--text-secondary)' }}>{currentVersion.trainedAt}</span></span>
-                    <span>训练任务: <span style={{ color: 'var(--text-secondary)', fontFamily: "'JetBrains Mono', monospace" }}>{currentVersion.taskId}</span></span>
+                    <MetricCard label="mAP@0.5" value={model.latestMAP.toFixed(3)} color="var(--accent-bright)" />
+                    <MetricCard label="Precision" value={model.latestPrecision.toFixed(3)} color="var(--teal)" />
+                    <MetricCard label="Recall" value={model.latestRecall.toFixed(3)} color="var(--warning)" />
+                    <MetricCard label="F1 Score" value={model.latestF1.toFixed(3)} color="var(--success)" />
                   </div>
                 </div>
               </div>
@@ -359,9 +296,9 @@ function ModelDetail() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                 {model.classes.map((cls, index) => (
                   <div key={cls} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div 
+                    <div
                       className="class-color"
-                      style={{ background: model.classColors[index] || `hsl(${(index * 50) % 360}, 70%, 50%)` }} 
+                      style={{ background: model.classColors[index] || `hsl(${(index * 50) % 360}, 70%, 50%)` }}
                     />
                     <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{cls}</span>
                   </div>
@@ -395,7 +332,7 @@ function ModelDetail() {
                   {imageSource === 'upload' && (
                     <div style={{ marginTop: 20 }}>
                       <label className="form-label">选择图片文件</label>
-                      <div 
+                      <div
                         className="upload-area"
                         onClick={() => document.getElementById('file-upload')?.click()}
                       >
@@ -424,7 +361,7 @@ function ModelDetail() {
                         {TEST_IMAGES.map(img => (
                           <div
                             key={img.id}
-                            className={`select-card${selectedImage?.id === img.id ? '' : ''}`}
+                            className="select-card"
                             style={{ cursor: 'pointer', padding: 8, borderColor: selectedImage?.id === img.id ? 'var(--accent)' : undefined }}
                             onClick={() => {
                               setSelectedImage(img)
@@ -488,7 +425,7 @@ function ModelDetail() {
                             boxShadow: `0 0 8px ${color}40`,
                           }}
                         >
-                          <div 
+                          <div
                             className="prediction-label"
                             style={{ background: color }}
                           >
@@ -533,9 +470,9 @@ function ModelDetail() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                       {model.classes.map((cls, index) => (
                         <div key={cls} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div 
+                          <div
                             className="class-color-sm"
-                            style={{ background: model.classColors[index] || '#409eff' }} 
+                            style={{ background: model.classColors[index] || '#409eff' }}
                           />
                           <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{cls}</span>
                         </div>
@@ -549,79 +486,19 @@ function ModelDetail() {
 
           <div className="model-detail-sidebar">
             <div className="card card-padded">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <Layers size={15} style={{ color: 'var(--accent-bright)' }} />
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>版本历史</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {sortedVersions.map((ver, index) => (
-                  <div
-                    key={ver.version}
-                    className={`select-card${ver.status === 'archived' ? ' opacity-60' : ''}`}
-                    style={{ padding: 12, cursor: 'pointer', borderColor: selectedVersion === ver.version ? 'var(--accent)' : undefined }}
-                    onClick={() => setSelectedVersion(ver.version)}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span className={`version-badge ${index === 0 ? 'version-badge-latest' : ''}`}>
-                          {index + 1}
-                        </span>
-                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: 'var(--text-primary)' }}>{ver.version}</span>
-                        <span className={`badge ${ver.status === 'published' ? 'badge-published' : 'badge-archived'}`}>
-                          {ver.status === 'published' ? <CheckCircle2 size={8} /> : <Archive size={8} />}
-                          {ver.status === 'published' ? '已发布' : '已归档'}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 16, fontSize: 10, color: 'var(--text-secondary)' }}>
-                      <span>mAP: <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--success)' }}>{ver.mAP.toFixed(3)}</span></span>
-                      <span>F1: <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--accent-bright)' }}>{ver.f1.toFixed(3)}</span></span>
-                    </div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>训练于 {ver.trainedAt}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="card card-padded" style={{ marginTop: 24 }}>
               <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>快速操作</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Link
-                  to="/validate/create"
-                  className="btn btn-teal"
-                >
-                  <Package size={14} /> 用数据集验证模型
+                <Link to="/train/create" className="btn btn-primary">
+                  <Zap size={14} /> 以此模型开始训练
                 </Link>
-                <Link
-                  to="/models/manualUpload"
-                  className="btn btn-secondary"
-                >
-                  <Package size={14} /> 上传新版本
+                <Link to="/validate/create" className="btn btn-teal">
+                  <CheckCircle2 size={14} /> 验证该模型
                 </Link>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-function VersionDropdown({ versions, selectedVersion, onSelect }: { versions: ModelVersion[]; selectedVersion: string; onSelect: (v: string) => void }) {
-  return (
-    <div className="version-dropdown">
-      {versions.map(ver => (
-        <button
-          key={ver.version}
-          className={`btn btn-ghost dropdown-item ${selectedVersion === ver.version ? 'dropdown-item-active' : ''}`}
-          onClick={() => onSelect(ver.version)}
-        >
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", marginRight: 8 }}>{ver.version}</span>
-          <span className={`badge ${ver.status === 'published' ? 'badge-published' : 'badge-archived'}`}>
-            {ver.status === 'published' ? <CheckCircle2 size={8} /> : <Archive size={8} />}
-          </span>
-        </button>
-      ))}
     </div>
   )
 }

@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { ArrowLeft, CheckCircle2, Package, Target, AlertCircle, Server, Cpu } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ArrowLeft, CheckCircle2, AlertCircle, Server } from 'lucide-react'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
+import { GPU_SERVERS, getAvailableServer } from '../../data/gpuServers'
 
 export const Route = createFileRoute('/validate/create')({
   component: CreateValidate,
@@ -29,39 +30,6 @@ const MODELS: Model[] = [
   { id: 'model-004', name: '火焰烟雾检测 v2.1', baseModel: 'YOLOv8m', mAP: 0.911, classes: ['火焰', '浓烟', '轻烟'] },
 ]
 
-interface GpuCardOption {
-  id: string
-  index: number
-  model: string
-  memory: string
-}
-
-const GPU_SERVER_OPTIONS = [
-  { id: 'gpu-001', name: '训练节点-A', spec: '512GB RAM', status: 'online', gpus: [
-    { id: 'gpu-001-0', index: 0, model: 'A100', memory: '80GB' },
-    { id: 'gpu-001-1', index: 1, model: 'A100', memory: '80GB' },
-    { id: 'gpu-001-2', index: 2, model: 'A100', memory: '80GB' },
-    { id: 'gpu-001-3', index: 3, model: 'A100', memory: '80GB' },
-  ]},
-  { id: 'gpu-002', name: '训练节点-B', spec: '256GB RAM', status: 'online', gpus: [
-    { id: 'gpu-002-0', index: 0, model: 'A100', memory: '80GB' },
-    { id: 'gpu-002-1', index: 1, model: 'A100', memory: '80GB' },
-  ]},
-  { id: 'gpu-003', name: '推理节点-A', spec: '128GB RAM', status: 'online', gpus: [
-    { id: 'gpu-003-0', index: 0, model: 'V100', memory: '32GB' },
-    { id: 'gpu-003-1', index: 1, model: 'V100', memory: '32GB' },
-  ]},
-  { id: 'gpu-004', name: '备用节点', spec: '384GB RAM', status: 'maintenance', gpus: [
-    { id: 'gpu-004-0', index: 0, model: 'A6000', memory: '48GB' },
-    { id: 'gpu-004-1', index: 1, model: 'A6000', memory: '48GB' },
-    { id: 'gpu-004-2', index: 2, model: 'A6000', memory: '48GB' },
-    { id: 'gpu-004-3', index: 3, model: 'A6000', memory: '48GB' },
-  ]},
-  { id: 'gpu-005', name: '开发测试节点', spec: '64GB RAM', status: 'offline', gpus: [
-    { id: 'gpu-005-0', index: 0, model: 'RTX 4090', memory: '24GB' },
-  ]},
-]
-
 const DATASETS: Dataset[] = [
   { id: 'ds-001', name: '道路缺陷测试集', images: 975, classes: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物'] },
   { id: 'ds-002', name: '安全帽测试集', images: 478, classes: ['安全帽', '无安全帽', '人员'] },
@@ -75,13 +43,20 @@ function CreateValidate() {
   const [selectedModel, setSelectedModel] = useState<string>('')
   const [selectedDataset, setSelectedDataset] = useState<string>('')
   const [selectedServerId, setSelectedServerId] = useState<string>('')
-  const [selectedGpuIds, setSelectedGpuIds] = useState<string[]>([])
   const [taskName, setTaskName] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const model = MODELS.find(m => m.id === selectedModel)
   const dataset = DATASETS.find(d => d.id === selectedDataset)
+
+  // Auto-assign best available GPU server on mount
+  useEffect(() => {
+    const server = getAvailableServer()
+    if (server) setSelectedServerId(server.id)
+  }, [])
+
+  const assignedServer = GPU_SERVERS.find(s => s.id === selectedServerId)
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {}
@@ -113,7 +88,10 @@ function CreateValidate() {
 
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
-      <div className="page-header">
+      <div className="page-header" style={{ alignItems: 'flex-start' }}>
+        <Link to="/validate" className="btn btn-ghost btn-sm">
+          <ArrowLeft size={14} /> 返回
+        </Link>
         <div>
           <div className="breadcrumb">
             <Link to="/">科宝训练平台</Link> ›
@@ -122,9 +100,7 @@ function CreateValidate() {
           </div>
           <h1 className="page-title">创建验证任务</h1>
         </div>
-        <Link to="/validate" className="btn btn-secondary">
-          <ArrowLeft size={14} /> 返回列表
-        </Link>
+        <div />
       </div>
 
       <div style={{ padding: '24px 32px', maxWidth: 800 }}>
@@ -256,59 +232,33 @@ function CreateValidate() {
             </div>
           )}
 
-          {/* Server selection */}
+          {/* Server — auto-assigned */}
           <div style={{ marginBottom: 24 }}>
-            <SearchableDropdown
-              label="选择 GPU 服务器"
-              color="var(--accent-bright)"
-              selectedId={selectedServerId}
-              onChange={(id) => { setSelectedServerId(id); setSelectedGpuIds([]) }}
-              items={GPU_SERVER_OPTIONS.map(srv => ({
-                id: srv.id,
-                name: srv.name,
-                subtitle: `${srv.gpus.length} 张 GPU · ${srv.spec}`,
-                count: srv.gpus.length,
-                countLabel: 'GPU',
-              }))}
-              placeholder="选择执行验证任务的服务器..."
-            />
-
-            {selectedServerId && (() => {
-              const server = GPU_SERVER_OPTIONS.find(s => s.id === selectedServerId)
-              if (!server) return null
-              return (
-                <div style={{ marginTop: 16, padding: '12px', background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
-                    选择显卡 <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>（可多选 · 已选 {selectedGpuIds.length}/{server.gpus.length} 张）</span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {server.gpus.map(g => {
-                      const selected = selectedGpuIds.includes(g.id)
-                      return (
-                        <label key={g.id} style={{
-                          display: 'flex', alignItems: 'center', gap: 8,
-                          padding: '6px 10px', cursor: 'pointer', fontSize: 12,
-                          background: selected ? 'var(--accent-glow)' : 'var(--bg-surface)',
-                          border: `1px solid ${selected ? 'var(--accent)' : 'var(--border-dim)'}`,
-                        }}>
-                          <input type="checkbox" checked={selected}
-                            onChange={() => setSelectedGpuIds(prev => prev.includes(g.id) ? prev.filter(id => id !== g.id) : [...prev, g.id])}
-                            style={{ accentColor: 'var(--accent)' }} />
-                          <Cpu size={12} style={{ color: selected ? 'var(--accent-bright)' : 'var(--text-muted)' }} />
-                          <span style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--text-muted)' }}>#{g.index}</span>
-                          <span style={{ color: 'var(--text-primary)' }}>{g.model}</span>
-                          <span style={{ color: 'var(--text-muted)', fontFamily: 'JetBrains Mono', fontSize: 11 }}>{g.memory}</span>
-                        </label>
-                      )
-                    })}
-                  </div>
-                  <div style={{ marginTop: 6, display: 'flex', gap: 6 }}>
-                    <button className="btn btn-ghost btn-sm" onClick={() => setSelectedGpuIds(server.gpus.map(g => g.id))}>全选</button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => setSelectedGpuIds([])}>取消全选</button>
-                  </div>
+            <label className="form-label">GPU 服务器（系统自动分配）</label>
+            {assignedServer ? (
+              <div style={{ padding: 14, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', borderRadius: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <Server size={14} style={{ color: 'var(--accent-bright)' }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{assignedServer.name}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{assignedServer.spec}</span>
                 </div>
-              )
-            })()}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {assignedServer.gpus.map(g => (
+                    <span key={g.id} style={{
+                      fontSize: 11, fontFamily: 'JetBrains Mono',
+                      background: 'var(--accent-glow)', color: 'var(--accent)',
+                      padding: '2px 8px', borderRadius: 3,
+                    }}>
+                      #{g.index} {g.model} {g.memory}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div style={{ padding: 14, background: 'var(--warning-glow)', border: '1px solid rgba(230,162,60,0.3)', borderRadius: 4, fontSize: 12, color: 'var(--warning)' }}>
+                暂无可用的 GPU 服务器
+              </div>
+            )}
           </div>
 
           <div style={{
@@ -324,13 +274,7 @@ function CreateValidate() {
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               {model && dataset ? (
                 <>
-                  {selectedServerId ? (() => {
-                    const srv = GPU_SERVER_OPTIONS.find(s => s.id === selectedServerId)
-                    const gpuNames = srv ? selectedGpuIds.map(id => srv.gpus.find(g => g.id === id)).filter(Boolean).map(g => `#${g!.index} ${g!.model}`).join('、') : ''
-                    return <>在<span style={{ color: 'var(--accent)' }}>{srv?.name}</span>（{gpuNames || '未选择显卡'}）上使用数据集「<span style={{ color: 'var(--text-primary)' }}>{dataset.name}</span>」对模型「<span style={{ color: 'var(--accent)' }}>{model.name}</span>」进行验证。</>
-                  })() : (
-                    <>使用数据集「<span style={{ color: 'var(--text-primary)' }}>{dataset.name}</span>」对模型「<span style={{ color: 'var(--accent)' }}>{model.name}</span>」进行验证。</>
-                  )}
+                  在<span style={{ color: 'var(--accent)' }}>{assignedServer?.name || '自动分配'}</span>上使用数据集「<span style={{ color: 'var(--text-primary)' }}>{dataset.name}</span>」对模型「<span style={{ color: 'var(--accent)' }}>{model.name}</span>」进行验证。
                 </>
               ) : (
                 '请选择模型和数据集'

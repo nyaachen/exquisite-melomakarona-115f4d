@@ -874,6 +874,39 @@ function TaskDetail() {
             </div>
           </div>
 
+          {/* Dataset snapshot */}
+          <div className="card card-padded">
+            <div className="section-title mb-3">数据集快照</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { label: '数据集', value: task.dataset },
+                { label: '划分', value: '训练 70% · 验证 15% · 测试 15%' },
+                { label: '图片总数', value: '4,872 张' },
+                { label: '类别', value: '裂缝、坑洼、破损、剥落、标线模糊、积水、障碍物' },
+                { label: '快照时间', value: task.createdAt },
+              ].map(row => (
+                <div key={row.label} className="data-row">
+                  <span className="data-row-label">{row.label}</span>
+                  <span className="data-row-value">{row.value}</span>
+                </div>
+              ))}
+              <div className="split-bar" style={{ marginTop: 4 }}>
+                <div className="split-bar-train" style={{ flex: 70 }}>
+                  <span className="split-bar-label" style={{ color: '#409eff' }}>训练 70%</span>
+                </div>
+                <div className="split-bar-val" style={{ flex: 15 }}>
+                  <span className="split-bar-label" style={{ color: '#10b981' }}>验证 15%</span>
+                </div>
+                <div className="split-bar-test" style={{ flex: 15 }}>
+                  <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 15%</span>
+                </div>
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
+                快照保存于任务创建时，记录当时使用的数据集划分状态
+              </div>
+            </div>
+          </div>
+
           {/* Progress */}
           <div className="card card-padded">
             <div className="section-title mb-4">训练进度</div>

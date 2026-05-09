@@ -639,9 +639,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
   transition: flex 0.3s ease;
   position: relative;
 }
-.split-train { background: rgba(64, 158, 255,0.4); color: var(--accent-bright); }
-.split-val   { background: rgba(64, 158, 255,0.35); color: var(--teal); }
-.split-test  { background: rgba(230, 162, 60,0.3); color: var(--warning); }
+.split-train { background: rgba(64, 158, 255, 0.4); color: #409eff; }
+.split-val   { background: rgba(16, 185, 129, 0.35); color: #10b981; }
+.split-test  { background: rgba(245, 158, 11, 0.3); color: #f59e0b; }
 
 /* ─── Modal ─── */
 .modal-backdrop {
@@ -1316,21 +1316,21 @@ input[type="range"]::-webkit-slider-thumb:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(64, 158, 255,0.4);
+  background: rgba(64, 158, 255, 0.4);
   transition: flex 0.3s ease;
 }
 .split-bar-val {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(64, 158, 255,0.35);
+  background: rgba(16, 185, 129, 0.35);
   transition: flex 0.3s ease;
 }
 .split-bar-test {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(230, 162, 60,0.3);
+  background: rgba(245, 158, 11, 0.3);
   transition: flex 0.3s ease;
 }
 .split-bar-label {

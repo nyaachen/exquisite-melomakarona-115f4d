@@ -15,6 +15,7 @@ import { Route as TrainIndexRouteImport } from './routes/train/index'
 import { Route as SubdatasetsIndexRouteImport } from './routes/subdatasets/index'
 import { Route as PretrainedModelsIndexRouteImport } from './routes/pretrained-models/index'
 import { Route as PresetsIndexRouteImport } from './routes/presets/index'
+import { Route as MonitorIndexRouteImport } from './routes/monitor/index'
 import { Route as ModelsIndexRouteImport } from './routes/models/index'
 import { Route as GpuServersIndexRouteImport } from './routes/gpu-servers/index'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets/index'
@@ -66,6 +67,11 @@ const PretrainedModelsIndexRoute = PretrainedModelsIndexRouteImport.update({
 const PresetsIndexRoute = PresetsIndexRouteImport.update({
   id: '/presets/',
   path: '/presets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MonitorIndexRoute = MonitorIndexRouteImport.update({
+  id: '/monitor/',
+  path: '/monitor/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsIndexRoute = ModelsIndexRouteImport.update({
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/datasets/': typeof DatasetsIndexRoute
   '/gpu-servers/': typeof GpuServersIndexRoute
   '/models/': typeof ModelsIndexRoute
+  '/monitor/': typeof MonitorIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/pretrained-models/': typeof PretrainedModelsIndexRoute
   '/subdatasets/': typeof SubdatasetsIndexRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/datasets': typeof DatasetsIndexRoute
   '/gpu-servers': typeof GpuServersIndexRoute
   '/models': typeof ModelsIndexRoute
+  '/monitor': typeof MonitorIndexRoute
   '/presets': typeof PresetsIndexRoute
   '/pretrained-models': typeof PretrainedModelsIndexRoute
   '/subdatasets': typeof SubdatasetsIndexRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/datasets/': typeof DatasetsIndexRoute
   '/gpu-servers/': typeof GpuServersIndexRoute
   '/models/': typeof ModelsIndexRoute
+  '/monitor/': typeof MonitorIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/pretrained-models/': typeof PretrainedModelsIndexRoute
   '/subdatasets/': typeof SubdatasetsIndexRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/datasets/'
     | '/gpu-servers/'
     | '/models/'
+    | '/monitor/'
     | '/presets/'
     | '/pretrained-models/'
     | '/subdatasets/'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/datasets'
     | '/gpu-servers'
     | '/models'
+    | '/monitor'
     | '/presets'
     | '/pretrained-models'
     | '/subdatasets'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/datasets/'
     | '/gpu-servers/'
     | '/models/'
+    | '/monitor/'
     | '/presets/'
     | '/pretrained-models/'
     | '/subdatasets/'
@@ -388,6 +400,7 @@ export interface RootRouteChildren {
   DatasetsIndexRoute: typeof DatasetsIndexRoute
   GpuServersIndexRoute: typeof GpuServersIndexRoute
   ModelsIndexRoute: typeof ModelsIndexRoute
+  MonitorIndexRoute: typeof MonitorIndexRoute
   PresetsIndexRoute: typeof PresetsIndexRoute
   PretrainedModelsIndexRoute: typeof PretrainedModelsIndexRoute
   SubdatasetsIndexRoute: typeof SubdatasetsIndexRoute
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/presets'
       fullPath: '/presets/'
       preLoaderRoute: typeof PresetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/monitor/': {
+      id: '/monitor/'
+      path: '/monitor'
+      fullPath: '/monitor/'
+      preLoaderRoute: typeof MonitorIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/models/': {
@@ -620,6 +640,7 @@ const rootRouteChildren: RootRouteChildren = {
   DatasetsIndexRoute: DatasetsIndexRoute,
   GpuServersIndexRoute: GpuServersIndexRoute,
   ModelsIndexRoute: ModelsIndexRoute,
+  MonitorIndexRoute: MonitorIndexRoute,
   PresetsIndexRoute: PresetsIndexRoute,
   PretrainedModelsIndexRoute: PretrainedModelsIndexRoute,
   SubdatasetsIndexRoute: SubdatasetsIndexRoute,

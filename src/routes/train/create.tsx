@@ -17,7 +17,13 @@ import {
   FileText,
   AlertCircle,
   Server,
+  BarChart3,
+  Image,
+  Sun,
+  Contrast,
+  Settings2,
 } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { DatasetPicker, type DatasetEntry } from '../../components/DatasetPicker'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
 
@@ -167,46 +173,7 @@ const ALL_PUBLIC_MODELS = [
   { id: 'pub-qwen-14b-base', name: 'Qwen-14B-Chat (原版)', architectureId: 'arch-qwen', source: 'Alibaba', fileSize: '28.0 GB', desc: '通义千问 140亿参数预训练', inputSize: 2048, numClasses: 0 },
 ]
 
-interface GpuCardOption {
-  id: string
-  index: number
-  model: string
-  memory: string
-}
-
-interface GpuServerOption {
-  id: string
-  name: string
-  spec: string
-  status: string
-  gpus: GpuCardOption[]
-}
-
-const GPU_SERVER_OPTIONS: GpuServerOption[] = [
-  { id: 'gpu-001', name: '训练节点-A', spec: '512GB RAM', status: 'online', gpus: [
-    { id: 'gpu-001-0', index: 0, model: 'A100', memory: '80GB' },
-    { id: 'gpu-001-1', index: 1, model: 'A100', memory: '80GB' },
-    { id: 'gpu-001-2', index: 2, model: 'A100', memory: '80GB' },
-    { id: 'gpu-001-3', index: 3, model: 'A100', memory: '80GB' },
-  ]},
-  { id: 'gpu-002', name: '训练节点-B', spec: '256GB RAM', status: 'online', gpus: [
-    { id: 'gpu-002-0', index: 0, model: 'A100', memory: '80GB' },
-    { id: 'gpu-002-1', index: 1, model: 'A100', memory: '80GB' },
-  ]},
-  { id: 'gpu-003', name: '推理节点-A', spec: '128GB RAM', status: 'online', gpus: [
-    { id: 'gpu-003-0', index: 0, model: 'V100', memory: '32GB' },
-    { id: 'gpu-003-1', index: 1, model: 'V100', memory: '32GB' },
-  ]},
-  { id: 'gpu-004', name: '备用节点', spec: '384GB RAM', status: 'maintenance', gpus: [
-    { id: 'gpu-004-0', index: 0, model: 'A6000', memory: '48GB' },
-    { id: 'gpu-004-1', index: 1, model: 'A6000', memory: '48GB' },
-    { id: 'gpu-004-2', index: 2, model: 'A6000', memory: '48GB' },
-    { id: 'gpu-004-3', index: 3, model: 'A6000', memory: '48GB' },
-  ]},
-  { id: 'gpu-005', name: '开发测试节点', spec: '64GB RAM', status: 'offline', gpus: [
-    { id: 'gpu-005-0', index: 0, model: 'RTX 4090', memory: '24GB' },
-  ]},
-]
+import { GPU_SERVERS, getAvailableServer } from '../../data/gpuServers'
 
 const STEPS = [
   { id: 1, label: '选择数据集', icon: <Layers size={14} /> },
@@ -221,10 +188,9 @@ function CreateTask() {
   const [step, setStep] = useState(1)
   const [submitting, setSubmitting] = useState(false)
 
-  // Step 1: Independent dataset selection
-  const [trainDatasetId, setTrainDatasetId] = useState('')
-  const [valDatasetId, setValDatasetId] = useState('')
-  const [testDatasetId, setTestDatasetId] = useState('')
+  // Step 1: Single dataset selection + split
+  const [datasetId, setDatasetId] = useState('')
+  const [datasetSplit, setDatasetSplit] = useState({ train: 70, val: 15, test: 15 })
   const [datasetErrors, setDatasetErrors] = useState<Record<string, string>>({})
 
   // Step 2: Model & Params
@@ -235,10 +201,21 @@ function CreateTask() {
   const [startPointId, setStartPointId] = useState<string | null>(null)
   const [startPointVersion, setStartPointVersion] = useState<string>('')
 
+  // Image processing
+  const [preprocessing, setPreprocessing] = useState<string[]>([])
+  const [augmentation, setAugmentation] = useState<string[]>([])
+
   // Step 3: Task name + server
   const [taskName, setTaskName] = useState('')
   const [selectedServerId, setSelectedServerId] = useState('')
-  const [selectedGpuIds, setSelectedGpuIds] = useState<string[]>([])
+
+  // Auto-assign best available GPU server on mount
+  useEffect(() => {
+    const server = getAvailableServer()
+    if (server) setSelectedServerId(server.id)
+  }, [])
+
+  const assignedServer = GPU_SERVERS.find(s => s.id === selectedServerId)
 
   const visiblePresets = useMemo(() =>
     ALL_PRESETS.filter(p => p.visibility === 'public' || p.author === CURRENT_USER),
@@ -251,48 +228,37 @@ function CreateTask() {
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }) }, [step])
 
   const architecture = ARCHITECTURES.find(a => a.id === architectureId)
-  const trainDs = DATASET_ENTRIES.find(d => d.id === trainDatasetId)
-  const valDs = DATASET_ENTRIES.find(d => d.id === valDatasetId)
-  const testDs = DATASET_ENTRIES.find(d => d.id === testDatasetId)
+  const selectedDs = DATASET_ENTRIES.find(d => d.id === datasetId)
 
-  const trainImageCount = trainDs ? trainDs.trainImages : 0
-  const valImageCount = valDs ? valDs.valImages : 0
-  const testImageCount = testDs ? testDs.testImages : 0
-  const totalImagesForValidation = trainImageCount + valImageCount + testImageCount
+  const totalImages = selectedDs ? selectedDs.totalImages : 0
+  const trainImageCount = Math.round(totalImages * datasetSplit.train / 100)
+  const valImageCount = Math.round(totalImages * datasetSplit.val / 100)
+  const testImageCount = totalImages - trainImageCount - valImageCount
 
-  // Class mismatch detection
-  const classMismatch = useMemo(() => {
-    const selected = [trainDs, valDs, testDs].filter(Boolean) as DatasetEntry[]
-    const sets = ['训练', '验证', '测试'] as const
-    const labels = ['训练数据集', '验证数据集', '测试数据集'] as const
-    const dss = [trainDs, valDs, testDs]
-    const items: { label: string; classes: string[] }[] = []
-    for (let i = 0; i < 3; i++) {
-      if (dss[i]) items.push({ label: labels[i], classes: dss[i]!.classes })
-    }
-    if (items.length < 2) return null
+  // Per-class distribution across train/val/test (mock)
+  const classDistribution = useMemo(() => {
+    if (!selectedDs || selectedDs.classes.length === 0) return []
+    const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h) }
+    return selectedDs.classes.map(cls => {
+      const h = hash(cls)
+      const base = 200 + (h % 800)
+      const scale = totalImages / (selectedDs.classes.length * base)
+      const t = Math.round(base * (0.55 + (h % 30) / 100) * scale)
+      const v = Math.round(base * (0.15 + ((h >> 4) % 15) / 100) * scale)
+      return { name: cls, 训练集: t, 验证集: v, 测试集: Math.max(0, Math.round(base * scale) - t - v) }
+    })
+  }, [selectedDs, totalImages])
 
-    const allClasses = [...new Set(items.flatMap(it => it.classes))].sort()
-    const mismatched = items.some(it =>
-      it.classes.length !== allClasses.length || !allClasses.every(c => it.classes.includes(c))
-    )
-    if (!mismatched) return null
-
-    return { items, allClasses }
-  }, [trainDs, valDs, testDs])
-
-  // Warning for missing val/test (non-blocking)
+  // Warning for split extremes
   const datasetWarnings: string[] = []
-  if (!valDatasetId) datasetWarnings.push('未选择验证数据集，建议选择一个验证集以监控训练过程中的模型表现')
-  if (!testDatasetId) datasetWarnings.push('未选择测试数据集，建议选择一个测试集以评估最终模型性能')
+  if (datasetSplit.train > 85) datasetWarnings.push('训练集占比过高（>85%），验证和测试数据可能不足')
+  if (datasetSplit.val < 5) datasetWarnings.push('验证集占比过低（<5%），可能无法准确监控训练过程')
+  if (datasetSplit.test < 5) datasetWarnings.push('测试集占比过低（<5%），最终评估结果可能不可靠')
 
   function validateDatasets(): boolean {
     const errs: Record<string, string> = {}
-    if (!trainDatasetId || trainImageCount === 0) {
-      errs.train = '必须选择一个包含图片的训练数据集'
-    }
-    if (totalImagesForValidation === 0) {
-      errs.general = '至少需要选择一个包含图片的数据集或子数据集'
+    if (!datasetId || totalImages === 0) {
+      errs.dataset = '必须选择一个包含图片的数据集'
     }
     setDatasetErrors(errs)
     return Object.keys(errs).length === 0
@@ -302,6 +268,15 @@ function CreateTask() {
     if (!validateDatasets()) return
     setStep(2)
   }
+
+  const datasetSnapshot = useMemo(() => ({
+    datasetId,
+    datasetName: selectedDs?.name || '',
+    totalImages,
+    split: { ...datasetSplit },
+    classes: selectedDs?.classes || [],
+    snapshotAt: new Date().toISOString(),
+  }), [datasetId, selectedDs, totalImages, datasetSplit])
 
   function handleArchChange(id: string) {
     setArchitectureId(id)
@@ -341,19 +316,19 @@ function CreateTask() {
 
   const reviewItems = useMemo(() => {
     const items: { label: string; value: string }[] = []
-    if (trainDs) items.push({ label: '训练数据集', value: `${trainDs.name} (${trainImageCount} 张)` })
-    if (valDs) items.push({ label: '验证数据集', value: `${valDs.name} (${valImageCount} 张)` })
-    if (testDs) items.push({ label: '测试数据集', value: `${testDs.name} (${testImageCount} 张)` })
+    if (selectedDs) {
+      items.push({ label: '数据集', value: selectedDs.name })
+      items.push({ label: '数据划分', value: `训练 ${datasetSplit.train}% · 验证 ${datasetSplit.val}% · 测试 ${datasetSplit.test}% (${totalImages.toLocaleString()} 张)` })
+    }
     if (architecture) {
       items.push({ label: '模型架构', value: architecture.name })
       items.push({ label: '基础模型', value: architecture.baseModel })
     }
     items.push({ label: '训练起点', value: STARTING_POINT_TYPES.find(s => s.id === startPointType)?.name || '随机' })
-    const selectedServer = GPU_SERVER_OPTIONS.find(s => s.id === selectedServerId)
-    const gpuNames = selectedServer
-      ? selectedGpuIds.map(id => selectedServer.gpus.find(g => g.id === id)).filter(Boolean).map(g => `#${g!.index} ${g!.model}`).join('、') || '未选择显卡'
+    const gpuNames = assignedServer
+      ? assignedServer.gpus.map(g => `#${g.index} ${g.model}`).join('、')
       : ''
-    items.push({ label: 'GPU 服务器', value: selectedServer ? `${selectedServer.name} · 显卡: ${gpuNames}` : '未选择' })
+    items.push({ label: 'GPU 服务器', value: assignedServer ? `${assignedServer.name} · ${gpuNames}` : '无可用服务器' })
     if (architecture) {
       architecture.params.forEach(p => {
         const val = paramValues[p.key]
@@ -361,7 +336,7 @@ function CreateTask() {
       })
     }
     return items
-  }, [trainDs, valDs, testDs, trainImageCount, valImageCount, testImageCount, architecture, startPointType, paramValues, selectedServerId, selectedGpuIds])
+  }, [selectedDs, datasetSplit, totalImages, trainImageCount, valImageCount, testImageCount, architecture, startPointType, paramValues, assignedServer])
 
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
@@ -402,9 +377,9 @@ function CreateTask() {
               <SectionTitle icon={<Layers size={15} />} title="选择训练/验证/测试数据集"
                 subtitle="为每个集合独立选择数据集或子数据集" />
 
-              {datasetErrors.train && (
+              {datasetErrors.dataset && (
                 <div style={{ padding: '10px 14px', background: 'var(--error-glow)', border: '1px solid rgba(239,68,68,0.3)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--error)' }}>
-                  <AlertCircle size={14} /> {datasetErrors.train}
+                  <AlertCircle size={14} /> {datasetErrors.dataset}
                 </div>
               )}
               {datasetWarnings.length > 0 && (
@@ -417,119 +392,245 @@ function CreateTask() {
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {/* Training Dataset */}
+                {/* Single Dataset Picker */}
                 <DatasetPicker
-                  label="训练数据集 *"
+                  label="选择数据集"
                   color="var(--accent-bright)"
-                  selectedId={trainDatasetId}
-                  onChange={setTrainDatasetId}
+                  selectedId={datasetId}
+                  onChange={(id) => {
+                    setDatasetId(id)
+                    const ds = DATASET_ENTRIES.find(d => d.id === id)
+                    // Default split from dataset or 70/15/15
+                    if (ds && 'defaultSplit' in ds) {
+                      const s = (ds as any).defaultSplit
+                      if (s) setDatasetSplit(s)
+                    }
+                  }}
                   entries={DATASET_ENTRIES}
                   imageKey="trainImages"
                 />
 
-                {/* Validation Dataset */}
-                <DatasetPicker
-                  label="验证数据集"
-                  color="var(--teal)"
-                  selectedId={valDatasetId}
-                  onChange={setValDatasetId}
-                  entries={DATASET_ENTRIES}
-                  imageKey="valImages"
-                />
-
-                {/* Test Dataset */}
-                <DatasetPicker
-                  label="测试数据集"
-                  color="var(--warning)"
-                  selectedId={testDatasetId}
-                  onChange={setTestDatasetId}
-                  entries={DATASET_ENTRIES}
-                  imageKey="testImages"
-                />
+                {/* Split adjustment */}
+                {selectedDs && (
+                  <div className="card" style={{ padding: 14, animation: 'slideIn 0.2s ease-out' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                      <Settings2 size={13} style={{ color: 'var(--accent-bright)' }} />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>数据划分</span>
+                    </div>
+                    <div className="split-bar" style={{ marginBottom: 10 }}>
+                      <div className="split-bar-train" style={{ flex: datasetSplit.train }}>
+                        <span className="split-bar-label" style={{ color: '#409eff' }}>训练 {datasetSplit.train}%</span>
+                      </div>
+                      <div className="split-bar-val" style={{ flex: datasetSplit.val }}>
+                        <span className="split-bar-label" style={{ color: '#10b981' }}>验证 {datasetSplit.val}%</span>
+                      </div>
+                      <div className="split-bar-test" style={{ flex: datasetSplit.test }}>
+                        <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 {datasetSplit.test}%</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--text-muted)' }}>
+                      <span>训练 {trainImageCount.toLocaleString()} 张</span>
+                      <span>验证 {valImageCount.toLocaleString()} 张</span>
+                      <span>测试 {testImageCount.toLocaleString()} 张</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 2 }}>
+                          <span style={{ color: '#409eff' }}>训练</span><span style={{ fontFamily: 'JetBrains Mono', color: 'var(--text-secondary)' }}>{datasetSplit.train}%</span>
+                        </div>
+                        <input type="range" min={10} max={90} value={datasetSplit.train} onChange={e => {
+                          const t = parseInt(e.target.value)
+                          const r = 100 - t
+                          setDatasetSplit({ train: t, val: Math.round(r * 0.6), test: r - Math.round(r * 0.6) })
+                        }} style={{ width: '100%' }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 2 }}>
+                          <span style={{ color: '#10b981' }}>验证</span><span style={{ fontFamily: 'JetBrains Mono', color: 'var(--text-secondary)' }}>{datasetSplit.val}%</span>
+                        </div>
+                        <input type="range" min={1} max={50} value={datasetSplit.val} onChange={e => {
+                          const v = parseInt(e.target.value)
+                          const r = 100 - v
+                          setDatasetSplit({ train: Math.round(r * 0.7), val: v, test: r - Math.round(r * 0.7) })
+                        }} style={{ width: '100%' }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 2 }}>
+                          <span style={{ color: '#f59e0b' }}>测试</span><span style={{ fontFamily: 'JetBrains Mono', color: 'var(--text-secondary)' }}>{datasetSplit.test}%</span>
+                        </div>
+                        <input type="range" min={1} max={50} value={datasetSplit.test} onChange={e => {
+                          const t = parseInt(e.target.value)
+                          const r = 100 - t
+                          setDatasetSplit({ train: Math.round(r * 0.7), val: r - Math.round(r * 0.7), test: t })
+                        }} style={{ width: '100%' }} />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 10, padding: '8px 10px', background: 'var(--accent-glow)', borderRadius: 4, fontSize: 11, color: 'var(--text-secondary)', display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <Info size={11} style={{ color: 'var(--accent-bright)', flexShrink: 0 }} />
+                      当前划分将在创建任务时保存为数据集快照
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Summary */}
-              <div className="card" style={{ padding: 16, marginTop: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>
-                  已选数据集概览
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-                  <div className="metric-chip">
-                    <div className="metric-chip-value" style={{ color: 'var(--accent-bright)', fontSize: 20 }}>
-                      {trainImageCount.toLocaleString()}
-                    </div>
-                    <div className="metric-chip-label">训练集图片</div>
+              {selectedDs && (
+                <div className="card" style={{ padding: 16, marginTop: 20 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>
+                    数据集概览 — {selectedDs.name}
                   </div>
-                  <div className="metric-chip">
-                    <div className="metric-chip-value" style={{ color: 'var(--teal)', fontSize: 20 }}>
-                      {valImageCount.toLocaleString()}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                    <div className="metric-chip">
+                      <div className="metric-chip-value" style={{ color: '#409eff', fontSize: 20 }}>
+                        {trainImageCount.toLocaleString()}
+                      </div>
+                      <div className="metric-chip-label">训练集 ({datasetSplit.train}%)</div>
                     </div>
-                    <div className="metric-chip-label">验证集图片</div>
-                  </div>
-                  <div className="metric-chip">
-                    <div className="metric-chip-value" style={{ color: 'var(--warning)', fontSize: 20 }}>
-                      {testImageCount.toLocaleString()}
+                    <div className="metric-chip">
+                      <div className="metric-chip-value" style={{ color: '#10b981', fontSize: 20 }}>
+                        {valImageCount.toLocaleString()}
+                      </div>
+                      <div className="metric-chip-label">验证集 ({datasetSplit.val}%)</div>
                     </div>
-                    <div className="metric-chip-label">测试集图片</div>
+                    <div className="metric-chip">
+                      <div className="metric-chip-value" style={{ color: '#f59e0b', fontSize: 20 }}>
+                        {testImageCount.toLocaleString()}
+                      </div>
+                      <div className="metric-chip-label">测试集 ({datasetSplit.test}%)</div>
+                    </div>
                   </div>
-                </div>
-                {totalImagesForValidation > 0 && (
                   <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
-                    总计 {totalImagesForValidation.toLocaleString()} 张图片（训练 {trainImageCount.toLocaleString()} + 验证 {valImageCount.toLocaleString()} + 测试 {testImageCount.toLocaleString()}）
-                  </div>
-                )}
-                {totalImagesForValidation === 0 && (
-                  <div style={{ marginTop: 10, fontSize: 12, color: 'var(--error)' }}>
-                    尚未选择任何数据集，请至少选择一个包含图片的数据集
-                  </div>
-                )}
-              </div>
-
-              {/* Class mismatch warning */}
-              {classMismatch && (
-                <div style={{ marginTop: 16, padding: 14, background: 'rgba(230, 162, 60,0.06)', border: '1px solid rgba(230, 162, 60,0.25)', display: 'flex', gap: 10, fontSize: 12 }}>
-                  <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, color: 'var(--warning)', marginBottom: 6 }}>类别不一致警告</div>
-                    <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>
-                      所选数据集的类别标签不完全一致，可能导致训练/验证/测试之间的标签不匹配，影响训练效果。
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {classMismatch.items.map(item => (
-                        <div key={item.label} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                          <span style={{ color: 'var(--text-muted)', flexShrink: 0, minWidth: 80 }}>{item.label}：</span>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                            {item.classes.map(cls => (
-                              <span key={cls} style={{
-                                fontSize: 10, padding: '1px 5px',
-                                background: classMismatch.allClasses.includes(cls) ? 'var(--bg-elevated)' : 'rgba(239,68,68,0.1)',
-                                color: 'var(--text-secondary)',
-                                border: '1px solid var(--border-dim)',
-                              }}>
-                                {cls}
-                              </span>
-                            ))}
-                            {classMismatch.allClasses.filter(c => !item.classes.includes(c)).map(cls => (
-                              <span key={cls} style={{
-                                fontSize: 10, padding: '1px 5px',
-                                background: 'rgba(239,68,68,0.08)',
-                                color: 'var(--error)',
-                                border: '1px solid rgba(239,68,68,0.2)',
-                              }}>
-                                缺 {cls}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    总计 {totalImages.toLocaleString()} 张图片 · {selectedDs.classes.length} 个类别
                   </div>
                 </div>
               )}
+              {!datasetId && (
+                <div style={{ marginTop: 20, fontSize: 12, color: 'var(--error)' }}>
+                  请选择一个数据集
+                </div>
+              )}
+
+              {/* Per-class distribution chart */}
+              {classDistribution.length > 0 && (
+                <div className="card" style={{ padding: 16, marginTop: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                    <BarChart3 size={14} style={{ color: 'var(--accent-bright)' }} />
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>各类别数据分布</span>
+                  </div>
+                  <ResponsiveContainer width="100%" height={Math.max(200, classDistribution.length * 36)}>
+                    <BarChart data={classDistribution} layout="vertical" margin={{ top: 0, right: 0, left: 60, bottom: 0 }}
+                      barGap={0} barCategoryGap="20%">
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-dim)" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={{ stroke: 'var(--border-dim)' }} tickLine={false} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-secondary)', fontFamily: 'JetBrains Mono' }} width={60} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 4, fontSize: 12 }}
+                        cursor={{ fill: 'var(--bg-hover)' }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11, color: 'var(--text-secondary)' }} />
+                      <Bar dataKey="训练集" fill="#409eff" radius={[0, 3, 3, 0]} />
+                      <Bar dataKey="验证集" fill="#10b981" radius={[0, 3, 3, 0]} />
+                      <Bar dataKey="测试集" fill="#f59e0b" radius={[0, 3, 3, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* ─── Image Processing ─── */}
+              <div className="card" style={{ padding: 16, marginTop: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                  <Image size={14} style={{ color: 'var(--accent-bright)' }} />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>图像处理</span>
+                </div>
+
+                {/* Suggestion banner */}
+                <div style={{
+                  padding: '10px 14px', background: 'var(--accent-glow)',
+                  border: '1px solid rgba(64,158,255,0.15)', borderRadius: 4,
+                  marginBottom: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)',
+                }}>
+                  <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
+                  <span>建议首先<strong>不使用</strong>增强处理训练模型，然后再添加合适的增强处理用来提高模型泛化程度。</span>
+                </div>
+
+                {/* Preprocessing */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <Contrast size={13} style={{ color: 'var(--teal)' }} />
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>预处理</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>— 应用于所有图像（训练集 + 验证集 + 测试集）</span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {[
+                      { id: 'resize', label: '调整大小', desc: '统一至输入尺寸' },
+                      { id: 'contrast', label: '调整对比度', desc: '直方图均衡化' },
+                      { id: 'grayscale', label: '纯灰度模式', desc: '丢弃颜色通道' },
+                      { id: 'normalize', label: '亮度归一化', desc: '均值 0 / 标准差 1' },
+                    ].map(op => {
+                      const active = preprocessing.includes(op.id)
+                      return (
+                        <button key={op.id}
+                          className="btn btn-sm"
+                          style={{
+                            background: active ? 'var(--accent-glow)' : 'var(--bg-elevated)',
+                            color: active ? 'var(--accent)' : 'var(--text-secondary)',
+                            borderColor: active ? 'rgba(64,158,255,0.3)' : 'var(--border-dim)',
+                          }}
+                          onClick={() => setPreprocessing(prev =>
+                            prev.includes(op.id) ? prev.filter(p => p !== op.id) : [...prev, op.id]
+                          )}
+                          title={op.desc}
+                        >
+                          {op.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Augmentation */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <Sun size={13} style={{ color: 'var(--warning)' }} />
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>增强处理</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>— 仅应用于训练集，产生额外副本以提高泛化能力</span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {[
+                      { id: 'flip', label: '图片翻转', desc: '水平/垂直翻转' },
+                      { id: 'rotate', label: '图片旋转', desc: '随机角度旋转' },
+                      { id: 'brightness', label: '亮度饱和度', desc: '色彩抖动' },
+                      { id: 'blur', label: '模糊', desc: '高斯模糊/运动模糊' },
+                      { id: 'noise', label: '噪声', desc: '高斯噪声/椒盐噪声' },
+                      { id: 'crop', label: '随机裁剪', desc: '随机区域裁剪' },
+                      { id: 'scale', label: '缩放', desc: '随机缩放变换' },
+                      { id: 'mosaic', label: '拼接', desc: '多图拼接增强' },
+                    ].map(op => {
+                      const active = augmentation.includes(op.id)
+                      return (
+                        <button key={op.id}
+                          className="btn btn-sm"
+                          style={{
+                            background: active ? 'rgba(230, 162, 60, 0.12)' : 'var(--bg-elevated)',
+                            color: active ? 'var(--warning)' : 'var(--text-secondary)',
+                            borderColor: active ? 'rgba(230,162,60,0.3)' : 'var(--border-dim)',
+                          }}
+                          onClick={() => setAugmentation(prev =>
+                            prev.includes(op.id) ? prev.filter(p => p !== op.id) : [...prev, op.id]
+                          )}
+                          title={op.desc}
+                        >
+                          {op.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
 
               <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                 <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
-                <span>可以从父数据集或已创建的子数据集中选择。直接选择父数据集将使用全部图片，选择子数据集将使用已划分好的图片子集。</span>
+                <span>选择一个数据集后，可通过拖拽滑块调整训练/验证/测试的划分比例。创建任务时当前划分将保存为数据集快照，可在任务详情中查看。</span>
               </div>
 
             </div>
@@ -747,71 +848,35 @@ function CreateTask() {
                 </div>
               </div>
 
-              <SectionTitle icon={<Server size={15} />} title="选择服务器" subtitle="选择执行训练任务的 GPU 服务器" />
+              <SectionTitle icon={<Server size={15} />} title="GPU 服务器" subtitle="系统自动分配执行训练任务的 GPU 服务器" />
               <div className="card" style={{ padding: 20, marginBottom: 20 }}>
-                <SearchableDropdown
-                  label="GPU 服务器"
-                  color="var(--accent-bright)"
-                  selectedId={selectedServerId}
-                  onChange={(id) => { setSelectedServerId(id); setSelectedGpuIds([]) }}
-                  items={GPU_SERVER_OPTIONS.map(srv => ({
-                    id: srv.id,
-                    name: srv.name,
-                    subtitle: `${srv.gpus.length} 张 GPU · ${srv.spec}`,
-                    count: srv.gpus.length,
-                    countLabel: 'GPU',
-                  }))}
-                  placeholder="选择执行训练任务的服务器..."
-                />
-
-                {selectedServerId && (() => {
-                  const server = GPU_SERVER_OPTIONS.find(s => s.id === selectedServerId)
-                  if (!server) return null
-                  return (
-                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border-dim)' }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>
-                        选择显卡 <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>（可多选 · 已选 {selectedGpuIds.length}/{server.gpus.length} 张）</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {server.gpus.map(g => {
-                          const selected = selectedGpuIds.includes(g.id)
-                          return (
-                            <label key={g.id} style={{
-                              display: 'flex', alignItems: 'center', gap: 10,
-                              padding: '8px 12px', cursor: 'pointer',
-                              background: selected ? 'var(--accent-glow)' : 'var(--bg-elevated)',
-                              border: `1px solid ${selected ? 'var(--accent)' : 'var(--border-dim)'}`,
-                              transition: 'all 0.15s',
-                            }}>
-                              <input
-                                type="checkbox"
-                                checked={selected}
-                                onChange={() => {
-                                  setSelectedGpuIds(prev =>
-                                    prev.includes(g.id) ? prev.filter(id => id !== g.id) : [...prev, g.id]
-                                  )
-                                }}
-                                style={{ accentColor: 'var(--accent)' }}
-                              />
-                              <Cpu size={14} style={{ color: selected ? 'var(--accent-bright)' : 'var(--text-muted)' }} />
-                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: 11, color: 'var(--text-muted)', minWidth: 24 }}>#{g.index}</span>
-                              <span style={{ fontSize: 12, color: 'var(--text-primary)', flex: 1 }}>{g.model}</span>
-                              <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}>{g.memory}</span>
-                            </label>
-                          )
-                        })}
-                      </div>
-                      <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setSelectedGpuIds(server.gpus.map(g => g.id))}>
-                          全选
-                        </button>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setSelectedGpuIds([])}>
-                          取消全选
-                        </button>
-                      </div>
+                {assignedServer ? (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <Server size={14} style={{ color: 'var(--accent-bright)' }} />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{assignedServer.name}</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{assignedServer.spec}</span>
                     </div>
-                  )
-                })()}
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {assignedServer.gpus.map(g => (
+                        <span key={g.id} style={{
+                          fontSize: 11, fontFamily: 'JetBrains Mono',
+                          background: 'var(--accent-glow)', color: 'var(--accent)',
+                          padding: '3px 8px', borderRadius: 3,
+                        }}>
+                          #{g.index} {g.model} {g.memory}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
+                      已自动分配 {assignedServer.gpus.length} 张 GPU
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 12, color: 'var(--warning)' }}>
+                    暂无可用的 GPU 服务器
+                  </div>
+                )}
               </div>
 
               <SectionTitle icon={<CheckCircle2 size={15} />} title="配置确认" subtitle="请核对以下配置无误后提交" />
