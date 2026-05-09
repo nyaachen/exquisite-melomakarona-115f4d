@@ -2,19 +2,11 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ArrowLeft, Save, Info, Cpu } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
-import type { GpuServer } from './index'
+import { GPU_SERVERS, type GpuServer } from '../../data/gpuServers'
 
 export const Route = createFileRoute('/gpu-servers/$serverId')({
   component: EditGpuServer,
 })
-
-const GPU_SERVERS: GpuServer[] = [
-  { id: 'gpu-001', name: '训练节点-A', host: '10.0.1.101', port: 2201, username: 'kebao_admin', password: '****', gpus: [{ id: 'gpu-001-0', index: 0, model: 'NVIDIA A100', memory: '80 GB' }, { id: 'gpu-001-1', index: 1, model: 'NVIDIA A100', memory: '80 GB' }, { id: 'gpu-001-2', index: 2, model: 'NVIDIA A100', memory: '80 GB' }, { id: 'gpu-001-3', index: 3, model: 'NVIDIA A100', memory: '80 GB' }], ram: '512 GB', diskSize: '8 TB', status: 'online', description: '主力训练节点', createdAt: '2026-03-15' },
-  { id: 'gpu-002', name: '训练节点-B', host: '10.0.1.102', port: 2201, username: 'kebao_admin', password: '****', gpus: [{ id: 'gpu-002-0', index: 0, model: 'NVIDIA A100', memory: '80 GB' }, { id: 'gpu-002-1', index: 1, model: 'NVIDIA A100', memory: '80 GB' }], ram: '256 GB', diskSize: '4 TB', status: 'online', description: '辅助训练节点', createdAt: '2026-03-20' },
-  { id: 'gpu-003', name: '推理节点-A', host: '10.0.2.101', port: 2201, username: 'kebao_infer', password: '****', gpus: [{ id: 'gpu-003-0', index: 0, model: 'NVIDIA V100', memory: '32 GB' }, { id: 'gpu-003-1', index: 1, model: 'NVIDIA V100', memory: '32 GB' }], ram: '128 GB', diskSize: '2 TB', status: 'online', description: '模型验证与推理', createdAt: '2026-04-01' },
-  { id: 'gpu-004', name: '备用节点', host: '10.0.1.201', port: 2201, username: 'kebao_admin', password: '****', gpus: [{ id: 'gpu-004-0', index: 0, model: 'NVIDIA A6000', memory: '48 GB' }, { id: 'gpu-004-1', index: 1, model: 'NVIDIA A6000', memory: '48 GB' }, { id: 'gpu-004-2', index: 2, model: 'NVIDIA A6000', memory: '48 GB' }, { id: 'gpu-004-3', index: 3, model: 'NVIDIA A6000', memory: '48 GB' }], ram: '384 GB', diskSize: '6 TB', status: 'maintenance', description: '备用训练节点', createdAt: '2026-04-10' },
-  { id: 'gpu-005', name: '开发测试节点', host: '10.0.3.101', port: 2201, username: 'dev_test', password: '****', gpus: [{ id: 'gpu-005-0', index: 0, model: 'NVIDIA RTX 4090', memory: '24 GB' }], ram: '64 GB', diskSize: '1 TB', status: 'offline', description: '开发调试用', createdAt: '2026-04-25' },
-]
 
 function EditGpuServer() {
   const { serverId } = Route.useParams()
