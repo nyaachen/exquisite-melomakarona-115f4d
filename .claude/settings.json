@@ -2,7 +2,19 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(curl -sL --connect-timeout 10 --max-time 15 \"https://ai.gxtri.cn/data-annotation-platform/assets/css/index-BEAQDGa5.css\")",
+      "Bash(curl -sL --connect-timeout 10 --max-time 15 \"https://ai.gxtri.cn/data-annotation-platform/assets/css/index-B3c6-tIn.css\")",
+      "Bash(grep -oE '#[0-9a-fA-F]{3,8}')",
+      "Bash(curl -sL --connect-timeout 10 --max-time 10 https://ai.gxtri.cn/data-annotation-platform/assets/css/__TRACKED_VAR__)",
+      "Bash(grep -oE '#[0-9a-fA-F]{3,8}|rgba?\\\\\\([^\\)]+\\\\\\)|var\\\\\\(--[^\\)]+\\\\\\)')",
+      "Bash(curl -sL --connect-timeout 10 --max-time 15 \"https://ai.gxtri.cn/data-annotation-platform/dataAnnotation\")",
+      "Bash(grep -oE '<style[^>]*>.*?</style>|var\\\\\\(--[^\\)]+\\\\\\)|#[0-9a-fA-F]{3,8}')",
+      "Bash(npx tsc *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\nyaachen\\.claude\\projects\\c--Users-nyaachen-Documents-VSCode-exquisite-melomakarona-115f4d\\memory",
+      "c:\\Users\\nyaachen\\.claude\\projects\\c--Users-nyaachen-Documents-VSCode-exquisite-melomakarona-115f4d"
     ]
   }
 }

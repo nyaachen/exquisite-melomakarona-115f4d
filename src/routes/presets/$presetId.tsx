@@ -157,7 +157,7 @@ function EditPreset() {
 
       <div className="content-padded" style={{ maxWidth: 720, margin: '0 auto' }}>
         {data.usageCount > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'rgba(230, 162, 60,0.06)', border: '1px solid rgba(230, 162, 60,0.2)', marginBottom: 20 }}>
             <AlertCircle size={16} style={{ color: 'var(--warning)', flexShrink: 0 }} />
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               该预设已被 <strong style={{ color: 'var(--warning)' }}>{data.usageCount}</strong> 个训练任务使用
@@ -220,7 +220,7 @@ function EditPreset() {
 
           {architecture && (
             <>
-              <div style={{ padding: '10px 14px', background: 'var(--accent-glow)', border: '1px solid rgba(27,107,239,0.15)', marginTop: 16, marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+              <div style={{ padding: '10px 14px', background: 'var(--accent-glow)', border: '1px solid rgba(64, 158, 255,0.15)', marginTop: 16, marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                 <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
                 <span>基于「{architecture.name}」模板的参数定义</span>
               </div>

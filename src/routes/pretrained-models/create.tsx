@@ -31,6 +31,7 @@ function CreatePretrainedModel() {
   const [numClasses, setNumClasses] = useState(80)
   const [classNamesStr, setClassNamesStr] = useState('')
   const [description, setDescription] = useState('')
+  const [coverImage, setCoverImage] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -125,6 +126,19 @@ function CreatePretrainedModel() {
             </div>
           </div>
 
+          <div className="form-section">
+            <div className="form-group">
+              <label className="form-label">封面图片 URL</label>
+              <input className="form-input" type="url" value={coverImage} onChange={e => setCoverImage(e.target.value)} placeholder="https://... 模型封面图片链接" />
+              <div className="form-hint">用于在模型广场中展示的封面图，建议 16:10 横版图片</div>
+            </div>
+            {coverImage && (
+              <div style={{ marginTop: 8, width: '100%', aspectRatio: '16/10', maxWidth: 320, borderRadius: 6, overflow: 'hidden', background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
+                <img src={coverImage} alt="封面预览" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+              </div>
+            )}
+          </div>
+
           {/* ─── 模型文件信息（预留，暂不上传） ─── */}
           <div className="form-section">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
@@ -186,7 +200,7 @@ function CreatePretrainedModel() {
             </div>
           </div>
 
-          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(27,107,239,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(64, 158, 255,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
             <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
             <span>添加后将在创建训练任务时可选此预训练权重。文件上传和存储功能后续版本开放。</span>
           </div>

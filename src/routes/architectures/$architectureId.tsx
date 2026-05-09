@@ -138,7 +138,7 @@ function EditArchitecture() {
 
       <div className="content-padded" style={{ maxWidth: 800, margin: '0 auto' }}>
         {data.usageCount > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'rgba(230, 162, 60,0.06)', border: '1px solid rgba(230, 162, 60,0.2)', marginBottom: 20 }}>
             <AlertCircle size={16} style={{ color: 'var(--warning)', flexShrink: 0 }} />
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               该模板已被 <strong style={{ color: 'var(--warning)' }}>{data.usageCount}</strong> 个训练预设引用，修改参数定义将影响所有关联预设

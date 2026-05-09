@@ -51,4 +51,4 @@ export function getGrade(score: number) {
 
 // ─── 默认类别颜色（fallback） ───
 
-export const DEFAULT_CLASS_COLORS = ['#1d4ed8', '#ef4444', '#f59e0b', '#8b5cf6', '#10b981', '#06b6d4', '#6366f1']
+export const DEFAULT_CLASS_COLORS = ['#409eff', '#f56c6c', '#e6a23c', '#8b5cf6', '#67c23a', '#06b6d4', '#6366f1']

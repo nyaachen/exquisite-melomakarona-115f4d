@@ -247,7 +247,7 @@ function CreateValidate() {
                 类别：{dataset.classes.join('、')}
               </div>
               {hasClassMismatch && (
-                <div style={{ marginTop: 8, padding: 8, background: 'rgba(245,158,11,0.1)', borderRadius: 6 }}>
+                <div style={{ marginTop: 8, padding: 8, background: 'rgba(230, 162, 60,0.1)', borderRadius: 6 }}>
                   <div style={{ fontSize: 11, color: 'var(--warning)' }}>
                     ⚠️ 数据集类别与模型类别数量不一致，可能影响验证结果准确性
                   </div>

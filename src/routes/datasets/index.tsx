@@ -36,7 +36,7 @@ function DatasetsPage() {
       </div>
 
       <div style={{ padding: '24px 32px' }}>
-        <div style={{ padding: '12px 16px', background: 'rgba(27,107,239,0.06)', border: '1px solid rgba(27,107,239,0.2)', borderRadius: 10, marginBottom: 20, fontSize: 12.5, color: 'var(--text-secondary)', display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ padding: '12px 16px', background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.2)', borderRadius: 10, marginBottom: 20, fontSize: 12.5, color: 'var(--text-secondary)', display: 'flex', gap: 8, alignItems: 'center' }}>
           <Layers size={13} style={{ color: 'var(--accent-bright)' }} />
           <span>数据集从<strong style={{ color: 'var(--text-primary)' }}>科宝标注平台</strong>自动同步，包含图像和标注数据。创建训练任务之前需要创建对应的划分。</span>
         </div>

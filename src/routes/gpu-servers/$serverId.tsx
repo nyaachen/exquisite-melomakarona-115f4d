@@ -160,7 +160,7 @@ function EditGpuServer() {
             )}
           </div>
 
-          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(27,107,239,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(64, 158, 255,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
             <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
             <span>显卡信息由服务器自动上报，此处仅展示，不可手动编辑。</span>
           </div>

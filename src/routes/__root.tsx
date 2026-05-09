@@ -10,6 +10,7 @@ import {
   Boxes,
   User,
   Globe,
+  Shield,
 } from 'lucide-react'
 import '../styles.css'
 
@@ -77,6 +78,7 @@ function Sidebar() {
         <div className="nav-label">系统配置</div>
         <NavLink to="/architectures" icon={<Boxes size={15} />} label="模型模板" />
         <NavLink to="/pretrained-models" icon={<Globe size={15} />} label="公开模型" />
+        <NavLink to="/system/private-models" icon={<Shield size={15} />} label="私有模型" />
         <NavLink to="/gpu-servers" icon={<Cpu size={15} />} label="GPU 服务器" />
       </div>
 

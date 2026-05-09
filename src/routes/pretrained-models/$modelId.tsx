@@ -248,7 +248,7 @@ function EditPretrainedModel() {
             <div className="form-hint">禁用后，创建训练任务时将不可选此模型</div>
           </div>
 
-          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(27,107,239,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(64, 158, 255,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
             <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
             <span>修改后将影响新建训练任务时的可用预训练模型选项。</span>
           </div>

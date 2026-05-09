@@ -186,7 +186,7 @@ function CreatePreset() {
 
           {architecture && (
             <>
-              <div style={{ padding: '10px 14px', background: 'var(--accent-glow)', border: '1px solid rgba(27,107,239,0.15)', marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+              <div style={{ padding: '10px 14px', background: 'var(--accent-glow)', border: '1px solid rgba(64, 158, 255,0.15)', marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                 <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
                 <span>基于「{architecture.name}」模板配置参数。以下参数均来自该模板定义，预设值可覆盖默认值。</span>
               </div>

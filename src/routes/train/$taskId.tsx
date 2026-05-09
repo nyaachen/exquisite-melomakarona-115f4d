@@ -529,7 +529,7 @@ function TaskDetail() {
                 <div style={{
                   width: 56, height: 56,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: task.published ? 'rgba(18,217,122,0.1)' : 'rgba(245,158,11,0.1)'
+                  background: task.published ? 'rgba(103, 194, 58,0.1)' : 'rgba(230, 162, 60,0.1)'
                 }}>
                   {task.published ? (
                     <CheckCircle2 size={28} style={{ color: 'var(--success)' }} />
@@ -761,7 +761,7 @@ function TaskDetail() {
                     )}
 
                     {predictions.map((pred, index) => {
-                      const color = CLASS_COLORS[task.classes.indexOf(pred.className)] || '#1d4ed8'
+                      const color = CLASS_COLORS[task.classes.indexOf(pred.className)] || '#409eff'
                       return (
                         <div
                           key={index}
@@ -802,7 +802,7 @@ function TaskDetail() {
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {predictions.map((pred, index) => {
-                          const color = CLASS_COLORS[task.classes.indexOf(pred.className)] || '#1d4ed8'
+                          const color = CLASS_COLORS[task.classes.indexOf(pred.className)] || '#409eff'
                           const isHighConfidence = pred.confidence >= 0.85
                           return (
                             <div
@@ -838,7 +838,7 @@ function TaskDetail() {
                             width: 10,
                             height: 10,
                             borderRadius: 2,
-                            background: CLASS_COLORS[index] || '#1d4ed8',
+                            background: CLASS_COLORS[index] || '#409eff',
                           }} />
                           <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{cls}</span>
                         </div>

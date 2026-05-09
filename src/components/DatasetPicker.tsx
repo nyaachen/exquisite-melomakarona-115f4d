@@ -106,7 +106,7 @@ export function DatasetPicker({ label, color, selectedId, onChange, entries, ima
               <span style={{
                 fontSize: 10,
                 padding: '1px 6px',
-                background: selected?.type === 'subdataset' ? 'rgba(13,148,136,0.12)' : 'rgba(27,107,239,0.1)',
+                background: selected?.type === 'subdataset' ? 'rgba(64, 158, 255,0.12)' : 'rgba(64, 158, 255,0.1)',
                 color: selected?.type === 'subdataset' ? 'var(--teal)' : 'var(--accent-bright)',
                 fontWeight: 600,
               }}>

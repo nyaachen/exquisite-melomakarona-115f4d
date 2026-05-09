@@ -97,7 +97,7 @@ function CreateGpuServer() {
             </div>
           </div>
 
-          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(27,107,239,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '12px 16px', background: 'var(--accent-glow)', border: '1px solid rgba(64, 158, 255,0.15)', marginTop: 16, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
             <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
             <span>添加后服务器默认离线。上线后将自动获取硬件信息（显卡列表、内存、磁盘等），无需手动填写。</span>
           </div>

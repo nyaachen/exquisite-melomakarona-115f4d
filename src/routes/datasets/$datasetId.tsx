@@ -171,7 +171,7 @@ function DatasetDetail() {
                 <span
                   key={tag}
                   style={{
-                    background: 'rgba(27,107,239,0.1)',
+                    background: 'rgba(64, 158, 255,0.1)',
                     color: 'var(--accent-bright)',
                     fontSize: 12,
                     padding: '4px 12px',
@@ -195,7 +195,7 @@ function DatasetDetail() {
                 <span
                   key={tag}
                   style={{
-                    background: 'rgba(10,184,158,0.1)',
+                    background: 'rgba(64, 158, 255,0.1)',
                     color: 'var(--teal)',
                     fontSize: 12,
                     padding: '4px 12px',
@@ -250,7 +250,7 @@ function DatasetDetail() {
                       width: `${(img.bbox.width / 400) * 100}%`,
                       height: `${(img.bbox.height / 300) * 100}%`,
                       border: '2px solid var(--accent)',
-                      backgroundColor: 'rgba(27,107,239,0.2)',
+                      backgroundColor: 'rgba(64, 158, 255,0.2)',
                     }}
                   />
                   {/* Label */}
@@ -362,8 +362,8 @@ function DatasetDetail() {
                     top: `${(img.bbox.y / 300) * 100}%`,
                     width: `${(img.bbox.width / 400) * 100}%`,
                     height: `${(img.bbox.height / 300) * 100}%`,
-                    border: '3px solid #1b6bef',
-                    backgroundColor: 'rgba(27,107,239,0.2)',
+                    border: '3px solid #409eff',
+                    backgroundColor: 'rgba(64, 158, 255,0.2)',
                   }}
                 />
                 {/* Label */}
@@ -372,7 +372,7 @@ function DatasetDetail() {
                     position: 'absolute',
                     left: `${(img.bbox.x / 400) * 100}%`,
                     top: `${(img.bbox.y / 300) * 100 - 30}%`,
-                    background: '#1b6bef',
+                    background: '#409eff',
                     color: 'white',
                     fontSize: 14,
                     padding: '4px 12px',

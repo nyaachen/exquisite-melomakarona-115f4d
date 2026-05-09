@@ -82,8 +82,8 @@ type SetType = 'train' | 'val' | 'test'
 
 const SET_META = {
   train: { label: '训练集', color: 'var(--accent-bright)', bg: 'rgba(59,130,246,0.08)', badge: '训练' },
-  val:   { label: '验证集', color: 'var(--teal)',             bg: 'rgba(13,148,136,0.08)', badge: '验证' },
-  test:  { label: '测试集', color: 'var(--warning)',          bg: 'rgba(245,158,11,0.08)', badge: '测试' },
+  val:   { label: '验证集', color: 'var(--teal)',             bg: 'rgba(64, 158, 255,0.08)', badge: '验证' },
+  test:  { label: '测试集', color: 'var(--warning)',          bg: 'rgba(230, 162, 60,0.08)', badge: '测试' },
 } as const
 
 function CreateSubdataset() {
@@ -435,7 +435,7 @@ function CreateSubdataset() {
 
                   {/* Per-label distribution */}
                   {form.selectedLabels.length > 0 && (
-                    <div style={{ marginTop: 16, padding: 12, background: 'rgba(13,148,136,0.06)', border: '1px solid rgba(13,148,136,0.15)' }}>
+                    <div style={{ marginTop: 16, padding: 12, background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.15)' }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', marginBottom: 10 }}>
                         <Tag size={11} style={{ display: 'inline', marginRight: 4 }} />
                         每个标签的分布情况
@@ -557,7 +557,7 @@ function CreateSubdataset() {
                                 {ann.classes.slice(0, 2).map(cls => (
                                   <span key={cls} style={{
                                     fontSize: 8, padding: '1px 3px',
-                                    background: form.selectedLabels.includes(cls) ? 'rgba(13,148,136,0.2)' : 'rgba(148,163,184,0.15)',
+                                    background: form.selectedLabels.includes(cls) ? 'rgba(64, 158, 255,0.2)' : 'rgba(148,163,184,0.15)',
                                     color: form.selectedLabels.includes(cls) ? 'var(--teal)' : 'var(--text-muted)',
                                   }}>
                                     {cls}
@@ -586,7 +586,7 @@ function CreateSubdataset() {
                   </div>
                 </div>
 
-                <div style={{ padding: '10px 14px', background: 'rgba(13,148,136,0.06)', border: '1px solid rgba(13,148,136,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+                <div style={{ padding: '10px 14px', background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                   <Info size={13} style={{ color: 'var(--teal)', flexShrink: 0, marginTop: 1 }} />
                   <span>点击单张图片可循环切换（训练→验证→测试→训练）。使用搜索可快速定位特定标签的图片。</span>
                 </div>
@@ -626,7 +626,7 @@ function CreateSubdataset() {
                   <label className="form-label">感兴趣的标签</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {form.selectedLabels.map(label => (
-                      <span key={label} className="class-tag" style={{ background: 'rgba(13,148,136,0.1)', color: 'var(--teal)', borderColor: 'rgba(13,148,136,0.3)' }}>
+                      <span key={label} className="class-tag" style={{ background: 'rgba(64, 158, 255,0.1)', color: 'var(--teal)', borderColor: 'rgba(64, 158, 255,0.3)' }}>
                         <Tag size={9} /> {label}
                       </span>
                     ))}

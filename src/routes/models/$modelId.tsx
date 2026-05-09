@@ -65,7 +65,7 @@ const SQUARE_MODELS: SquareModel[] = [
     category: '缺陷检测',
     baseModel: 'YOLOv8m',
     classes: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物'],
-    classColors: ['#1d4ed8', '#ef4444', '#f59e0b', '#8b5cf6', '#10b981', '#06b6d4', '#6366f1'],
+    classColors: ['#409eff', '#f56c6c', '#e6a23c', '#8b5cf6', '#67c23a', '#06b6d4', '#6366f1'],
     totalVersions: 3,
     publishedVersions: 2,
     latestVersion: 'v2.3',
@@ -89,7 +89,7 @@ const SQUARE_MODELS: SquareModel[] = [
     category: '安全检测',
     baseModel: 'YOLOv8s',
     classes: ['安全帽', '无安全帽', '人员'],
-    classColors: ['#1d4ed8', '#ef4444', '#10b981'],
+    classColors: ['#409eff', '#f56c6c', '#67c23a'],
     totalVersions: 2,
     publishedVersions: 1,
     latestVersion: 'v1.0',
@@ -111,7 +111,7 @@ const SQUARE_MODELS: SquareModel[] = [
     category: '行为检测',
     baseModel: 'YOLOv8s',
     classes: ['正常站立', '跌倒'],
-    classColors: ['#10b981', '#ef4444'],
+    classColors: ['#67c23a', '#f56c6c'],
     totalVersions: 2,
     publishedVersions: 1,
     latestVersion: 'v1.0',
@@ -133,7 +133,7 @@ const SQUARE_MODELS: SquareModel[] = [
     category: '安全检测',
     baseModel: 'YOLOv8m',
     classes: ['火焰', '浓烟', '轻烟'],
-    classColors: ['#ef4444', '#6b7280', '#9ca3af'],
+    classColors: ['#f56c6c', '#6b7280', '#9ca3af'],
     totalVersions: 3,
     publishedVersions: 2,
     latestVersion: 'v2.1',
@@ -474,7 +474,7 @@ function ModelDetail() {
                     )}
 
                     {predictions.map((pred, index) => {
-                      const color = model.classColors[model.classes.indexOf(pred.className)] || '#1d4ed8'
+                      const color = model.classColors[model.classes.indexOf(pred.className)] || '#409eff'
                       return (
                         <div
                           key={index}
@@ -506,7 +506,7 @@ function ModelDetail() {
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                         {predictions.map((pred, index) => {
-                          const color = model.classColors[model.classes.indexOf(pred.className)] || '#1d4ed8'
+                          const color = model.classColors[model.classes.indexOf(pred.className)] || '#409eff'
                           const isHighConfidence = pred.confidence >= 0.85
                           return (
                             <div
@@ -535,7 +535,7 @@ function ModelDetail() {
                         <div key={cls} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <div 
                             className="class-color-sm"
-                            style={{ background: model.classColors[index] || '#1d4ed8' }} 
+                            style={{ background: model.classColors[index] || '#409eff' }} 
                           />
                           <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{cls}</span>
                         </div>

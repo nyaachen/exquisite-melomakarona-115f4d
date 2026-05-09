@@ -394,25 +394,6 @@ function CreateTask() {
           ))}
         </div>
 
-        {/* Sticky top nav */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--bg-base)', padding: '10px 0', borderBottom: '1px solid var(--border-dim)', display: 'flex', justifyContent: step === 1 ? 'flex-end' : 'space-between', alignItems: 'center' }}>
-          {step > 1 && (
-            <button className="btn btn-secondary" onClick={() => setStep(step - 1)}><ChevronLeft size={15} /> 上一步</button>
-          )}
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>第 {step} / {STEPS.length} 步 · {STEPS[step - 1].label}</span>
-          {step === 1 && (
-            <button className="btn btn-primary" onClick={handleNextFromStep1}>下一步 <ChevronRight size={15} /></button>
-          )}
-          {step === 2 && (
-            <button className="btn btn-primary" onClick={() => setStep(3)}>下一步 <ChevronRight size={15} /></button>
-          )}
-          {step === 3 && (
-            <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting || !taskName}>
-              {submitting ? <><span className="spinner" /> 正在创建…</> : <><CheckCircle2 size={15} /> 创建训练任务</>}
-            </button>
-          )}
-        </div>
-
         <div style={{ animation: 'slideIn 0.25s ease-out', paddingBottom: '50vh' }}>
 
           {/* ═══════════ Step 1: Select Train/Val/Test Datasets ═══════════ */}
@@ -427,7 +408,7 @@ function CreateTask() {
                 </div>
               )}
               {datasetWarnings.length > 0 && (
-                <div style={{ padding: '10px 14px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', marginBottom: 12, display: 'flex', gap: 8, fontSize: 12 }}>
+                <div style={{ padding: '10px 14px', background: 'rgba(230, 162, 60,0.06)', border: '1px solid rgba(230, 162, 60,0.2)', marginBottom: 12, display: 'flex', gap: 8, fontSize: 12 }}>
                   <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
                   <div style={{ color: 'var(--text-secondary)' }}>
                     {datasetWarnings.map((w, i) => <div key={i}>{w}</div>)}
@@ -506,7 +487,7 @@ function CreateTask() {
 
               {/* Class mismatch warning */}
               {classMismatch && (
-                <div style={{ marginTop: 16, padding: 14, background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', gap: 10, fontSize: 12 }}>
+                <div style={{ marginTop: 16, padding: 14, background: 'rgba(230, 162, 60,0.06)', border: '1px solid rgba(230, 162, 60,0.25)', display: 'flex', gap: 10, fontSize: 12 }}>
                   <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, color: 'var(--warning)', marginBottom: 6 }}>类别不一致警告</div>
@@ -546,17 +527,11 @@ function CreateTask() {
                 </div>
               )}
 
-              <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(27,107,239,0.06)', border: '1px solid rgba(27,107,239,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
+              <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                 <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
                 <span>可以从父数据集或已创建的子数据集中选择。直接选择父数据集将使用全部图片，选择子数据集将使用已划分好的图片子集。</span>
               </div>
 
-              {/* Navigation */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 28 }}>
-                <button className="btn btn-primary" onClick={handleNextFromStep1}>
-                  下一步 <ChevronRight size={15} />
-                </button>
-              </div>
             </div>
           )}
 
@@ -735,7 +710,7 @@ function CreateTask() {
               {startPointType === 'public' && (
                 <div style={{ animation: 'slideIn 0.2s ease-out', marginBottom: 16 }}>
                   {visiblePublicModels.length === 0 ? (
-                    <div style={{ padding: '14px 16px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ padding: '14px 16px', background: 'rgba(230, 162, 60,0.06)', border: '1px solid rgba(230, 162, 60,0.2)', fontSize: 12, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Info size={13} style={{ color: 'var(--warning)', flexShrink: 0 }} />
                       当前选择的架构暂无关联的公开预训练模型
                     </div>
@@ -757,10 +732,6 @@ function CreateTask() {
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28 }}>
-                <button className="btn btn-secondary" onClick={() => setStep(1)}><ChevronLeft size={15} /> 上一步</button>
-                <button className="btn btn-primary" onClick={() => setStep(3)}>下一步 <ChevronRight size={15} /></button>
-              </div>
             </div>
           )}
 
@@ -866,14 +837,38 @@ function CreateTask() {
                 任务创建后将自动加入训练队列，在云服务器上执行。可在"训练任务"页面查看进度。
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28 }}>
-                <button className="btn btn-secondary" onClick={() => setStep(2)}><ChevronLeft size={15} /> 上一步</button>
-                <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting || !taskName}>
-                  {submitting ? <><span className="spinner" /> 正在创建…</> : <><CheckCircle2 size={15} /> 创建训练任务</>}
-                </button>
-              </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Fixed bottom bar */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 'var(--sidebar-width)', right: 0, zIndex: 20,
+        background: 'var(--bg-card)', borderTop: '1px solid var(--border-dim)',
+        padding: '12px 32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
+      }}>
+        <div style={{ maxWidth: 860, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ width: 100 }}>
+            {step > 1 && (
+              <button className="btn btn-secondary" onClick={() => setStep(step - 1)}><ChevronLeft size={15} /> 上一步</button>
+            )}
+          </div>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>第 {step} / {STEPS.length} 步 · {STEPS[step - 1].label}</span>
+          <div style={{ width: 100, display: 'flex', justifyContent: 'flex-end' }}>
+            {step === 1 && (
+              <button className="btn btn-primary" onClick={handleNextFromStep1}>下一步 <ChevronRight size={15} /></button>
+            )}
+            {step === 2 && (
+              <button className="btn btn-primary" onClick={() => setStep(3)}>下一步 <ChevronRight size={15} /></button>
+            )}
+            {step === 3 && (
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting || !taskName}>
+                {submitting ? <><span className="spinner" /> 正在创建…</> : <><CheckCircle2 size={15} /> 创建训练任务</>}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
