@@ -8,16 +8,41 @@ import {
   User,
   MapPin,
   X,
-  Settings2,
-  AlertCircle,
-  BarChart3,
+  SplitSquareVertical,
 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { NotFound } from '../../components/NotFound'
+import { ClassDistributionChart } from '../../components/ClassDistributionChart'
+import { DatasetSplitManager } from '../../components/DatasetSplitManager'
+import { SplitAdjuster } from '../../components/SplitAdjuster'
 
 export const Route = createFileRoute('/datasets/$datasetId')({
   component: DatasetDetail,
 })
+
+// ─── Mock Data ───
+
+function generateAnnotations(count: number, classPool: string[]): Annotation[] {
+  return Array.from({ length: count }, (_, i) => {
+    const numClasses = 1 + Math.floor(Math.random() * 3)
+    const annClasses: string[] = []
+    for (let j = 0; j < numClasses; j++) {
+      annClasses.push(classPool[(i + j * 7 + j * j * 3) % classPool.length])
+    }
+    return {
+      id: `ann-${i + 1}`,
+      name: `image_${String(i + 1).padStart(5, '0')}.jpg`,
+      set: 'train' as const,
+      classes: [...new Set(annClasses)],
+    }
+  })
+}
+
+interface Annotation {
+  id: string
+  name: string
+  set: 'train' | 'val' | 'test'
+  classes: string[]
+}
 
 const DATASETS = [
   {
@@ -38,7 +63,8 @@ const DATASETS = [
       { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=road%20surface%20water%20ponding%20after%20rain%20photography&image_size=landscape_4_3', label: '积水检测', bbox: { x: 150, y: 100, width: 220, height: 140 } },
       { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=faded%20road%20markings%20on%20asphalt%20photography&image_size=landscape_4_3', label: '标线模糊', bbox: { x: 80, y: 160, width: 280, height: 40 } },
       { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=road%20obstacle%20debris%20on%20highway%20photography&image_size=landscape_4_3', label: '障碍物检测', bbox: { x: 200, y: 130, width: 80, height: 100 } },
-    ]
+    ],
+    annotations: generateAnnotations(4872, ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物', '正常']),
   },
   {
     id: 'ds-002',
@@ -58,7 +84,8 @@ const DATASETS = [
       { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=construction%20worker%20blue%20helmet%20high%20altitude%20work%20photography&image_size=landscape_4_3', label: '安全帽', bbox: { x: 180, y: 30, width: 90, height: 70 } },
       { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=construction%20team%20working%20on%20building%20site%20photography&image_size=landscape_4_3', label: '人员', bbox: { x: 120, y: 80, width: 70, height: 160 } },
       { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=worker%20safety%20inspection%20construction%20site%20photography&image_size=landscape_4_3', label: '安全帽', bbox: { x: 150, y: 45, width: 85, height: 75 } },
-    ]
+    ],
+    annotations: generateAnnotations(2391, ['安全帽', '无安全帽', '人员']),
   },
   {
     id: 'ds-003',
@@ -78,7 +105,8 @@ const DATASETS = [
       { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=factory%20production%20line%20machinery%20photography&image_size=landscape_4_3', label: '正常设备', bbox: { x: 40, y: 30, width: 340, height: 220 } },
       { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=industrial%20robot%20arm%20automation%20photography&image_size=landscape_4_3', label: '正常设备', bbox: { x: 120, y: 20, width: 200, height: 240 } },
       { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=broken%20industrial%20machine%20equipment%20photography&image_size=landscape_4_3', label: '异常设备', bbox: { x: 70, y: 45, width: 300, height: 190 } },
-    ]
+    ],
+    annotations: generateAnnotations(1628, ['正常设备', '异常设备', '待检修']),
   },
   {
     id: 'ds-004',
@@ -98,32 +126,23 @@ const DATASETS = [
       { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20night%20time%20photography&image_size=landscape_4_3', label: '车牌', bbox: { x: 130, y: 90, width: 160, height: 55 } },
       { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20rainy%20weather%20photography&image_size=landscape_4_3', label: '模糊车牌', bbox: { x: 155, y: 100, width: 130, height: 45 } },
       { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20covered%20by%20dirt%20photography&image_size=landscape_4_3', label: '遮挡车牌', bbox: { x: 145, y: 95, width: 145, height: 48 } },
-    ]
+    ],
+    annotations: generateAnnotations(7840, ['车牌', '遮挡车牌', '模糊车牌']),
   },
 ]
 
+// ─── Component ───
+
 function DatasetDetail() {
   const params = Route.useParams()
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [showSplitModal, setShowSplitModal] = useState(false)
-  const [splitForm, setSplitForm] = useState({ train: 70, val: 15, test: 15 })
   const dataset = DATASETS.find(ds => ds.id === params.datasetId)
   if (!dataset) return <NotFound />
 
-  const trainCount = Math.round(dataset.annotationCount * dataset.split.train / 100)
-  const valCount = Math.round(dataset.annotationCount * dataset.split.val / 100)
-  const testCount = dataset.annotationCount - trainCount - valCount
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [splitMode, setSplitMode] = useState<'view' | 'edit'>('view')
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([])
+  const [split, setSplit] = useState(dataset.split)
 
-  const handleSplitSave = () => {
-    dataset!.split = { ...splitForm }
-    setShowSplitModal(false)
-  }
-  const openSplitModal = () => {
-    setSplitForm({ ...dataset!.split })
-    setShowSplitModal(true)
-  }
-
-  // Per-class distribution (mock)
   const classDistribution = useMemo(() => {
     const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h) }
     return dataset.contentTags.map(cls => {
@@ -184,54 +203,78 @@ function DatasetDetail() {
           </div>
         </div>
 
-        {/* Split Section */}
-        <div className="card" style={{ padding: 20, marginBottom: 24 }}>
+        {/* Data split section */}
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Settings2 size={14} style={{ color: 'var(--accent-bright)' }} />
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>数据划分</span>
+              <SplitSquareVertical size={14} style={{ color: 'var(--accent-bright)' }} />
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>数据划分</span>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={openSplitModal}>
-              <Settings2 size={12} /> 调整划分
-            </button>
+            {splitMode === 'view' && (
+              <button className="btn btn-secondary btn-sm" onClick={() => setSplitMode('edit')}>
+                <SplitSquareVertical size={12} /> 调整划分
+              </button>
+            )}
           </div>
-          <div className="split-bar" style={{ marginBottom: 10 }}>
-            <div className="split-bar-train" style={{ flex: dataset.split.train }}>
-              <span className="split-bar-label" style={{ color: '#409eff' }}>训练 {dataset.split.train}%</span>
+
+          {splitMode === 'view' && (
+            <div>
+              <div className="split-bar" style={{ marginBottom: 10 }}>
+                <div className="split-bar-train" style={{ flex: split.train }}>
+                  <span className="split-bar-label" style={{ color: '#409eff' }}>训练 {split.train}%</span>
+                </div>
+                <div className="split-bar-val" style={{ flex: split.val }}>
+                  <span className="split-bar-label" style={{ color: '#10b981' }}>验证 {split.val}%</span>
+                </div>
+                <div className="split-bar-test" style={{ flex: split.test }}>
+                  <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 {split.test}%</span>
+                </div>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                训练 {Math.round(dataset.annotationCount * split.train / 100).toLocaleString()} 张 · 验证 {Math.round(dataset.annotationCount * split.val / 100).toLocaleString()} 张 · 测试 {Math.round(dataset.annotationCount * split.test / 100).toLocaleString()} 张
+              </div>
             </div>
-            <div className="split-bar-val" style={{ flex: dataset.split.val }}>
-              <span className="split-bar-label" style={{ color: '#10b981' }}>验证 {dataset.split.val}%</span>
+          )}
+
+          {splitMode === 'edit' && (
+            <div style={{ marginTop: 8 }}>
+              <SplitAdjuster
+                totalCount={dataset.annotationCount}
+                split={split}
+                onChange={setSplit}
+                showPercentInputs
+                showCountInputs
+              />
+              <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
+                <button className="btn btn-primary" onClick={() => setSplitMode('view')}>
+                  <Tag size={12} /> 确认划分
+                </button>
+                <button className="btn btn-ghost" onClick={() => { setSplit(dataset.split); setSplitMode('view') }}>
+                  取消
+                </button>
+              </div>
             </div>
-            <div className="split-bar-test" style={{ flex: dataset.split.test }}>
-              <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 {dataset.split.test}%</span>
-            </div>
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            训练 {trainCount.toLocaleString()} 张 · 验证 {valCount.toLocaleString()} 张 · 测试 {testCount.toLocaleString()} 张
-          </div>
+          )}
         </div>
 
-        {/* Per-class distribution chart */}
-        <div className="card" style={{ padding: 16, marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-            <BarChart3 size={14} style={{ color: 'var(--accent-bright)' }} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>各类别数据分布</span>
-          </div>
-          <ResponsiveContainer width="100%" height={Math.max(180, classDistribution.length * 36)}>
-            <BarChart data={classDistribution} layout="vertical" margin={{ top: 0, right: 0, left: 60, bottom: 0 }}
-              barGap={0} barCategoryGap="20%">
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-dim)" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={{ stroke: 'var(--border-dim)' }} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-secondary)', fontFamily: 'JetBrains Mono' }} width={60} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 4, fontSize: 12 }} cursor={{ fill: 'var(--bg-hover)' }} />
-              <Bar dataKey="训练集" fill="#409eff" radius={[0, 3, 3, 0]} />
-              <Bar dataKey="验证集" fill="#10b981" radius={[0, 3, 3, 0]} />
-              <Bar dataKey="测试集" fill="#f59e0b" radius={[0, 3, 3, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        {/* Split adjustment panel */}
+        <div style={{ marginBottom: 24 }}>
+          <DatasetSplitManager
+            annotations={dataset.annotations}
+            classNames={dataset.contentTags}
+            currentSplit={split}
+            totalCount={dataset.annotationCount}
+            selectedLabels={selectedLabels}
+            onSelectedLabelsChange={setSelectedLabels}
+          />
         </div>
 
-        {/* Tags Section */}
+        {/* Class distribution */}
+        <div style={{ marginBottom: 24 }}>
+          <ClassDistributionChart data={classDistribution} />
+        </div>
+
+        {/* Content tags */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
           <div className="card" style={{ padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
@@ -261,7 +304,7 @@ function DatasetDetail() {
           </div>
         </div>
 
-        {/* Image Preview Section */}
+        {/* Image preview */}
         <div className="card" style={{ padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -308,71 +351,6 @@ function DatasetDetail() {
           </div>
         )
       })()}
-
-      {/* Split edit modal */}
-      {showSplitModal && (
-        <div className="modal-backdrop" onClick={() => setShowSplitModal(false)}>
-          <div className="modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>调整数据划分</span>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowSplitModal(false)}>✕</button>
-            </div>
-
-            <div style={{ padding: 12, background: 'var(--warning-glow)', border: '1px solid rgba(230,162,60,0.25)', borderRadius: 4, marginBottom: 20, display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-              <AlertCircle size={14} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 1 }} />
-              调整划分将<strong style={{ color: 'var(--warning)' }}>影响后续所有训练任务</strong>使用的数据集划分。已创建的任务不受影响。
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 11, color: '#409eff', marginBottom: 4, fontWeight: 600 }}>训练集</div>
-                <input type="number" className="form-input" value={splitForm.train}
-                  style={{ textAlign: 'center', fontFamily: 'JetBrains Mono' }}
-                  onChange={e => {
-                    const t = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
-                    const r = 100 - t
-                    setSplitForm({ train: t, val: Math.round(r * 0.6), test: r - Math.round(r * 0.6) })
-                  }} />
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{Math.round(dataset.annotationCount * splitForm.train / 100).toLocaleString()} 张</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 11, color: '#10b981', marginBottom: 4, fontWeight: 600 }}>验证集</div>
-                <input type="number" className="form-input" value={splitForm.val}
-                  style={{ textAlign: 'center', fontFamily: 'JetBrains Mono' }}
-                  onChange={e => {
-                    const v = Math.max(0, Math.min(100 - splitForm.train, parseInt(e.target.value) || 0))
-                    setSplitForm({ ...splitForm, val: v, test: 100 - splitForm.train - v })
-                  }} />
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{Math.round(dataset.annotationCount * splitForm.val / 100).toLocaleString()} 张</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 4, fontWeight: 600 }}>测试集</div>
-                <input type="number" className="form-input" value={splitForm.test}
-                  style={{ textAlign: 'center', fontFamily: 'JetBrains Mono' }}
-                  disabled />
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{Math.round(dataset.annotationCount * splitForm.test / 100).toLocaleString()} 张</div>
-              </div>
-            </div>
-
-            <div className="split-bar" style={{ marginBottom: 20 }}>
-              <div className="split-bar-train" style={{ flex: splitForm.train }}>
-                <span className="split-bar-label" style={{ color: '#409eff' }}>{splitForm.train}%</span>
-              </div>
-              <div className="split-bar-val" style={{ flex: splitForm.val }}>
-                <span className="split-bar-label" style={{ color: '#10b981' }}>{splitForm.val}%</span>
-              </div>
-              <div className="split-bar-test" style={{ flex: splitForm.test }}>
-                <span className="split-bar-label" style={{ color: '#f59e0b' }}>{splitForm.test}%</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button className="btn btn-secondary" onClick={() => setShowSplitModal(false)}>取消</button>
-              <button className="btn btn-primary" onClick={handleSplitSave}>确认调整</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

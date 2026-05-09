@@ -64,7 +64,11 @@ function Sidebar() {
         <NavLink to="/" icon={<LayoutDashboard size={15} />} label="首页" />
 
         <div className="nav-label">模型</div>
-        <NavLink to="/models" icon={<Package size={15} />} label="模型广场" />
+        <NavLink to="/plaza" icon={<Package size={15} />} label="模型广场" />
+        <NavLink to="/model-management" icon={<Layers size={15} />} label="模型管理" />
+        <NavLink to="/models" icon={<Package size={15} />} label="模型广场 (旧)" />
+        <NavLink to="/pretrained-models" icon={<Globe size={15} />} label="公开模型 (旧)" />
+        <NavLink to="/system/private-models" icon={<Shield size={15} />} label="私有模型 (旧)" />
 
         <div className="nav-label">数据</div>
         <NavLink to="/datasets" icon={<Layers size={15} />} label="数据集" />
@@ -77,10 +81,8 @@ function Sidebar() {
 
         <div className="nav-label">系统配置</div>
         <NavLink to="/architectures" icon={<Boxes size={15} />} label="模型模板" />
-        <NavLink to="/pretrained-models" icon={<Globe size={15} />} label="公开模型" />
-        <NavLink to="/system/private-models" icon={<Shield size={15} />} label="私有模型" />
-        <NavLink to="/monitor" icon={<Activity size={15} />} label="资源监控" />
         <NavLink to="/gpu-servers" icon={<Cpu size={15} />} label="GPU 服务器" />
+        <NavLink to="/monitor" icon={<Activity size={15} />} label="监控中心" />
       </div>
 
       <div className="sidebar-footer">

@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
+import { SplitAdjuster } from '../../components/SplitAdjuster'
 
 export const Route = createFileRoute('/subdatasets/create')({
   component: CreateSubdataset,
@@ -255,17 +256,9 @@ function CreateSubdataset() {
     })
   }
 
-  // ---- Handlers for ratio changes ----
-  function setTrainRatio(v: number) {
-    const val = Math.max(0, Math.min(100, v))
-    const remaining = 100 - val
-    const vr = form.valRatio + form.testRatio > 0 ? Math.round(remaining * (form.valRatio / (form.valRatio + form.testRatio))) : Math.round(remaining / 2)
-    setForm(prev => ({ ...prev, trainRatio: val, valRatio: vr, testRatio: 100 - val - vr }))
-  }
-
-  function setValRatio(v: number) {
-    const val = Math.max(0, Math.min(100 - form.trainRatio, v))
-    setForm(prev => ({ ...prev, valRatio: val, testRatio: 100 - prev.trainRatio - val }))
+  // ---- Handler for split changes ----
+  function handleSplitChange(split: { train: number; val: number; test: number }) {
+    setForm(prev => ({ ...prev, trainRatio: split.train, valRatio: split.val, testRatio: split.test }))
   }
 
   return (
@@ -360,68 +353,13 @@ function CreateSubdataset() {
               <div style={{ animation: 'slideIn 0.2s ease-out' }}>
                 <SectionTitle icon={<SplitSquareVertical size={15} />} title="自动划分" subtitle="调节滑块或直接输入比例/数量，实时预览" />
                 <div className="card" style={{ padding: 24 }}>
-                  {/* Split bar preview */}
-                  <div className="split-bar" style={{ marginBottom: 16 }}>
-                    <div className="split-seg split-train" style={{ flex: form.trainRatio || 0.1 }}>
-                      训练 {form.trainRatio}%
-                    </div>
-                    <div className="split-seg split-val" style={{ flex: form.valRatio || 0.1 }}>
-                      验证 {form.valRatio}%
-                    </div>
-                    <div className="split-seg split-test" style={{ flex: form.testRatio || 0.1 }}>
-                      测试 {form.testRatio}%
-                    </div>
-                  </div>
-
-                  {/* Count summary */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 }}>
-                    {[
-                      { label: '训练集', ratio: form.trainRatio, count: Math.round(allAnnotations.length * form.trainRatio / 100), color: 'var(--accent-bright)' },
-                      { label: '验证集', ratio: form.valRatio, count: Math.round(allAnnotations.length * form.valRatio / 100), color: 'var(--teal)' },
-                      { label: '测试集', ratio: form.testRatio, count: Math.round(allAnnotations.length * form.testRatio / 100), color: 'var(--warning)' },
-                    ].map(s => (
-                      <div key={s.label} className="metric-chip">
-                        <div className="metric-chip-value" style={{ color: s.color, fontSize: 18 }}>{s.count.toLocaleString()}</div>
-                        <div className="metric-chip-label">{s.label} ({s.ratio}%)</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Ratio sliders with manual input */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <RatioRow
-                      label="训练集比例"
-                      pct={form.trainRatio}
-                      count={Math.round(allAnnotations.length * form.trainRatio / 100)}
-                      total={allAnnotations.length}
-                      color="var(--accent-bright)"
-                      onChangePct={setTrainRatio}
-                      onChangeCount={c => setTrainRatio(Math.round((c / allAnnotations.length) * 100))}
-                    />
-                    <RatioRow
-                      label="验证集比例"
-                      pct={form.valRatio}
-                      count={Math.round(allAnnotations.length * form.valRatio / 100)}
-                      total={allAnnotations.length}
-                      color="var(--teal)"
-                      maxPct={100 - form.trainRatio}
-                      onChangePct={setValRatio}
-                      onChangeCount={c => setValRatio(Math.round((c / allAnnotations.length) * 100))}
-                    />
-                    {/* Test set: display only */}
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <label className="form-label" style={{ marginBottom: 0 }}>测试集比例</label>
-                        <span style={{ fontFamily: 'JetBrains Mono', fontSize: 14, fontWeight: 600, color: 'var(--warning)' }}>{form.testRatio}%</span>
-                      </div>
-                      <div className="progress-bar" style={{ height: 6 }}>
-                        <div className="progress-fill" style={{ width: `${form.testRatio}%`, background: 'var(--warning)' }} />
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                        {Math.round(allAnnotations.length * form.testRatio / 100).toLocaleString()} 张（自动计算 = 100% − 训练 − 验证）
-                      </div>
-                    </div>
-                  </div>
+                  <SplitAdjuster
+                    totalCount={allAnnotations.length}
+                    split={{ train: form.trainRatio, val: form.valRatio, test: form.testRatio }}
+                    onChange={handleSplitChange}
+                    showPercentInputs
+                    showCountInputs
+                  />
 
                   {/* Action buttons */}
                   <div style={{ marginTop: 18, display: 'flex', gap: 10 }}>
@@ -681,74 +619,6 @@ function SectionTitle({ icon, title, subtitle }: { icon: React.ReactNode; title:
         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{title}</span>
       </div>
       {subtitle && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 24 }}>{subtitle}</div>}
-    </div>
-  )
-}
-
-function RatioRow({ label, pct, count, total, color, maxPct = 100, onChangePct, onChangeCount, readonly }: {
-  label: string
-  pct: number
-  count: number
-  total: number
-  color: string
-  maxPct?: number
-  onChangePct?: (v: number) => void
-  onChangeCount?: (v: number) => void
-  readonly?: boolean
-}) {
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <label className="form-label" style={{ marginBottom: 0 }}>{label}</label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Percentage input */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <input
-              type="number"
-              className="form-input"
-              style={{ width: 50, textAlign: 'center', fontFamily: 'JetBrains Mono', fontSize: 12, padding: '4px 6px' }}
-              value={pct}
-              min={0} max={maxPct}
-              onChange={e => {
-                if (readonly || !onChangePct) return
-                const v = parseInt(e.target.value)
-                if (!isNaN(v)) onChangePct(v)
-              }}
-              disabled={readonly}
-            />
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>%</span>
-          </div>
-          {/* Count input */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <input
-              type="number"
-              className="form-input"
-              style={{ width: 64, textAlign: 'center', fontFamily: 'JetBrains Mono', fontSize: 12, padding: '4px 6px' }}
-              value={count}
-              min={0} max={total}
-              onChange={e => {
-                if (readonly || !onChangeCount) return
-                const v = parseInt(e.target.value)
-                if (!isNaN(v)) onChangeCount(Math.max(0, Math.min(total, v)))
-              }}
-              disabled={readonly}
-            />
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>张</span>
-          </div>
-        </div>
-      </div>
-      {!readonly ? (
-        <input
-          type="range"
-          min={0} max={maxPct} value={pct}
-          onChange={e => onChangePct?.(Number(e.target.value))}
-          style={{ background: `linear-gradient(90deg, ${color} ${(pct / maxPct) * 100}%, var(--border-default) ${(pct / maxPct) * 100}%)` }}
-        />
-      ) : (
-        <div className="progress-bar" style={{ height: 6 }}>
-          <div className="progress-fill" style={{ width: `${pct}%`, background: color }} />
-        </div>
-      )}
     </div>
   )
 }

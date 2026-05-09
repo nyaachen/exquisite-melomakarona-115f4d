@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { ArrowLeft, CheckCircle2, AlertCircle, Server } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
-import { GPU_SERVERS, getAvailableServer } from '../../data/gpuServers'
 
 export const Route = createFileRoute('/validate/create')({
   component: CreateValidate,
@@ -42,21 +41,12 @@ function CreateValidate() {
   const navigate = useNavigate()
   const [selectedModel, setSelectedModel] = useState<string>('')
   const [selectedDataset, setSelectedDataset] = useState<string>('')
-  const [selectedServerId, setSelectedServerId] = useState<string>('')
   const [taskName, setTaskName] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const model = MODELS.find(m => m.id === selectedModel)
   const dataset = DATASETS.find(d => d.id === selectedDataset)
-
-  // Auto-assign best available GPU server on mount
-  useEffect(() => {
-    const server = getAvailableServer()
-    if (server) setSelectedServerId(server.id)
-  }, [])
-
-  const assignedServer = GPU_SERVERS.find(s => s.id === selectedServerId)
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {}
@@ -233,35 +223,6 @@ function CreateValidate() {
             </div>
           )}
 
-          {/* Server — auto-assigned */}
-          <div style={{ marginBottom: 24 }}>
-            <label className="form-label">GPU 服务器（系统自动分配）</label>
-            {assignedServer ? (
-              <div style={{ padding: 14, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', borderRadius: 4 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                  <Server size={14} style={{ color: 'var(--accent-bright)' }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{assignedServer.name}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{assignedServer.spec}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {assignedServer.gpus.map(g => (
-                    <span key={g.id} style={{
-                      fontSize: 11, fontFamily: 'JetBrains Mono',
-                      background: 'var(--accent-glow)', color: 'var(--accent)',
-                      padding: '2px 8px', borderRadius: 3,
-                    }}>
-                      #{g.index} {g.model} {g.memory}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div style={{ padding: 14, background: 'var(--warning-glow)', border: '1px solid rgba(230,162,60,0.3)', borderRadius: 4, fontSize: 12, color: 'var(--warning)' }}>
-                暂无可用的 GPU 服务器
-              </div>
-            )}
-          </div>
-
           <div style={{
             padding: 16,
             background: 'var(--bg-surface)',
@@ -275,7 +236,7 @@ function CreateValidate() {
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               {model && dataset ? (
                 <>
-                  在<span style={{ color: 'var(--accent)' }}>{assignedServer?.name || '自动分配'}</span>上使用数据集「<span style={{ color: 'var(--text-primary)' }}>{dataset.name}</span>」对模型「<span style={{ color: 'var(--accent)' }}>{model.name}</span>」进行验证。
+                  使用数据集「<span style={{ color: 'var(--text-primary)' }}>{dataset.name}</span>」对模型「<span style={{ color: 'var(--accent)' }}>{model.name}</span>」进行验证。
                 </>
               ) : (
                 '请选择模型和数据集'

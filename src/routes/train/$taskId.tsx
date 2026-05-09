@@ -1,41 +1,21 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect, useRef } from 'react'
-import { SearchableDropdown } from '../../components/SearchableDropdown'
-import { NotFound } from '../../components/NotFound'
-import { TRAIN_STATUS, DEFAULT_CLASS_COLORS } from '../../constants'
+import { createFileRoute } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import {
-  ArrowLeft,
   RefreshCw,
   CheckCircle2,
   XCircle,
   Clock,
-  Terminal,
-  BarChart2,
-  FlaskConical,
-  Package,
   AlertTriangle,
-  Cpu,
-  TrendingUp,
-  Award,
-  Target,
-  Zap,
-  ChevronRight,
-  Upload,
-  ImageIcon,
-  Database,
-  AlertCircle,
-  Plus,
-  Copy,
 } from 'lucide-react'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
+import { NotFound } from '../../components/NotFound'
+import { TRAIN_STATUS, DEFAULT_CLASS_COLORS } from '../../constants'
+import { TaskHeader } from '../../components/train/TaskHeader'
+import { CompletedTaskPanel } from '../../components/train/CompletedTaskPanel'
+import { ModelValidationPanel } from '../../components/train/ModelValidationPanel'
+import { TaskInfoCards } from '../../components/train/TaskInfoCards'
+import { TrainingChartsSection } from '../../components/train/TrainingChartsSection'
+import { TrainingLogPanel } from '../../components/train/TrainingLogPanel'
+import { PublishModelModal } from '../../components/train/PublishModelModal'
 
 export const Route = createFileRoute('/train/$taskId')({
   component: TaskDetail,
@@ -50,20 +30,17 @@ interface EpochMetric {
   valLoss: number
 }
 
-/** 为已完成/进行中的任务生成每轮训练指标（确定性，基于种子） */
 function generateEpochMetrics(
   totalEpochs: number,
   finalMAP: number,
   startEpoch: number = totalEpochs,
 ): EpochMetric[] {
   const epochs: EpochMetric[] = []
-  // 模拟训练曲线：mAP 从 0.15 上升到 finalMAP，loss 从 2.0 下降到 0.35
   const mapStart = 0.15
   const lossStart = 2.0
   const lossEnd = 0.35
   for (let i = 1; i <= startEpoch; i++) {
     const t = i / totalEpochs
-    // 使用 sigmoid-like 曲线模拟训练收敛
     const mapProgress = 1 / (1 + Math.exp(-10 * (t - 0.3)))
     epochs.push({
       epoch: i,
@@ -130,7 +107,6 @@ const TASK_DATA: Record<string, {
   },
 }
 
-// Verification results for completed tasks
 const VERIFICATION_RESULTS: Record<string, {
   quality: 'excellent' | 'good' | 'pass' | 'improve';
   qualityLabel: string;
@@ -187,37 +163,12 @@ const VERIFICATION_RESULTS: Record<string, {
   },
 }
 
-// Mock test set images for visualization
 const TEST_IMAGES = [
   { id: 'test-001', name: 'test_0001.jpg', width: 640, height: 480 },
   { id: 'test-002', name: 'test_0002.jpg', width: 640, height: 480 },
   { id: 'test-003', name: 'test_0003.jpg', width: 640, height: 480 },
   { id: 'test-004', name: 'test_0004.jpg', width: 640, height: 480 },
   { id: 'test-005', name: 'test_0005.jpg', width: 640, height: 480 },
-]
-
-// Mock datasets for visualization
-const DATASETS = [
-  {
-    id: 'ds-001',
-    name: '道路缺陷检测数据集 v2.3',
-    images: 4872,
-    imagesList: [
-      { id: 'ds-img-001', name: 'img_0001.jpg', width: 640, height: 480 },
-      { id: 'ds-img-002', name: 'img_0002.jpg', width: 640, height: 480 },
-      { id: 'ds-img-003', name: 'img_0003.jpg', width: 640, height: 480 },
-    ],
-  },
-  {
-    id: 'ds-002',
-    name: '施工安全帽检测集',
-    images: 2391,
-    imagesList: [
-      { id: 'ds-img-004', name: 'img_0004.jpg', width: 640, height: 480 },
-      { id: 'ds-img-005', name: 'img_0005.jpg', width: 640, height: 480 },
-      { id: 'ds-img-006', name: 'img_0006.jpg', width: 640, height: 480 },
-    ],
-  },
 ]
 
 const CLASS_COLORS = DEFAULT_CLASS_COLORS
@@ -229,21 +180,12 @@ const PUBLISHABLE_MODELS = [
   { id: 'sq-model-004', name: '火焰烟雾检测', existingVersions: ['v2.1', 'v2.0', 'v1.5'] },
 ]
 
-type ImageSource = 'upload' | 'testset' | 'dataset'
-
-interface Prediction {
-  className: string
-  confidence: number
-  bbox: { x: number; y: number; width: number; height: number }
-}
-
-// Simulate training log lines (now driven by EpochMetric)
 function generateLog(metric: EpochMetric, total: number): string[] {
   const loss = metric.loss.toFixed(4)
   const valLoss = metric.valLoss.toFixed(4)
   const map = metric.mAP.toFixed(3)
   return [
-    `[dim]${new Date().toTimeString().slice(0, 8)}[0m Epoch ${metric.epoch}/${total}`,
+    `[dim]${new Date().toTimeString().slice(0, 8)}[/dim] Epoch ${metric.epoch}/${total}`,
     `  train/box_loss: ${loss}  train/cls_loss: ${(metric.loss * 0.55).toFixed(4)}  train/dfl_loss: ${(metric.loss * 0.28).toFixed(4)}`,
     `  val/box_loss:   ${valLoss}  val/cls_loss:   ${(metric.valLoss * 0.55).toFixed(4)}  val/dfl_loss:   ${(metric.valLoss * 0.28).toFixed(4)}`,
     `  metrics/mAP50: ${map}  metrics/mAP50-95: ${(metric.mAP * 0.62).toFixed(3)}`,
@@ -257,69 +199,10 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
   pending: <Clock size={11} />,
 }
 
-function ReLineChart({ data, color, height = 120 }: { data: number[]; color: string; height?: number }) {
-  if (data.length === 0) {
-    return (
-      <div className="mini-chart" style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>暂无数据</span>
-      </div>
-    )
-  }
-
-  const chartData = data.map((value, index) => ({
-    epoch: index + 1,
-    value,
-  }))
-
-  return (
-    <div className="mini-chart" style={{ height: `${height}px`, minHeight: '80px', minWidth: '200px' }}>
-      <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-dim)" />
-          <XAxis
-            dataKey="epoch"
-            tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-            axisLine={{ stroke: 'var(--border-dim)' }}
-            tickLine={{ stroke: 'var(--border-dim)' }}
-            minTickGap={20}
-          />
-          <YAxis
-            tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-            axisLine={{ stroke: 'var(--border-dim)' }}
-            tickLine={{ stroke: 'var(--border-dim)' }}
-            domain={['auto', 'auto']}
-          />
-          <Tooltip
-            contentStyle={{
-              background: 'var(--bg-elevated)',
-              border: '1px solid var(--border-default)',
-              borderRadius: 6,
-              padding: '8px 12px',
-              fontSize: 12,
-            }}
-            formatter={(value) => [`${typeof value === 'number' ? value.toFixed(4) : value}`, '值']}
-            labelFormatter={(label) => `第 ${label} 轮`}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 4, fill: color }}
-            animationDuration={300}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  )
-}
-
 function TaskDetail() {
   const { taskId } = Route.useParams()
   const task = TASK_DATA[taskId]
   if (!task) return <NotFound />
-  const navigate = useNavigate()
 
   const [epoch, setEpoch] = useState(task.startEpoch)
   const [mAP, setMAP] = useState(task.mAP)
@@ -333,112 +216,8 @@ function TaskDetail() {
     () => task.epochs.map(e => e.loss),
   )
   const [perfView, setPerfView] = useState<'val' | 'test'>('val')
-  const logRef = useRef<HTMLDivElement>(null)
   const [logExpanded, setLogExpanded] = useState(false)
-  // Publish modal
   const [showPublishModal, setShowPublishModal] = useState(false)
-  const [publishMode, setPublishMode] = useState<'new' | 'existing'>('new')
-  const [publishModelId, setPublishModelId] = useState('')
-  const [publishVersion, setPublishVersion] = useState('')
-  const [publishModelName, setPublishModelName] = useState('')
-  const [publishModelDesc, setPublishModelDesc] = useState('')
-  const [publishModelCategory, setPublishModelCategory] = useState('')
-  const [publishErrors, setPublishErrors] = useState<Record<string, string>>({})
-  const [publishSubmitting, setPublishSubmitting] = useState(false)
-
-  const publishSelectedModel = PUBLISHABLE_MODELS.find(m => m.id === publishModelId)
-  const publishExistingVersions = publishSelectedModel?.existingVersions || []
-
-  function openPublishModal() {
-    setPublishMode('new')
-    setPublishModelId('')
-    setPublishVersion('')
-    setPublishModelName('')
-    setPublishModelDesc('')
-    setPublishModelCategory('')
-    setPublishErrors({})
-    setShowPublishModal(true)
-  }
-
-  function validatePublish(): boolean {
-    const e: Record<string, string> = {}
-    if (publishMode === 'existing') {
-      if (!publishModelId) e.publishModelId = '请选择已有模型'
-    } else {
-      if (!publishModelName.trim()) e.publishModelName = '请输入模型名称'
-    }
-    if (!publishVersion) {
-      e.publishVersion = '请输入版本号'
-    } else if (publishMode === 'existing' && publishExistingVersions.includes(publishVersion)) {
-      e.publishVersion = '该版本号已存在'
-    } else if (!/^v?\d+\.\d+/.test(publishVersion)) {
-      e.publishVersion = '版本号格式不正确，建议格式：v1.0'
-    }
-    setPublishErrors(e)
-    return Object.keys(e).length === 0
-  }
-
-  async function handlePublish() {
-    if (!validatePublish()) return
-    setPublishSubmitting(true)
-    await new Promise(r => setTimeout(r, 1500))
-    const name = publishMode === 'existing' ? publishSelectedModel?.name : publishModelName
-    alert(`模型「${name}」${publishVersion} 发布成功！`)
-    setShowPublishModal(false)
-    setPublishSubmitting(false)
-  }
-
-  // Visualization states
-  const [imageSource, setImageSource] = useState<ImageSource>('testset')
-  const [selectedDataset, setSelectedDataset] = useState(DATASETS[0]?.id || '')
-  const [selectedImage, setSelectedImage] = useState(TEST_IMAGES[0])
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-  const [predictions, setPredictions] = useState<Prediction[]>([])
-  const [isPredicting, setIsPredicting] = useState(false)
-
-  const availableImages = imageSource === 'testset' 
-    ? TEST_IMAGES 
-    : DATASETS.find(d => d.id === selectedDataset)?.imagesList || []
-
-  const currentImage = imageSource === 'upload' && uploadedImage 
-    ? { name: '上传的图片', width: 640, height: 480 } 
-    : selectedImage
-
-  async function runPrediction() {
-    setIsPredicting(true)
-    await new Promise(r => setTimeout(r, 1500))
-    
-    const mockPredictions: Prediction[] = []
-    const numBoxes = Math.floor(Math.random() * 3) + 1
-    for (let i = 0; i < numBoxes; i++) {
-      const classIndex = Math.floor(Math.random() * task.classes.length)
-      mockPredictions.push({
-        className: task.classes[classIndex],
-        confidence: 0.75 + Math.random() * 0.24,
-        bbox: {
-          x: 50 + Math.random() * 200,
-          y: 50 + Math.random() * 200,
-          width: 80 + Math.random() * 120,
-          height: 80 + Math.random() * 120,
-        },
-      })
-    }
-    setPredictions(mockPredictions)
-    setIsPredicting(false)
-  }
-
-  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setUploadedImage(event.target?.result as string)
-        setSelectedImage({ id: 'upload', name: file.name, width: 640, height: 480 })
-        setPredictions([])
-      }
-      reader.readAsDataURL(file)
-    }
-  }
 
   useEffect(() => {
     if (task.status !== 'running') return
@@ -446,7 +225,6 @@ function TaskDetail() {
       setEpoch(prev => {
         if (prev >= task.totalEpochs) { clearInterval(interval); return prev }
         const next = prev + 1
-        // Build a new EpochMetric using the same deterministic curve
         const t = next / task.totalEpochs
         const mapProgress = 1 / (1 + Math.exp(-10 * (t - 0.3)))
         const metric: EpochMetric = {
@@ -469,10 +247,6 @@ function TaskDetail() {
     return () => clearInterval(interval)
   }, [task.status, task.totalEpochs, task.mAP])
 
-  useEffect(() => {
-    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
-  }, [logs])
-
   const progress = Math.round((epoch / task.totalEpochs) * 100)
   const sc = TRAIN_STATUS[task.status]
   const ic = STATUS_ICONS[task.status]
@@ -485,28 +259,45 @@ function TaskDetail() {
     details: [],
   }
 
+  const configRows = [
+    { label: '数据集', value: task.dataset },
+    { label: '基础模型', value: task.baseModel },
+    { label: '优化器', value: task.optimizer },
+    { label: '批次大小', value: String(task.batchSize) },
+    { label: '图像尺寸', value: `${task.imgSize}×${task.imgSize}` },
+    { label: '训练设备', value: task.device },
+    { label: '创建时间', value: task.createdAt },
+  ]
+
+  const snapshotRows = [
+    { label: '数据集', value: task.dataset },
+    { label: '划分', value: '训练 70% · 验证 15% · 测试 15%' },
+    { label: '图片总数', value: '4,872 张' },
+    { label: '类别', value: '裂缝、坑洼、破损、剥落、标线模糊、积水、障碍物' },
+    { label: '快照时间', value: task.createdAt },
+  ]
+
+  const splitBar = (
+    <div className="split-bar" style={{ marginTop: 4 }}>
+      <div className="split-bar-train" style={{ flex: 70 }}>
+        <span className="split-bar-label" style={{ color: '#409eff' }}>训练 70%</span>
+      </div>
+      <div className="split-bar-val" style={{ flex: 15 }}>
+        <span className="split-bar-label" style={{ color: '#10b981' }}>验证 15%</span>
+      </div>
+      <div className="split-bar-test" style={{ flex: 15 }}>
+        <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 15%</span>
+      </div>
+    </div>
+  )
+
   return (
     <>
     <div className="slide-in">
-      {/* Header */}
-      <div className="page-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link to="/train" className="btn btn-ghost btn-sm">
-            <ArrowLeft size={14} /> 返回
-          </Link>
-          <div>
-            <div className="breadcrumb">
-              <Link to="/">科宝训练平台</Link> ›
-              <Link to="/train">训练任务</Link> ›
-              <span>{task.name}</span>
-            </div>
-            <div className="flex items-center gap-3 mt-1">
-              <h1 className="page-title mb-0">{task.name}</h1>
-              <span className={`badge ${sc.cls}`}>{ic} {sc.label}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <TaskHeader
+        taskName={task.name}
+        statusBadge={<span className={`badge ${sc.cls}`}>{ic} {sc.label}</span>}
+      />
 
       <div className="content-padded">
         {/* Failed error */}
@@ -520,681 +311,84 @@ function TaskDetail() {
           </div>
         )}
 
-        {/* Verification Results - only for completed tasks */}
+        {/* Completed task: verification + validation */}
         {task.status === 'completed' && (
           <>
-            {/* 训练结果状态 */}
-            <div className="card card-padded mb-5">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{
-                  width: 56, height: 56,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: task.published ? 'rgba(103, 194, 58,0.1)' : 'rgba(230, 162, 60,0.1)'
-                }}>
-                  {task.published ? (
-                    <CheckCircle2 size={28} style={{ color: 'var(--success)' }} />
-                  ) : (
-                    <Clock size={28} style={{ color: 'var(--warning)' }} />
-                  )}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 4 }}>
-                    训练结果状态
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 20, fontWeight: 700,
-                      color: task.published ? 'var(--success)' : 'var(--warning)'
-                    }}>
-                      {task.published ? '已发布' : '未发布'}
-                    </span>
-                    {task.published && task.modelName && task.modelVersion && (
-                      <span className="badge" style={{ background: 'var(--accent-glow)', color: 'var(--accent)' }}>
-                        {task.modelName} v{task.modelVersion}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                    {task.published
-                      ? `发布时间: ${task.publishedAt}`
-                      : '训练任务产生的结果初始处于未发布状态，只有发布后才会出现在模型广场'
-                    }
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                  <Link to="/validate/create" className="btn btn-success btn-sm">
-                    <FlaskConical size={14} /> 创建验证任务
-                  </Link>
-                  {!task.published ? (
-                    <button className="btn btn-teal btn-sm" onClick={openPublishModal}>
-                      <Package size={13} /> 发布模型
-                    </button>
-                  ) : (
-                    <Link to="/models/$modelId" params={{ modelId: 'model-001' }} className="btn btn-primary btn-sm">
-                      <Package size={13} /> 查看模型
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-
-           
-
-            {/* Detailed metrics */}
-            <div className="card card-padded mb-5">
-              <div className="section-title mb-3">详细指标</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12 }}>
-                {verification.details.map(d => (
-                  <div key={d.label} className="metric-chip">
-                    <div className="metric-chip-value" style={{
-                      color: d.status === 'pass' ? 'var(--success)' :
-                             d.status === 'warn' ? 'var(--warning)' : 'var(--error)'
-                    }}>
-                      {d.value}
-                    </div>
-                    <div className="metric-chip-label">{d.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Model Validation Panel */}
-            <div className="card card-padded mb-5">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-                <Package size={15} style={{ color: 'var(--accent-bright)' }} />
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>模型验证</span>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 20 }}>
-                {/* Left Panel - Image Selection */}
-                <div style={{ borderRight: '1px solid var(--border-dim)', paddingRight: 20 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <button
-                      className={`btn btn-sm ${imageSource === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
-                      onClick={() => setImageSource('upload')}
-                    >
-                      <Upload size={12} /> 本地上传
-                    </button>
-                    <button
-                      className={`btn btn-sm ${imageSource === 'testset' ? 'btn-primary' : 'btn-secondary'}`}
-                      onClick={() => setImageSource('testset')}
-                    >
-                      <ImageIcon size={12} /> 测试集图片
-                    </button>
-                    
-                  </div>
-
-                  {imageSource === 'upload' && (
-                    <div style={{ marginTop: 16 }}>
-                      <label className="form-label text-xs">选择图片文件</label>
-                      <div style={{
-                        border: '2px dashed var(--border-default)',
-                        borderRadius: 6,
-                        padding: '16px',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                      }}
-                        onClick={() => document.getElementById(`file-upload-${taskId}`)?.click()}
-                      >
-                        <Upload size={20} style={{ color: 'var(--text-muted)', marginBottom: 6 }} />
-                        <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-                          {uploadedImage ? '点击更换图片' : '点击或拖拽上传图片'}
-                        </div>
-                        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>
-                          支持 JPG、PNG、WebP 格式
-                        </div>
-                      </div>
-                      <input
-                        id={`file-upload-${taskId}`}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        style={{ display: 'none' }}
-                      />
-                    </div>
-                  )}
-
-                  {imageSource === 'testset' && (
-                    <div style={{ marginTop: 16 }}>
-                      <label className="form-label text-xs">测试集图片</label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-                        {TEST_IMAGES.map(img => (
-                          <div
-                            key={img.id}
-                            className="select-card"
-                            style={{
-                              borderColor: selectedImage?.id === img.id ? 'var(--accent)' : undefined,
-                              cursor: 'pointer',
-                              padding: 6,
-                            }}
-                            onClick={() => {
-                              setSelectedImage(img)
-                              setPredictions([])
-                            }}
-                          >
-                            <div style={{
-                              width: '100%',
-                              aspectRatio: '4/3',
-                              background: 'var(--bg-elevated)',
-                              borderRadius: 4,
-                              marginBottom: 4,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}>
-                              <ImageIcon size={16} style={{ color: 'var(--text-muted)' }} />
-                            </div>
-                            <div style={{ fontSize: 9, color: 'var(--text-muted)', textAlign: 'center' }}>
-                              {img.name}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  
-                </div>
-
-                {/* Right Panel - Prediction Result */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                      {currentImage?.name || '未选择图片'}
-                    </div>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={runPrediction}
-                      disabled={!currentImage || isPredicting}
-                    >
-                      <Zap size={12} /> {isPredicting ? '预测中...' : '运行预测'}
-                    </button>
-                  </div>
-
-                  <div style={{
-                    position: 'relative',
-                    background: 'var(--bg-elevated)',
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    aspectRatio: '4/3',
-                    minHeight: 240,
-                  }}>
-                    {uploadedImage ? (
-                      <img
-                        src={uploadedImage}
-                        alt="Uploaded"
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'var(--bg-elevated)',
-                      }}>
-                        <ImageIcon size={32} style={{ color: 'var(--text-muted)' }} />
-                      </div>
-                    )}
-
-                    {/* Prediction boxes */}
-                    {isPredicting && (
-                      <div style={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'rgba(0,0,0,0.5)',
-                      }}>
-                        <div style={{
-                          width: 32,
-                          height: 32,
-                          border: 2,
-                          borderStyle: 'solid',
-                          borderColor: 'transparent var(--accent) var(--accent) var(--accent)',
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite',
-                        }} />
-                      </div>
-                    )}
-
-                    {predictions.map((pred, index) => {
-                      const color = CLASS_COLORS[task.classes.indexOf(pred.className)] || '#409eff'
-                      return (
-                        <div
-                          key={index}
-                          style={{
-                            position: 'absolute',
-                            left: `${(pred.bbox.x / 640) * 100}%`,
-                            top: `${(pred.bbox.y / 480) * 100}%`,
-                            width: `${(pred.bbox.width / 640) * 100}%`,
-                            height: `${(pred.bbox.height / 480) * 100}%`,
-                            border: `2px solid ${color}`,
-                            borderRadius: 3,
-                            boxShadow: `0 0 6px ${color}40`,
-                          }}
-                        >
-                          <div style={{
-                            position: 'absolute',
-                            top: '-20px',
-                            left: 0,
-                            background: color,
-                            color: 'white',
-                            fontSize: 9,
-                            padding: '2px 4px',
-                            borderRadius: 2,
-                            whiteSpace: 'nowrap',
-                          }}>
-                            {pred.className} {pred.confidence.toFixed(2)}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-
-                  {/* Prediction Results List */}
-                  {predictions.length > 0 && (
-                    <div style={{ marginTop: 12 }}>
-                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
-                        检测结果 ({predictions.length} 个目标)
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {predictions.map((pred, index) => {
-                          const color = CLASS_COLORS[task.classes.indexOf(pred.className)] || '#409eff'
-                          const isHighConfidence = pred.confidence >= 0.85
-                          return (
-                            <div
-                              key={index}
-                              className="badge"
-                              style={{
-                                background: `${color}15`,
-                                color: color,
-                                borderColor: `${color}30`,
-                              }}
-                            >
-                              {isHighConfidence ? <CheckCircle2 size={9} /> : <AlertCircle size={9} />}
-                              <span>{pred.className}</span>
-                              <span style={{ fontFamily: 'JetBrains Mono', fontSize: 9 }}>
-                                {pred.confidence.toFixed(2)}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Legend */}
-                  <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border-dim)' }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8 }}>
-                      类别图例
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                      {task.classes.map((cls, index) => (
-                        <div key={cls} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <div style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: 2,
-                            background: CLASS_COLORS[index] || '#409eff',
-                          }} />
-                          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{cls}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CompletedTaskPanel
+              published={task.published}
+              modelName={task.modelName}
+              modelVersion={task.modelVersion}
+              publishedAt={task.publishedAt}
+              verification={verification}
+              onPublishClick={() => setShowPublishModal(true)}
+            />
+            <ModelValidationPanel
+              taskId={taskId}
+              classes={task.classes}
+              classColors={CLASS_COLORS}
+              testImages={TEST_IMAGES}
+            />
           </>
         )}
 
-        {/* Info + Progress row */}
-        <div className="grid-2 mb-5">
-          {/* Task info */}
-          <div className="card card-padded">
-            <div className="section-title mb-3">任务配置</div>
-            <div className="flex flex-col gap-2">
-              {[
-                { label: '数据集', value: task.dataset },
-                { label: '基础模型', value: task.baseModel },
-                { label: '优化器', value: task.optimizer },
-                { label: '批次大小', value: String(task.batchSize) },
-                { label: '图像尺寸', value: `${task.imgSize}×${task.imgSize}` },
-                { label: '训练设备', value: task.device },
-                { label: '创建时间', value: task.createdAt },
-              ].map(row => (
-                <div key={row.label} className="data-row">
-                  <span className="data-row-label">{row.label}</span>
-                  <span className="data-row-value">{row.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Dataset snapshot */}
-          <div className="card card-padded">
-            <div className="section-title mb-3">数据集快照</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { label: '数据集', value: task.dataset },
-                { label: '划分', value: '训练 70% · 验证 15% · 测试 15%' },
-                { label: '图片总数', value: '4,872 张' },
-                { label: '类别', value: '裂缝、坑洼、破损、剥落、标线模糊、积水、障碍物' },
-                { label: '快照时间', value: task.createdAt },
-              ].map(row => (
-                <div key={row.label} className="data-row">
-                  <span className="data-row-label">{row.label}</span>
-                  <span className="data-row-value">{row.value}</span>
-                </div>
-              ))}
-              <div className="split-bar" style={{ marginTop: 4 }}>
-                <div className="split-bar-train" style={{ flex: 70 }}>
-                  <span className="split-bar-label" style={{ color: '#409eff' }}>训练 70%</span>
-                </div>
-                <div className="split-bar-val" style={{ flex: 15 }}>
-                  <span className="split-bar-label" style={{ color: '#10b981' }}>验证 15%</span>
-                </div>
-                <div className="split-bar-test" style={{ flex: 15 }}>
-                  <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 15%</span>
-                </div>
-              </div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
-                快照保存于任务创建时，记录当时使用的数据集划分状态
-              </div>
-            </div>
-          </div>
-
-          {/* Progress */}
-          <div className="card card-padded">
-            <div className="section-title mb-4">训练进度</div>
-
-            <div className="progress-info">
-              <span className="progress-main">
-                {epoch}<span className="progress-sub">/{task.totalEpochs}轮</span>
-              </span>
-              <span className={`progress-percent ${progress === 100 ? 'text-success' : 'text-accent'}`}>{progress}%</span>
-            </div>
-
-            <div className="progress-bar progress-lg mb-4">
-              <div className={`progress-fill ${task.status === 'failed' ? 'progress-fill-error' : ''}`}
-                style={{ width: `${progress}%` }} />
-            </div>
-
-            <div className="grid-3 mb-4">
-              {[
-                { label: 'mAP@0.5', value: mAP > 0 ? mAP.toFixed(3) : '—', color: 'var(--success)' },
-                { label: 'Precision', value: precision > 0 ? precision.toFixed(3) : '—', color: 'var(--teal)' },
-                { label: 'Recall', value: recall > 0 ? recall.toFixed(3) : '—', color: 'var(--warning)' },
-              ].map(m => (
-                <div key={m.label} className="metric-chip">
-                  <div className="metric-chip-value" style={{ color: m.color }}>{m.value}</div>
-                  <div className="metric-chip-label">{m.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {task.status === 'running' && (
-              <div className="gpu-info">
-                <Cpu size={12} className="text-accent" />
-                <span>GPU {task.device} · 已用 {Math.floor(epoch * 1.32)}min · 预计剩余 {Math.ceil((task.totalEpochs - epoch) * 1.32)}min</span>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Info + Progress cards */}
+        <TaskInfoCards
+          configRows={configRows}
+          snapshotRows={snapshotRows}
+          splitBar={splitBar}
+          epoch={epoch}
+          totalEpochs={task.totalEpochs}
+          progress={progress}
+          mAP={mAP}
+          precision={precision}
+          recall={recall}
+          isRunning={task.status === 'running'}
+          device={task.device}
+        />
 
         {/* Training Charts */}
-        <div className="grid-2 mb-5">
-          <div className="card card-padded">
-            <div className="chart-title">mAP@0.5 曲线（共 {mapHistory.length} 轮）</div>
-            <ReLineChart data={mapHistory} color="var(--success)" height={100} />
-          </div>
-          <div className="card card-padded">
-            <div className="chart-title">训练损失曲线（共 {lossHistory.length} 轮）</div>
-            <ReLineChart data={lossHistory} color="var(--accent)" height={100} />
-          </div>
+        <TrainingChartsSection
+          mapHistory={mapHistory}
+          lossHistory={lossHistory}
+          classes={task.classes}
+          mAP={mAP}
+          perfView={perfView}
+          onPerfViewChange={setPerfView}
+        />
 
-          {/* Class metrics */}
-          <div className="card card-padded" style={{ gridColumn: '1 / -1' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-              <div className="chart-title" style={{ marginBottom: 0 }}>类别检测性能</div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-              <div style={{ display: 'flex', gap: 0 }}>
-                <button
-                  className={`btn btn-sm ${perfView === 'val' ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setPerfView('val')}
-                >
-                  验证集
-                </button>
-                <button
-                  className={`btn btn-sm ${perfView === 'test' ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setPerfView('test')}
-                >
-                  测试集
-                </button>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                <span style={{ width: 100, flexShrink: 0 }}>类别</span>
-                <span style={{ flex: 1 }}>准确率</span>
-                <span style={{ width: 72, textAlign: 'right', flexShrink: 0 }}>mAP</span>
-              </div>
-
-              {task.classes.map((cls, i) => {
-                // Generate stable mock data per view
-                const seed = (i + 1) * (perfView === 'val' ? 7 : 13)
-                const classMap = mAP > 0
-                  ? Math.min(0.99, mAP * (0.82 + (perfView === 'val' ? 0.04 : 0.01) + i * 0.015 + (Math.sin(seed) * 0.06)))
-                  : 0
-                const pct = Math.round(classMap * 100)
-
-                return (
-                  <div key={cls} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0,
-                    padding: '9px 8px',
-                  }}>
-                    <span style={{
-                      width: 100, flexShrink: 0, fontSize: 13, fontWeight: 500,
-                      color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {cls}
-                    </span>
-
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div className="progress-bar" style={{ flex: 1, height: 8 }}>
-                        <div className="progress-fill" style={{
-                          width: `${pct}%`,
-                          background: pct >= 80 ? 'var(--success)'
-                            : pct >= 60 ? 'var(--teal)'
-                            : pct >= 40 ? 'var(--warning)'
-                            : 'var(--error)',
-                        }} />
-                      </div>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono', minWidth: 32, textAlign: 'right' }}>
-                        {pct}%
-                      </span>
-                    </div>
-
-                    <span style={{
-                      width: 72, flexShrink: 0, textAlign: 'right',
-                      fontFamily: 'JetBrains Mono', fontSize: 13, fontWeight: 600,
-                      color: pct >= 80 ? 'var(--success)'
-                        : pct >= 60 ? 'var(--teal)'
-                        : pct >= 40 ? 'var(--warning)'
-                        : 'var(--text-muted)',
-                    }}>
-                      {classMap > 0 ? classMap.toFixed(3) : '—'}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Training Log (collapsible) */}
-        <div className="card">
-          <button 
-            style={{ width: '100%', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', background: 'transparent', transition: 'background 0.15s' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)' }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-            onClick={() => setLogExpanded(!logExpanded)}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Terminal size={15} style={{ color: 'var(--accent-bright)' }} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>训练日志</span>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({logs.length} 条)</span>
-            </div>
-            <div style={{ transform: logExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-              <ChevronRight size={15} style={{ color: 'var(--text-muted)' }} />
-            </div>
-          </button>
-          
-          {logExpanded && (
-            <div className="log-terminal" style={{ height: 300, borderTop: '1px solid var(--border-dim)' }} ref={logRef}>
-              <span className="log-line log-dim"># 科宝训练平台 · 任务 {taskId} · {task.name}</span>
-              <span className="log-line log-dim"># 数据集: {task.dataset} · 基础模型: {task.baseModel}</span>
-              <span className="log-line log-dim"># ─────────────────────────────────────────</span>
-              {task.status === 'pending' && (
-                <span className="log-line log-warn">⏳ 任务在队列中等待 GPU 资源…</span>
-              )}
-              {task.status === 'failed' && (
-                <>
-                  <span className="log-line log-error">✗ 训练进程异常终止 (Epoch {task.startEpoch}/{task.totalEpochs})</span>
-                  <span className="log-line log-error">{task.errorMsg}</span>
-                </>
-              )}
-              {(task.status === 'completed' || task.status === 'running') && (
-                <>
-                  <span className="log-line log-success">✓ 模型权重加载完成: {task.baseModel}.pt</span>
-                  <span className="log-line log-info">  训练集: {task.trainImages} 张 · 验证集: {task.valImages} 张</span>
-                  <span className="log-line log-info">  设备: {task.device} · 批次大小: {task.batchSize} · 图像尺寸: {task.imgSize}</span>
-                  <span className="log-line log-dim">  ─────────────────────────────────</span>
-                </>
-              )}
-              {logs.map((l, i) => (
-                <span key={i} className={`log-line ${l.cls}`}>{l.text}</span>
-              ))}
-              {task.status === 'completed' && (
-                <>
-                  <span className="log-line log-dim">  ─────────────────────────────────</span>
-                  <span className="log-line log-success">✓ 训练完成！最佳模型已保存: best.pt</span>
-                  <span className="log-line log-success">  mAP@0.5: {task.mAP.toFixed(3)}  Precision: {task.precision.toFixed(3)}  Recall: {task.recall.toFixed(3)}</span>
-                </>
-              )}
-              {task.status === 'running' && (
-                <span className="log-line log-info">▌<span className="cursor-blink">_</span></span>
-              )}
-            </div>
-          )}
-        </div>
+        {/* Training Log */}
+        <TrainingLogPanel
+          logs={logs}
+          taskId={taskId}
+          taskName={task.name}
+          dataset={task.dataset}
+          baseModel={task.baseModel}
+          trainImages={task.trainImages}
+          valImages={task.valImages}
+          device={task.device}
+          batchSize={task.batchSize}
+          imgSize={task.imgSize}
+          status={task.status}
+          totalEpochs={task.totalEpochs}
+          mAP={task.mAP}
+          precision={task.precision}
+          recall={task.recall}
+          startEpoch={task.startEpoch}
+          errorMsg={task.errorMsg}
+          logExpanded={logExpanded}
+          onToggle={() => setLogExpanded(!logExpanded)}
+        />
       </div>
-
     </div>
 
-    {/* Publish Modal — rendered outside slide-in to avoid transform trapping */}
-    {showPublishModal && (
-      <div className="modal-backdrop" onClick={() => setShowPublishModal(false)}>
-        <div className="modal" style={{ maxWidth: 540 }} onClick={e => e.stopPropagation()}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>发布模型</span>
-            <button className="btn btn-ghost btn-sm" onClick={() => setShowPublishModal(false)}>✕</button>
-          </div>
-
-            {/* Current task info */}
-            <div style={{ padding: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', marginBottom: 16, fontSize: 12 }}>
-              <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>发布任务</div>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{task.name}</div>
-              <div style={{ color: 'var(--text-secondary)', marginTop: 2 }}>
-                {task.baseModel} · mAP: {task.mAP > 0 ? task.mAP.toFixed(3) : '—'}
-              </div>
-            </div>
-
-            {/* Publish mode toggle */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-              <button className={`btn btn-sm ${publishMode === 'new' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => { setPublishMode('new'); setPublishErrors({}) }}>
-                <Plus size={13} /> 创建新模型
-              </button>
-              <button className={`btn btn-sm ${publishMode === 'existing' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => { setPublishMode('existing'); setPublishErrors({}) }}>
-                <Copy size={13} /> 发布到已有模型
-              </button>
-            </div>
-
-            {publishMode === 'existing' ? (
-              <div style={{ animation: 'slideDown 0.15s ease-out' }}>
-                <div style={{ marginBottom: 14 }}>
-                  <SearchableDropdown
-                    label="选择已有模型"
-                    color="var(--accent-bright)"
-                    selectedId={publishModelId}
-                    onChange={(id) => { setPublishModelId(id); setPublishErrors({}) }}
-                    items={PUBLISHABLE_MODELS.map(m => ({
-                      id: m.id,
-                      name: m.name,
-                      subtitle: `已有版本: ${m.existingVersions.join('、')}`,
-                      tags: m.existingVersions,
-                    }))}
-                    placeholder="选择要追加版本的已有模型..."
-                  />
-                  {publishErrors.publishModelId && <div className="error-text">{publishErrors.publishModelId}</div>}
-                </div>
-                {publishSelectedModel && (
-                  <div style={{ padding: 10, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', marginBottom: 14, fontSize: 11, color: 'var(--text-secondary)' }}>
-                    当前已有版本：{publishSelectedModel.existingVersions.join('、')}，发布后将成为第 {publishSelectedModel.existingVersions.length + 1} 个版本
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ animation: 'slideDown 0.15s ease-out' }}>
-                <div style={{ marginBottom: 14 }}>
-                  <label className="form-label">模型名称</label>
-                  <input className="form-input" type="text" value={publishModelName} onChange={e => { setPublishModelName(e.target.value); setPublishErrors({}) }} placeholder="例如：道路缺陷检测" />
-                  {publishErrors.publishModelName && <div className="error-text">{publishErrors.publishModelName}</div>}
-                </div>
-                <div style={{ marginBottom: 14 }}>
-                  <label className="form-label">模型描述（选填）</label>
-                  <textarea className="form-input" value={publishModelDesc} onChange={e => setPublishModelDesc(e.target.value)} placeholder="简要描述模型的功能和适用场景..." style={{ minHeight: 60, resize: 'vertical' }} />
-                </div>
-                <div style={{ marginBottom: 14 }}>
-                  <label className="form-label">模型类别</label>
-                  <select className="form-input" value={publishModelCategory} onChange={e => setPublishModelCategory(e.target.value)}>
-                    <option value="">请选择模型类别</option>
-                    <option value="缺陷检测">缺陷检测</option>
-                    <option value="安全检测">安全检测</option>
-                    <option value="行为检测">行为检测</option>
-                    <option value="目标跟踪">目标跟踪</option>
-                    <option value="图像分割">图像分割</option>
-                    <option value="其他">其他</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            <div style={{ marginBottom: 16 }}>
-              <label className="form-label">{publishMode === 'existing' ? '新版本号' : '初始版本号'}</label>
-              <input className="form-input" type="text" value={publishVersion} onChange={e => { setPublishVersion(e.target.value); setPublishErrors({}) }} placeholder="例如：v1.0" style={{ fontFamily: 'JetBrains Mono' }} />
-              {publishErrors.publishVersion && <div className="error-text">{publishErrors.publishVersion}</div>}
-              {publishMode === 'existing' && !publishErrors.publishVersion && publishVersion && !publishExistingVersions.includes(publishVersion) && (
-                <div style={{ fontSize: 12, color: 'var(--success)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <CheckCircle2 size={12} /> 版本号可用
-                </div>
-              )}
-            </div>
-
-            <button className="btn btn-primary" style={{ width: '100%' }} onClick={handlePublish} disabled={publishSubmitting}>
-              {publishSubmitting ? <><span className="spinner" /> 发布中…</> : <><CheckCircle2 size={14} /> 确认发布</>}
-            </button>
-          </div>
-        </div>
-      )}
-
+    <PublishModelModal
+      show={showPublishModal}
+      taskName={task.name}
+      baseModel={task.baseModel}
+      mAP={task.mAP}
+      publishableModels={PUBLISHABLE_MODELS}
+      onClose={() => setShowPublishModal(false)}
+    />
     </>
   )
 }
