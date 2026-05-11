@@ -72,7 +72,7 @@ function Sidebar() {
 
         <div className="nav-label">数据</div>
         <NavLink to="/datasets" icon={<Layers size={15} />} label="数据集" />
-        <NavLink to="/subdatasets" icon={<Layers size={15} />} label="子数据集" />
+
 
         <div className="nav-label">训练</div>
         <NavLink to="/train" icon={<Cpu size={15} />} label="训练任务" />

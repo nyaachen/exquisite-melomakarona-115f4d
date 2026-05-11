@@ -2,100 +2,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Plus, CheckCircle2, XCircle, Clock, RefreshCw, ArrowRight, Target, Search } from 'lucide-react'
 import { VALIDATE_STATUS } from '../../constants'
+import { VALIDATE_TASKS } from '../../data/validate'
 
 export const Route = createFileRoute('/validate/')({
   component: ValidateList,
 })
-
-interface ValidateTask {
-  id: string
-  name: string
-  modelId: string
-  modelName: string
-  datasetId: string
-  datasetName: string
-  status: 'running' | 'completed' | 'failed' | 'pending'
-  progress: number
-  mAP?: number
-  precision?: number
-  recall?: number
-  f1?: number
-  createdAt: string
-  completedAt?: string
-}
-
-const VALIDATE_TASKS: ValidateTask[] = [
-  {
-    id: 'val-001',
-    name: '道路缺陷检测 v2.3 验证',
-    modelId: 'model-001',
-    modelName: '道路缺陷检测 v2.3',
-    datasetId: 'ds-001',
-    datasetName: '道路缺陷测试集',
-    status: 'completed',
-    progress: 100,
-    mAP: 0.765,
-    precision: 0.812,
-    recall: 0.731,
-    f1: 0.770,
-    createdAt: '2026-04-29 14:30',
-    completedAt: '2026-04-29 14:45',
-  },
-  {
-    id: 'val-002',
-    name: '安全帽检测模型验证',
-    modelId: 'model-002',
-    modelName: '施工安全帽检测 v1.0',
-    datasetId: 'ds-002',
-    datasetName: '安全帽测试集',
-    status: 'completed',
-    progress: 100,
-    mAP: 0.918,
-    precision: 0.935,
-    recall: 0.902,
-    f1: 0.918,
-    createdAt: '2026-04-28 16:00',
-    completedAt: '2026-04-28 16:12',
-  },
-  {
-    id: 'val-003',
-    name: '跌倒检测交叉验证',
-    modelId: 'model-003',
-    modelName: '人员跌倒检测 v1.0',
-    datasetId: 'ds-003',
-    datasetName: '跌倒行为测试集',
-    status: 'running',
-    progress: 67,
-    createdAt: '2026-04-29 15:00',
-  },
-  {
-    id: 'val-004',
-    name: '火焰烟雾模型验证',
-    modelId: 'model-004',
-    modelName: '火焰烟雾检测 v2.1',
-    datasetId: 'ds-004',
-    datasetName: '火焰烟雾测试集',
-    status: 'failed',
-    progress: 45,
-    createdAt: '2026-04-27 10:30',
-  },
-  {
-    id: 'val-005',
-    name: '道路缺陷检测 v2.2 验证',
-    modelId: 'model-old-001',
-    modelName: '道路缺陷检测 v2.2',
-    datasetId: 'ds-001',
-    datasetName: '道路缺陷测试集',
-    status: 'completed',
-    progress: 100,
-    mAP: 0.742,
-    precision: 0.795,
-    recall: 0.708,
-    f1: 0.750,
-    createdAt: '2026-04-10 09:15',
-    completedAt: '2026-04-10 09:28',
-  },
-]
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   running: <RefreshCw size={10} className="spinning" />,
@@ -107,7 +18,9 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
 function ValidateList() {
   const [searchQuery, setSearchQuery] = useState('')
 
-  const filtered = VALIDATE_TASKS.filter(t =>
+  const tasks = Object.values(VALIDATE_TASKS)
+
+  const filtered = tasks.filter(t =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.modelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.datasetName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -176,11 +89,11 @@ function ValidateList() {
                           {task.progress}%
                         </span>
                       </td>
-                      <td className="mono" style={{ color: task.mAP ? 'var(--success)' : 'var(--text-muted)' }}>
-                        {task.mAP ? task.mAP.toFixed(3) : '—'}
+                      <td className="mono" style={{ color: task.result?.mAP ? 'var(--success)' : 'var(--text-muted)' }}>
+                        {task.result?.mAP ? task.result.mAP.toFixed(3) : '—'}
                       </td>
-                      <td className="mono" style={{ color: task.f1 ? 'var(--accent-bright)' : 'var(--text-muted)' }}>
-                        {task.f1 ? task.f1.toFixed(3) : '—'}
+                      <td className="mono" style={{ color: task.result?.f1 ? 'var(--accent-bright)' : 'var(--text-muted)' }}>
+                        {task.result?.f1 ? task.result.f1.toFixed(3) : '—'}
                       </td>
                       <td style={{ fontSize: 12 }}>{task.createdAt}</td>
                       <td style={{ fontSize: 12 }}>{task.completedAt || '—'}</td>

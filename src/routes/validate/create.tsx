@@ -2,40 +2,11 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react'
 import { SearchableDropdown } from '../../components/SearchableDropdown'
+import { VALIDATE_MODELS, VALIDATE_DATASETS } from '../../data/validate'
 
 export const Route = createFileRoute('/validate/create')({
   component: CreateValidate,
 })
-
-interface Model {
-  id: string
-  name: string
-  baseModel: string
-  mAP: number
-  classes: string[]
-}
-
-interface Dataset {
-  id: string
-  name: string
-  images: number
-  classes: string[]
-}
-
-const MODELS: Model[] = [
-  { id: 'model-001', name: '道路缺陷检测 v2.3', baseModel: 'YOLOv8m', mAP: 0.782, classes: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物'] },
-  { id: 'model-002', name: '施工安全帽检测 v1.0', baseModel: 'YOLOv8s', mAP: 0.923, classes: ['安全帽', '无安全帽', '人员'] },
-  { id: 'model-003', name: '人员跌倒检测 v1.0', baseModel: 'YOLOv8s', mAP: 0.887, classes: ['正常站立', '跌倒'] },
-  { id: 'model-004', name: '火焰烟雾检测 v2.1', baseModel: 'YOLOv8m', mAP: 0.911, classes: ['火焰', '浓烟', '轻烟'] },
-]
-
-const DATASETS: Dataset[] = [
-  { id: 'ds-001', name: '道路缺陷测试集', images: 975, classes: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物'] },
-  { id: 'ds-002', name: '安全帽测试集', images: 478, classes: ['安全帽', '无安全帽', '人员'] },
-  { id: 'ds-003', name: '跌倒行为测试集', images: 642, classes: ['正常站立', '跌倒'] },
-  { id: 'ds-004', name: '火焰烟雾测试集', images: 1120, classes: ['火焰', '浓烟', '轻烟'] },
-  { id: 'ds-005', name: '混合测试集', images: 2000, classes: ['裂缝', '坑洼', '安全帽', '火焰', '人员'] },
-]
 
 function CreateValidate() {
   const navigate = useNavigate()
@@ -45,8 +16,8 @@ function CreateValidate() {
   const [isCreating, setIsCreating] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const model = MODELS.find(m => m.id === selectedModel)
-  const dataset = DATASETS.find(d => d.id === selectedDataset)
+  const model = VALIDATE_MODELS.find(m => m.id === selectedModel)
+  const dataset = VALIDATE_DATASETS.find(d => d.id === selectedDataset)
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {}
@@ -116,7 +87,7 @@ function CreateValidate() {
               color="var(--accent-bright)"
               selectedId={selectedModel}
               onChange={(id) => { setSelectedModel(id); setErrors({}) }}
-              items={MODELS.map(m => ({
+              items={VALIDATE_MODELS.map(m => ({
                 id: m.id,
                 name: m.name,
                 subtitle: `${m.baseModel}`,
@@ -168,7 +139,7 @@ function CreateValidate() {
               color="var(--success)"
               selectedId={selectedDataset}
               onChange={(id) => { setSelectedDataset(id); setErrors({}) }}
-              items={DATASETS.map(ds => ({
+              items={VALIDATE_DATASETS.map(ds => ({
                 id: ds.id,
                 name: ds.name,
                 tags: ds.classes,

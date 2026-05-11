@@ -13,123 +13,11 @@ import {
 import { NotFound } from '../../components/NotFound'
 import { ClassDistributionChart } from '../../components/ClassDistributionChart'
 import { DatasetSplitManager } from '../../components/DatasetSplitManager'
-import { SplitAdjuster } from '../../components/SplitAdjuster'
+import { DATASETS } from '../../data/datasets'
 
 export const Route = createFileRoute('/datasets/$datasetId')({
   component: DatasetDetail,
 })
-
-// ─── Mock Data ───
-
-function generateAnnotations(count: number, classPool: string[]): Annotation[] {
-  return Array.from({ length: count }, (_, i) => {
-    const numClasses = 1 + Math.floor(Math.random() * 3)
-    const annClasses: string[] = []
-    for (let j = 0; j < numClasses; j++) {
-      annClasses.push(classPool[(i + j * 7 + j * j * 3) % classPool.length])
-    }
-    return {
-      id: `ann-${i + 1}`,
-      name: `image_${String(i + 1).padStart(5, '0')}.jpg`,
-      set: 'train' as const,
-      classes: [...new Set(annClasses)],
-    }
-  })
-}
-
-interface Annotation {
-  id: string
-  name: string
-  set: 'train' | 'val' | 'test'
-  classes: string[]
-}
-
-const DATASETS = [
-  {
-    id: 'ds-001',
-    name: '道路缺陷检测数据集 v2.3',
-    description: '该数据集包含城市道路、高速公路等场景下的道路缺陷图像，用于训练道路缺陷检测模型。',
-    contentTags: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物'],
-    sceneTags: ['城市道路', '高速公路', '乡村道路', '桥梁隧道'],
-    annotationCount: 4872,
-    split: { train: 70, val: 15, test: 15 },
-    annotatedBy: '张工',
-    createdAt: '2026-04-29',
-    source: '科宝标注平台',
-    images: [
-      { id: 'img-001', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=road%20surface%20crack%20defect%20closeup%20photography&image_size=landscape_4_3', label: '裂缝检测', bbox: { x: 120, y: 80, width: 200, height: 60 } },
-      { id: 'img-002', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=pothole%20on%20asphalt%20road%20surface%20photography&image_size=landscape_4_3', label: '坑洼检测', bbox: { x: 180, y: 150, width: 120, height: 80 } },
-      { id: 'img-003', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=damaged%20road%20surface%20with%20potholes%20photography&image_size=landscape_4_3', label: '破损检测', bbox: { x: 90, y: 120, width: 180, height: 100 } },
-      { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=road%20surface%20water%20ponding%20after%20rain%20photography&image_size=landscape_4_3', label: '积水检测', bbox: { x: 150, y: 100, width: 220, height: 140 } },
-      { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=faded%20road%20markings%20on%20asphalt%20photography&image_size=landscape_4_3', label: '标线模糊', bbox: { x: 80, y: 160, width: 280, height: 40 } },
-      { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=road%20obstacle%20debris%20on%20highway%20photography&image_size=landscape_4_3', label: '障碍物检测', bbox: { x: 200, y: 130, width: 80, height: 100 } },
-    ],
-    annotations: generateAnnotations(4872, ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物', '正常']),
-  },
-  {
-    id: 'ds-002',
-    name: '施工安全帽检测集',
-    description: '建筑工地施工人员安全帽佩戴检测数据集，包含多种角度和光照条件下的样本。',
-    contentTags: ['安全帽', '无安全帽', '人员'],
-    sceneTags: ['建筑工地', '高空作业', '隧道施工', '厂房作业'],
-    annotationCount: 2391,
-    split: { train: 80, val: 10, test: 10 },
-    annotatedBy: '李工',
-    createdAt: '2026-04-28',
-    source: '科宝标注平台',
-    images: [
-      { id: 'img-001', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=construction%20worker%20wearing%20yellow%20safety%20helmet%20photography&image_size=landscape_4_3', label: '安全帽', bbox: { x: 140, y: 40, width: 100, height: 80 } },
-      { id: 'img-002', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=construction%20worker%20without%20safety%20helmet%20photography&image_size=landscape_4_3', label: '无安全帽', bbox: { x: 160, y: 50, width: 80, height: 60 } },
-      { id: 'img-003', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=multiple%20construction%20workers%20on%20site%20photography&image_size=landscape_4_3', label: '人员', bbox: { x: 100, y: 60, width: 60, height: 180 } },
-      { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=construction%20worker%20blue%20helmet%20high%20altitude%20work%20photography&image_size=landscape_4_3', label: '安全帽', bbox: { x: 180, y: 30, width: 90, height: 70 } },
-      { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=construction%20team%20working%20on%20building%20site%20photography&image_size=landscape_4_3', label: '人员', bbox: { x: 120, y: 80, width: 70, height: 160 } },
-      { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=worker%20safety%20inspection%20construction%20site%20photography&image_size=landscape_4_3', label: '安全帽', bbox: { x: 150, y: 45, width: 85, height: 75 } },
-    ],
-    annotations: generateAnnotations(2391, ['安全帽', '无安全帽', '人员']),
-  },
-  {
-    id: 'ds-003',
-    name: '工厂设备异常检测集',
-    description: '工业设备异常状态检测数据集，包含正常和异常状态的设备图像。',
-    contentTags: ['正常设备', '异常设备', '待检修'],
-    sceneTags: ['工厂车间', '生产线', '仓库设备', '机械设备'],
-    annotationCount: 1628,
-    split: { train: 70, val: 20, test: 10 },
-    annotatedBy: '王工',
-    createdAt: '2026-04-29',
-    source: '科宝标注平台',
-    images: [
-      { id: 'img-001', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=industrial%20machine%20equipment%20normal%20state%20photography&image_size=landscape_4_3', label: '正常设备', bbox: { x: 60, y: 40, width: 320, height: 200 } },
-      { id: 'img-002', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=industrial%20machine%20equipment%20abnormal%20fault%20photography&image_size=landscape_4_3', label: '异常设备', bbox: { x: 80, y: 50, width: 280, height: 180 } },
-      { id: 'img-003', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=factory%20equipment%20maintenance%20repair%20photography&image_size=landscape_4_3', label: '待检修', bbox: { x: 100, y: 60, width: 240, height: 160 } },
-      { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=factory%20production%20line%20machinery%20photography&image_size=landscape_4_3', label: '正常设备', bbox: { x: 40, y: 30, width: 340, height: 220 } },
-      { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=industrial%20robot%20arm%20automation%20photography&image_size=landscape_4_3', label: '正常设备', bbox: { x: 120, y: 20, width: 200, height: 240 } },
-      { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=broken%20industrial%20machine%20equipment%20photography&image_size=landscape_4_3', label: '异常设备', bbox: { x: 70, y: 45, width: 300, height: 190 } },
-    ],
-    annotations: generateAnnotations(1628, ['正常设备', '异常设备', '待检修']),
-  },
-  {
-    id: 'ds-004',
-    name: '车牌识别数据集',
-    description: '各种场景下的车牌图像数据集，支持多种车牌格式识别训练。',
-    contentTags: ['车牌', '遮挡车牌', '模糊车牌'],
-    sceneTags: ['城市道路', '停车场', '高速公路', '小区出入口'],
-    annotationCount: 7840,
-    split: { train: 75, val: 15, test: 10 },
-    annotatedBy: '赵工',
-    createdAt: '2026-04-27',
-    source: '科宝标注平台',
-    images: [
-      { id: 'img-001', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20clear%20photography&image_size=landscape_4_3', label: '车牌', bbox: { x: 150, y: 100, width: 140, height: 45 } },
-      { id: 'img-002', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20obstructed%20partial%20covered%20photography&image_size=landscape_4_3', label: '遮挡车牌', bbox: { x: 160, y: 95, width: 120, height: 40 } },
-      { id: 'img-003', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20blurry%20motion%20blur%20photography&image_size=landscape_4_3', label: '模糊车牌', bbox: { x: 140, y: 105, width: 150, height: 50 } },
-      { id: 'img-004', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20night%20time%20photography&image_size=landscape_4_3', label: '车牌', bbox: { x: 130, y: 90, width: 160, height: 55 } },
-      { id: 'img-005', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20rainy%20weather%20photography&image_size=landscape_4_3', label: '模糊车牌', bbox: { x: 155, y: 100, width: 130, height: 45 } },
-      { id: 'img-006', url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=car%20license%20plate%20covered%20by%20dirt%20photography&image_size=landscape_4_3', label: '遮挡车牌', bbox: { x: 145, y: 95, width: 145, height: 48 } },
-    ],
-    annotations: generateAnnotations(7840, ['车牌', '遮挡车牌', '模糊车牌']),
-  },
-]
 
 // ─── Component ───
 
@@ -139,20 +27,48 @@ function DatasetDetail() {
   if (!dataset) return <NotFound />
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [splitMode, setSplitMode] = useState<'view' | 'edit'>('view')
-  const [selectedLabels, setSelectedLabels] = useState<string[]>([])
-  const [split, setSplit] = useState(dataset.split)
+  const [showSplitModal, setShowSplitModal] = useState(false)
+
+  // 从 resources 推导划分比例
+  const resources = dataset.resources
+  const split = useMemo(() => {
+    const total = resources.length
+    if (total === 0) return { train: 70, val: 15, test: 15 }
+    const counts = { train: 0, val: 0, test: 0 }
+    resources.forEach(r => { counts[r.set]++ })
+    return {
+      train: Math.round((counts.train / total) * 100),
+      val: Math.round((counts.val / total) * 100),
+      test: 100 - Math.round((counts.train / total) * 100) - Math.round((counts.val / total) * 100),
+    }
+  }, [resources])
+
+  // 从 contentTagList 推导扁平标签名列表
+  const flatContentTags = useMemo(() => {
+    const names: string[] = []
+    dataset.contentTagList.forEach(g =>
+      g.labelDetails.forEach(d => {
+        if (!names.includes(d.labelName)) names.push(d.labelName)
+      })
+    )
+    return names
+  }, [dataset.contentTagList])
 
   const classDistribution = useMemo(() => {
     const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h) }
-    return dataset.contentTags.map(cls => {
+    return flatContentTags.map(cls => {
       const h = hash(cls)
       const base = 100 + (h % 600)
-      const t = Math.round(base * (dataset.split.train / 100))
-      const v = Math.round(base * (dataset.split.val / 100))
+      const t = Math.round(base * (split.train / 100))
+      const v = Math.round(base * (split.val / 100))
       return { name: cls, 训练集: t, 验证集: v, 测试集: Math.max(0, base - t - v) }
     })
-  }, [dataset])
+  }, [flatContentTags, split])
+
+  const handleSaveSplit = (_split: { train: number; val: number; test: number }, _assignments: Record<string, 'train' | 'val' | 'test'>) => {
+    // 划分调整结果：_split 为比例，_assignments 为每张图片的归属
+    setShowSplitModal(false)
+  }
 
   return (
     <div>
@@ -165,9 +81,9 @@ function DatasetDetail() {
             <div className="breadcrumb">
               <Link to="/">科宝训练平台</Link> ›
               <Link to="/datasets">数据集管理</Link> ›
-              <span>{dataset.name}</span>
+              <span>{dataset.datasetName}</span>
             </div>
-            <h1 className="page-title">{dataset.name}</h1>
+            <h1 className="page-title">{dataset.datasetName}</h1>
           </div>
         </div>
       </div>
@@ -180,98 +96,27 @@ function DatasetDetail() {
               <div style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>标注数据数量</div>
                 <div style={{ fontSize: 36, fontWeight: 700, color: 'var(--accent-bright)', fontFamily: 'JetBrains Mono' }}>
-                  {dataset.annotationCount.toLocaleString()}
+                  {dataset.dataCount.toLocaleString()}
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <User size={16} style={{ color: 'var(--text-muted)' }} />
-                  <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>创建人: {dataset.annotatedBy}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>创建人: {dataset.createBy}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Calendar size={16} style={{ color: 'var(--text-muted)' }} />
-                  <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>创建时间: {dataset.createdAt}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>创建时间: {dataset.createTime}</span>
                 </div>
               </div>
             </div>
             <div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>数据集备注</div>
               <div style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: '1.6' }}>
-                {dataset.description}
+                {dataset.description ?? '暂无备注'}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Data split section */}
-        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <SplitSquareVertical size={14} style={{ color: 'var(--accent-bright)' }} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>数据划分</span>
-            </div>
-            {splitMode === 'view' && (
-              <button className="btn btn-secondary btn-sm" onClick={() => setSplitMode('edit')}>
-                <SplitSquareVertical size={12} /> 调整划分
-              </button>
-            )}
-          </div>
-
-          {splitMode === 'view' && (
-            <div>
-              <div className="split-bar" style={{ marginBottom: 10 }}>
-                <div className="split-bar-train" style={{ flex: split.train }}>
-                  <span className="split-bar-label" style={{ color: '#409eff' }}>训练 {split.train}%</span>
-                </div>
-                <div className="split-bar-val" style={{ flex: split.val }}>
-                  <span className="split-bar-label" style={{ color: '#10b981' }}>验证 {split.val}%</span>
-                </div>
-                <div className="split-bar-test" style={{ flex: split.test }}>
-                  <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 {split.test}%</span>
-                </div>
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                训练 {Math.round(dataset.annotationCount * split.train / 100).toLocaleString()} 张 · 验证 {Math.round(dataset.annotationCount * split.val / 100).toLocaleString()} 张 · 测试 {Math.round(dataset.annotationCount * split.test / 100).toLocaleString()} 张
-              </div>
-            </div>
-          )}
-
-          {splitMode === 'edit' && (
-            <div style={{ marginTop: 8 }}>
-              <SplitAdjuster
-                totalCount={dataset.annotationCount}
-                split={split}
-                onChange={setSplit}
-                showPercentInputs
-                showCountInputs
-              />
-              <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
-                <button className="btn btn-primary" onClick={() => setSplitMode('view')}>
-                  <Tag size={12} /> 确认划分
-                </button>
-                <button className="btn btn-ghost" onClick={() => { setSplit(dataset.split); setSplitMode('view') }}>
-                  取消
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Split adjustment panel */}
-        <div style={{ marginBottom: 24 }}>
-          <DatasetSplitManager
-            annotations={dataset.annotations}
-            classNames={dataset.contentTags}
-            currentSplit={split}
-            totalCount={dataset.annotationCount}
-            selectedLabels={selectedLabels}
-            onSelectedLabelsChange={setSelectedLabels}
-          />
-        </div>
-
-        {/* Class distribution */}
-        <div style={{ marginBottom: 24 }}>
-          <ClassDistributionChart data={classDistribution} />
         </div>
 
         {/* Content tags */}
@@ -282,7 +127,7 @@ function DatasetDetail() {
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>内容标签</span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {dataset.contentTags.map(tag => (
+              {flatContentTags.map(tag => (
                 <span key={tag} style={{ background: 'rgba(64,158,255,0.1)', color: 'var(--accent-bright)', fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 500 }}>
                   {tag}
                 </span>
@@ -295,13 +140,81 @@ function DatasetDetail() {
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>场景标签</span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {dataset.sceneTags.map(tag => (
-                <span key={tag} style={{ background: 'rgba(64,158,255,0.1)', color: 'var(--teal)', fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 500 }}>
-                  {tag}
+              {dataset.sceneTags ? (
+                <span style={{ background: 'rgba(64,158,255,0.1)', color: 'var(--teal)', fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 500 }}>
+                  {dataset.sceneTags}
                 </span>
-              ))}
+              ) : (
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>暂无场景标签</span>
+              )}
             </div>
           </div>
+        </div>
+
+        {/* Data split section */}
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <SplitSquareVertical size={14} style={{ color: 'var(--accent-bright)' }} />
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>数据划分</span>
+            </div>
+            <button className="btn btn-secondary btn-sm" onClick={() => setShowSplitModal(true)}>
+              <SplitSquareVertical size={12} /> 调整划分
+            </button>
+          </div>
+
+          <div>
+            <div className="split-bar" style={{ marginBottom: 10 }}>
+              <div className="split-bar-train" style={{ flex: split.train }}>
+                <span className="split-bar-label" style={{ color: '#409eff' }}>训练 {split.train}%</span>
+              </div>
+              <div className="split-bar-val" style={{ flex: split.val }}>
+                <span className="split-bar-label" style={{ color: '#10b981' }}>验证 {split.val}%</span>
+              </div>
+              <div className="split-bar-test" style={{ flex: split.test }}>
+                <span className="split-bar-label" style={{ color: '#f59e0b' }}>测试 {split.test}%</span>
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              训练 {Math.round(dataset.dataCount * split.train / 100).toLocaleString()} 张 · 验证 {Math.round(dataset.dataCount * split.val / 100).toLocaleString()} 张 · 测试 {Math.round(dataset.dataCount * split.test / 100).toLocaleString()} 张
+            </div>
+          </div>
+        </div>
+
+        {/* Split adjustment modal */}
+        {showSplitModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000, paddingTop: '5vh', animation: 'fadeIn 0.2s ease-out', overflowY: 'auto' }}>
+            <div style={{ background: 'var(--bg-base)', borderRadius: 12, width: '100%', maxWidth: 960, maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', animation: 'slideIn 0.25s ease-out' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border-dim)', position: 'sticky', top: 0, background: 'var(--bg-base)', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <SplitSquareVertical size={18} style={{ color: 'var(--accent-bright)' }} />
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>调整数据划分</span>
+                </div>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setShowSplitModal(false)}
+                  style={{ width: 36, height: 36, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div style={{ padding: 24 }}>
+                <DatasetSplitManager
+                  resources={resources}
+                  classNames={flatContentTags}
+                  currentSplit={split}
+                  totalCount={dataset.dataCount}
+                  datasetName={dataset.datasetName}
+                  onSave={handleSaveSplit}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Class distribution */}
+        <div style={{ marginBottom: 24 }}>
+          <ClassDistributionChart data={classDistribution} />
         </div>
 
         {/* Image preview */}
@@ -311,29 +224,61 @@ function DatasetDetail() {
               <Images size={16} style={{ color: 'var(--accent-bright)' }} />
               <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>标注数据预览</span>
             </div>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>共 {dataset.images.length} 张预览图</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>共 {resources.length} 张预览图</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            {dataset.images.map((img, index) => (
-              <div key={img.id} className="select-card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', position: 'relative' }}
-                onClick={() => setSelectedImage(img.id)}>
-                <div style={{ position: 'relative', aspectRatio: '4/3' }}>
-                  <img src={img.url} alt={`预览图 ${index + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', left: `${(img.bbox.x / 400) * 100}%`, top: `${(img.bbox.y / 300) * 100}%`, width: `${(img.bbox.width / 400) * 100}%`, height: `${(img.bbox.height / 300) * 100}%`, border: '3px solid #409eff', backgroundColor: 'rgba(0, 85, 213, 0.2)' }} />
-                  <div style={{ position: 'absolute', top: `${(img.bbox.y / 300) * 100 - 24}px`, left: `${(img.bbox.x / 400) * 100}%`, color: 'white', fontSize: 10, padding: '2px 6px', background: '#0055d5', borderRadius: 2, whiteSpace: 'nowrap' }}>
-                    {img.label}
+            {resources.map((res) => {
+              const firstShape = res.labelResultJson.shapes[0]
+              const w = res.labelResultJson.imageWidth || 1920
+              const h = res.labelResultJson.imageHeight || 1080
+              const boxes = firstShape?.boxes
+              return (
+                <div key={res.id} className="select-card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', position: 'relative' }}
+                  onClick={() => setSelectedImage(res.id)}>
+                  <div style={{ position: 'relative', aspectRatio: '4/3' }}>
+                    <img src={res.url} alt={res.fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {boxes && (
+                      <>
+                        <div style={{
+                          position: 'absolute',
+                          left: `${(Number(boxes[0]) / w) * 100}%`,
+                          top: `${(Number(boxes[1]) / h) * 100}%`,
+                          width: `${((Number(boxes[2]) - Number(boxes[0])) / w) * 100}%`,
+                          height: `${((Number(boxes[3]) - Number(boxes[1])) / h) * 100}%`,
+                          border: '3px solid #409eff',
+                          backgroundColor: 'rgba(0, 85, 213, 0.2)',
+                        }} />
+                        <div style={{
+                          position: 'absolute',
+                          top: `${(Number(boxes[1]) / h) * 100 - 24}px`,
+                          left: `${(Number(boxes[0]) / w) * 100}%`,
+                          color: 'white',
+                          fontSize: 10,
+                          padding: '2px 6px',
+                          background: '#0055d5',
+                          borderRadius: 2,
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {firstShape.labelInfo.name}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
 
       {/* Image zoom modal */}
       {selectedImage && (() => {
-        const img = dataset.images.find(i => i.id === selectedImage)
-        if (!img) return null
+        const res = resources.find(r => r.id === selectedImage)
+        if (!res) return null
+        const firstShape = res.labelResultJson.shapes[0]
+        const w = res.labelResultJson.imageWidth || 1920
+        const h = res.labelResultJson.imageHeight || 1080
+        const boxes = firstShape?.boxes
         return (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, animation: 'fadeIn 0.2s ease-out' }}
             onClick={() => setSelectedImage(null)}>
@@ -342,11 +287,33 @@ function DatasetDetail() {
               <X size={20} />
             </button>
             <div style={{ position: 'relative', maxWidth: '80vw', maxHeight: '80vh' }}>
-              <img src={img.url} alt={img.label} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              <div style={{ position: 'absolute', left: `${(img.bbox.x / 400) * 100}%`, top: `${(img.bbox.y / 300) * 100}%`, width: `${(img.bbox.width / 400) * 100}%`, height: `${(img.bbox.height / 300) * 100}%`, border: '3px solid #409eff', backgroundColor: 'rgba(0,85,213,0.15)' }} />
-              <div style={{ position: 'absolute', top: `${(img.bbox.y / 300) * 100 - 28}px`, left: `${(img.bbox.x / 400) * 100}%`, color: 'white', fontSize: 14, padding: '4px 12px', background: '#0055d5', borderRadius: 6, fontWeight: 600 }}>
-                {img.label}
-              </div>
+              <img src={res.url} alt={res.fileName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              {boxes && (
+                <>
+                  <div style={{
+                    position: 'absolute',
+                    left: `${(Number(boxes[0]) / w) * 100}%`,
+                    top: `${(Number(boxes[1]) / h) * 100}%`,
+                    width: `${((Number(boxes[2]) - Number(boxes[0])) / w) * 100}%`,
+                    height: `${((Number(boxes[3]) - Number(boxes[1])) / h) * 100}%`,
+                    border: '3px solid #409eff',
+                    backgroundColor: 'rgba(0,85,213,0.15)',
+                  }} />
+                  <div style={{
+                    position: 'absolute',
+                    top: `${(Number(boxes[1]) / h) * 100 - 28}px`,
+                    left: `${(Number(boxes[0]) / w) * 100}%`,
+                    color: 'white',
+                    fontSize: 14,
+                    padding: '4px 12px',
+                    background: '#0055d5',
+                    borderRadius: 6,
+                    fontWeight: 600,
+                  }}>
+                    {firstShape.labelInfo.name}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )

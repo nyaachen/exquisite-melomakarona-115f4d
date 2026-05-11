@@ -1,24 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { RefreshCw, Layers, ArrowRight, Search } from 'lucide-react'
+import { DATASETS } from '../../data/datasets'
 
 export const Route = createFileRoute('/datasets/')({
   component: DatasetsPage,
 })
 
-const DATASETS = [
-  { id: 'ds-001', name: '道路缺陷检测数据集 v2.3', images: 4872, classes: 8, labeled: 4721, synced: '2026-04-29 08:30', status: 'synced' },
-  { id: 'ds-002', name: '施工安全帽检测集', images: 2391, classes: 3, labeled: 2391, synced: '2026-04-28 11:20', status: 'synced' },
-  { id: 'ds-003', name: '工厂设备异常检测集', images: 1628, classes: 3, labeled: 1628, synced: '2026-04-29 07:45', status: 'synced' },
-  { id: 'ds-004', name: '车牌识别数据集', images: 7840, classes: 3, labeled: 7840, synced: '2026-04-27 20:10', status: 'synced' },
-  { id: 'ds-005', name: '人员跌倒检测数据集', images: 3210, classes: 2, labeled: 3101, synced: '2026-04-26 09:00', status: 'partial' },
-]
-
 function DatasetsPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const filteredDatasets = DATASETS.filter(ds =>
-    ds.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ds.datasetName.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
@@ -59,48 +52,40 @@ function DatasetsPage() {
               <thead>
                 <tr>
                   <th>数据集名称</th>
-                  <th>数据集描述</th>
-                  <th>标注资源格式</th>
-                  <th>标注信息类型</th>
-                  <th>场景标签</th>
+                  <th>来源</th>
+                  <th>标签组</th>
+                  <th>类别数</th>
                   <th>数据数量</th>
+                  <th>创建时间</th>
                   <th>操作</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredDatasets.map(ds => (
-                  <tr key={ds.id}>
-                    <td className="primary">{ds.name}</td>
-                    <td className="mono">{ds.images.toLocaleString()}</td>
-                    <td className="mono">
-                      <span style={{ color: ds.labeled === ds.images ? 'var(--success)' : 'var(--warning)' }}>
-                        {ds.labeled.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="mono">{ds.classes}</td>
-                    <td>
-                      {ds.status === 'synced'
-                        ? <span className="badge badge-completed">高速公路</span>
-                        : <span className="badge badge-pending">开车</span>
-                      }
-                    </td>
-                    <td style={{ fontSize: 12 }}>{ds.images.toLocaleString()}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 0 }}>
-                        <Link to={`/datasets/${ds.id}`}  className="btn btn-ghost btn-sm">
-                          查看详情 <ArrowRight size={11} />
-                        </Link>
-                        <Link to="/subdatasets/create" className="btn btn-ghost btn-sm">
-                          创建子数据集 <ArrowRight size={11} />
-                        </Link>
-                        <Link to="/train/create" className="btn btn-ghost btn-sm">
-                          创建训练任务 <ArrowRight size={11} />
-                        </Link>
-                  
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {filteredDatasets.map(ds => {
+                  const classCount = ds.contentTagList.reduce(
+                    (sum, g) => sum + g.labelDetails.length, 0
+                  )
+                  return (
+                    <tr key={ds.id}>
+                      <td className="primary">{ds.datasetName}</td>
+                      <td>{ds.sourceTypeName}</td>
+                      <td>{ds.contentTagList.map(g => g.name).join(', ') || '-'}</td>
+                      <td className="mono">{classCount}</td>
+                      <td className="mono">{ds.dataCount.toLocaleString()}</td>
+                      <td style={{ fontSize: 12 }}>{ds.createTime}</td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 0 }}>
+                          <Link to={`/datasets/${ds.id}`} className="btn btn-ghost btn-sm">
+                            查看详情 <ArrowRight size={11} />
+                          </Link>
+                          <Link to="/train/create" className="btn btn-ghost btn-sm">
+                            创建训练任务 <ArrowRight size={11} />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

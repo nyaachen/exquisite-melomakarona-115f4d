@@ -160,7 +160,7 @@ function TaskDetail() {
               onPublishClick={() => setShowPublishModal(true)}
             />
             <ModelValidationPanel
-              taskId={taskId}
+              prefix={taskId}
               classes={task.classes}
               classColors={DEFAULT_CLASS_COLORS}
               testImages={TEST_IMAGES}

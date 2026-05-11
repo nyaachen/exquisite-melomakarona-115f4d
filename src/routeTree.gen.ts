@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ValidateIndexRouteImport } from './routes/validate/index'
 import { Route as TrainIndexRouteImport } from './routes/train/index'
-import { Route as SubdatasetsIndexRouteImport } from './routes/subdatasets/index'
 import { Route as PretrainedModelsIndexRouteImport } from './routes/pretrained-models/index'
 import { Route as PresetsIndexRouteImport } from './routes/presets/index'
 import { Route as PlazaIndexRouteImport } from './routes/plaza/index'
@@ -28,7 +27,6 @@ import { Route as TrainCreateRouteImport } from './routes/train/create'
 import { Route as TrainTaskIdRouteImport } from './routes/train/$taskId'
 import { Route as SystemUserRouteImport } from './routes/system/user'
 import { Route as SystemPrivateModelsRouteImport } from './routes/system/private-models'
-import { Route as SubdatasetsCreateRouteImport } from './routes/subdatasets/create'
 import { Route as PretrainedModelsCreateRouteImport } from './routes/pretrained-models/create'
 import { Route as PretrainedModelsModelIdRouteImport } from './routes/pretrained-models/$modelId'
 import { Route as PresetsCreateRouteImport } from './routes/presets/create'
@@ -56,11 +54,6 @@ const ValidateIndexRoute = ValidateIndexRouteImport.update({
 const TrainIndexRoute = TrainIndexRouteImport.update({
   id: '/train/',
   path: '/train/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SubdatasetsIndexRoute = SubdatasetsIndexRouteImport.update({
-  id: '/subdatasets/',
-  path: '/subdatasets/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PretrainedModelsIndexRoute = PretrainedModelsIndexRouteImport.update({
@@ -136,11 +129,6 @@ const SystemUserRoute = SystemUserRouteImport.update({
 const SystemPrivateModelsRoute = SystemPrivateModelsRouteImport.update({
   id: '/system/private-models',
   path: '/system/private-models',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SubdatasetsCreateRoute = SubdatasetsCreateRouteImport.update({
-  id: '/subdatasets/create',
-  path: '/subdatasets/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PretrainedModelsCreateRoute = PretrainedModelsCreateRouteImport.update({
@@ -225,7 +213,6 @@ export interface FileRoutesByFullPath {
   '/presets/create': typeof PresetsCreateRoute
   '/pretrained-models/$modelId': typeof PretrainedModelsModelIdRoute
   '/pretrained-models/create': typeof PretrainedModelsCreateRoute
-  '/subdatasets/create': typeof SubdatasetsCreateRoute
   '/system/private-models': typeof SystemPrivateModelsRoute
   '/system/user': typeof SystemUserRoute
   '/train/$taskId': typeof TrainTaskIdRoute
@@ -241,7 +228,6 @@ export interface FileRoutesByFullPath {
   '/plaza/': typeof PlazaIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/pretrained-models/': typeof PretrainedModelsIndexRoute
-  '/subdatasets/': typeof SubdatasetsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
 }
@@ -260,7 +246,6 @@ export interface FileRoutesByTo {
   '/presets/create': typeof PresetsCreateRoute
   '/pretrained-models/$modelId': typeof PretrainedModelsModelIdRoute
   '/pretrained-models/create': typeof PretrainedModelsCreateRoute
-  '/subdatasets/create': typeof SubdatasetsCreateRoute
   '/system/private-models': typeof SystemPrivateModelsRoute
   '/system/user': typeof SystemUserRoute
   '/train/$taskId': typeof TrainTaskIdRoute
@@ -276,7 +261,6 @@ export interface FileRoutesByTo {
   '/plaza': typeof PlazaIndexRoute
   '/presets': typeof PresetsIndexRoute
   '/pretrained-models': typeof PretrainedModelsIndexRoute
-  '/subdatasets': typeof SubdatasetsIndexRoute
   '/train': typeof TrainIndexRoute
   '/validate': typeof ValidateIndexRoute
 }
@@ -296,7 +280,6 @@ export interface FileRoutesById {
   '/presets/create': typeof PresetsCreateRoute
   '/pretrained-models/$modelId': typeof PretrainedModelsModelIdRoute
   '/pretrained-models/create': typeof PretrainedModelsCreateRoute
-  '/subdatasets/create': typeof SubdatasetsCreateRoute
   '/system/private-models': typeof SystemPrivateModelsRoute
   '/system/user': typeof SystemUserRoute
   '/train/$taskId': typeof TrainTaskIdRoute
@@ -312,7 +295,6 @@ export interface FileRoutesById {
   '/plaza/': typeof PlazaIndexRoute
   '/presets/': typeof PresetsIndexRoute
   '/pretrained-models/': typeof PretrainedModelsIndexRoute
-  '/subdatasets/': typeof SubdatasetsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
 }
@@ -333,7 +315,6 @@ export interface FileRouteTypes {
     | '/presets/create'
     | '/pretrained-models/$modelId'
     | '/pretrained-models/create'
-    | '/subdatasets/create'
     | '/system/private-models'
     | '/system/user'
     | '/train/$taskId'
@@ -349,7 +330,6 @@ export interface FileRouteTypes {
     | '/plaza/'
     | '/presets/'
     | '/pretrained-models/'
-    | '/subdatasets/'
     | '/train/'
     | '/validate/'
   fileRoutesByTo: FileRoutesByTo
@@ -368,7 +348,6 @@ export interface FileRouteTypes {
     | '/presets/create'
     | '/pretrained-models/$modelId'
     | '/pretrained-models/create'
-    | '/subdatasets/create'
     | '/system/private-models'
     | '/system/user'
     | '/train/$taskId'
@@ -384,7 +363,6 @@ export interface FileRouteTypes {
     | '/plaza'
     | '/presets'
     | '/pretrained-models'
-    | '/subdatasets'
     | '/train'
     | '/validate'
   id:
@@ -403,7 +381,6 @@ export interface FileRouteTypes {
     | '/presets/create'
     | '/pretrained-models/$modelId'
     | '/pretrained-models/create'
-    | '/subdatasets/create'
     | '/system/private-models'
     | '/system/user'
     | '/train/$taskId'
@@ -419,7 +396,6 @@ export interface FileRouteTypes {
     | '/plaza/'
     | '/presets/'
     | '/pretrained-models/'
-    | '/subdatasets/'
     | '/train/'
     | '/validate/'
   fileRoutesById: FileRoutesById
@@ -439,7 +415,6 @@ export interface RootRouteChildren {
   PresetsCreateRoute: typeof PresetsCreateRoute
   PretrainedModelsModelIdRoute: typeof PretrainedModelsModelIdRoute
   PretrainedModelsCreateRoute: typeof PretrainedModelsCreateRoute
-  SubdatasetsCreateRoute: typeof SubdatasetsCreateRoute
   SystemPrivateModelsRoute: typeof SystemPrivateModelsRoute
   SystemUserRoute: typeof SystemUserRoute
   TrainTaskIdRoute: typeof TrainTaskIdRoute
@@ -455,7 +430,6 @@ export interface RootRouteChildren {
   PlazaIndexRoute: typeof PlazaIndexRoute
   PresetsIndexRoute: typeof PresetsIndexRoute
   PretrainedModelsIndexRoute: typeof PretrainedModelsIndexRoute
-  SubdatasetsIndexRoute: typeof SubdatasetsIndexRoute
   TrainIndexRoute: typeof TrainIndexRoute
   ValidateIndexRoute: typeof ValidateIndexRoute
 }
@@ -481,13 +455,6 @@ declare module '@tanstack/react-router' {
       path: '/train'
       fullPath: '/train/'
       preLoaderRoute: typeof TrainIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/subdatasets/': {
-      id: '/subdatasets/'
-      path: '/subdatasets'
-      fullPath: '/subdatasets/'
-      preLoaderRoute: typeof SubdatasetsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pretrained-models/': {
@@ -593,13 +560,6 @@ declare module '@tanstack/react-router' {
       path: '/system/private-models'
       fullPath: '/system/private-models'
       preLoaderRoute: typeof SystemPrivateModelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/subdatasets/create': {
-      id: '/subdatasets/create'
-      path: '/subdatasets/create'
-      fullPath: '/subdatasets/create'
-      preLoaderRoute: typeof SubdatasetsCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pretrained-models/create': {
@@ -711,7 +671,6 @@ const rootRouteChildren: RootRouteChildren = {
   PresetsCreateRoute: PresetsCreateRoute,
   PretrainedModelsModelIdRoute: PretrainedModelsModelIdRoute,
   PretrainedModelsCreateRoute: PretrainedModelsCreateRoute,
-  SubdatasetsCreateRoute: SubdatasetsCreateRoute,
   SystemPrivateModelsRoute: SystemPrivateModelsRoute,
   SystemUserRoute: SystemUserRoute,
   TrainTaskIdRoute: TrainTaskIdRoute,
@@ -727,7 +686,6 @@ const rootRouteChildren: RootRouteChildren = {
   PlazaIndexRoute: PlazaIndexRoute,
   PresetsIndexRoute: PresetsIndexRoute,
   PretrainedModelsIndexRoute: PretrainedModelsIndexRoute,
-  SubdatasetsIndexRoute: SubdatasetsIndexRoute,
   TrainIndexRoute: TrainIndexRoute,
   ValidateIndexRoute: ValidateIndexRoute,
 }

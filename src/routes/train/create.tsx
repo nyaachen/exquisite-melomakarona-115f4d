@@ -9,7 +9,8 @@ import {
   Package,
   Globe,
 } from 'lucide-react'
-import type { DatasetEntry } from '../../components/DatasetPicker'
+import { datasetToEntry, type DatasetEntry } from '../../components/DatasetPicker'
+import { DATASETS } from '../../data/datasets'
 import { CreateStepper, type StepDef } from '../../components/train/CreateStepper'
 import { DatasetStep } from '../../components/train/DatasetStep'
 import { ModelConfigStep } from '../../components/train/ModelConfigStep'
@@ -118,17 +119,8 @@ const ALL_PRESETS = [
   },
 ]
 
-// ─── Combined Datasets (parent datasets + sub-datasets) ───
-const DATASET_ENTRIES: DatasetEntry[] = [
-  { id: 'ds-001', name: '道路缺陷检测数据集 v2.3', type: 'parent', totalImages: 4872, trainImages: 4872, valImages: 4872, testImages: 4872, classes: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物', '正常'] },
-  { id: 'ds-002', name: '施工安全帽检测集', type: 'parent', totalImages: 2391, trainImages: 2391, valImages: 2391, testImages: 2391, classes: ['安全帽', '无安全帽', '人员'] },
-  { id: 'ds-003', name: '工厂设备异常检测集', type: 'parent', totalImages: 1628, trainImages: 1628, valImages: 1628, testImages: 1628, classes: ['正常设备', '异常设备', '待检修'] },
-  { id: 'ds-004', name: '车牌识别数据集', type: 'parent', totalImages: 7840, trainImages: 7840, valImages: 7840, testImages: 7840, classes: ['车牌', '遮挡车牌', '模糊车牌'] },
-  { id: 'sub-001', name: '道路缺陷 v2.3 标准划分子集', type: 'subdataset', parentName: '道路缺陷检测数据集 v2.3', totalImages: 4872, trainImages: 3410, valImages: 974, testImages: 488, classes: ['裂缝', '坑洼', '破损', '剥落', '标线模糊', '积水', '障碍物', '正常'] },
-  { id: 'sub-002', name: '施工安全帽检测子集', type: 'subdataset', parentName: '施工安全帽检测集', totalImages: 2391, trainImages: 1913, valImages: 239, testImages: 239, classes: ['安全帽', '无安全帽', '人员'] },
-  { id: 'sub-003', name: '设备异常检测标准子集', type: 'subdataset', parentName: '工厂设备异常检测集', totalImages: 1628, trainImages: 1139, valImages: 326, testImages: 163, classes: ['正常设备', '异常设备', '待检修'] },
-  { id: 'sub-004', name: '车牌识别 v1.0 子集', type: 'subdataset', parentName: '车牌识别数据集', totalImages: 7840, trainImages: 6272, valImages: 784, testImages: 784, classes: ['车牌', '遮挡车牌', '模糊车牌'] },
-]
+// ─── Datasets ───
+const DATASET_ENTRIES: DatasetEntry[] = DATASETS.map(datasetToEntry)
 
 const STARTING_POINT_TYPES = [
   { id: 'random', name: '随机起点', icon: <Shuffle size={16} />, desc: '从随机初始化权重开始训练' },
@@ -186,10 +178,6 @@ function CreateTask() {
   const [startPointType, setStartPointType] = useState('random')
   const [startPointId, setStartPointId] = useState<string | null>(null)
   const [startPointVersion, setStartPointVersion] = useState<string>('')
-
-  // Image processing
-  const [preprocessing, setPreprocessing] = useState<string[]>([])
-  const [augmentation, setAugmentation] = useState<string[]>([])
 
   // Step 3: Task name
   const [taskName, setTaskName] = useState('')
@@ -323,8 +311,6 @@ function CreateTask() {
               datasetSplit={datasetSplit}
               datasetErrors={datasetErrors}
               datasetWarnings={datasetWarnings}
-              preprocessing={preprocessing}
-              augmentation={augmentation}
               classDistribution={classDistribution}
               entries={DATASET_ENTRIES}
               selectedDs={selectedDs}
@@ -334,15 +320,21 @@ function CreateTask() {
               testImageCount={testImageCount}
               onDatasetChange={(id) => {
                 setDatasetId(id)
-                const ds = DATASET_ENTRIES.find(d => d.id === id)
-                if (ds && 'defaultSplit' in ds) {
-                  const s = (ds as any).defaultSplit
-                  if (s) setDatasetSplit(s)
+                const ds = DATASETS.find(d => d.id === id)
+                if (ds) {
+                  const total = ds.resources.length
+                  if (total > 0) {
+                    const counts = { train: 0, val: 0, test: 0 }
+                    ds.resources.forEach(r => { counts[r.set]++ })
+                    setDatasetSplit({
+                      train: Math.round((counts.train / total) * 100),
+                      val: Math.round((counts.val / total) * 100),
+                      test: 100 - Math.round((counts.train / total) * 100) - Math.round((counts.val / total) * 100),
+                    })
+                  }
                 }
               }}
               onSplitChange={setDatasetSplit}
-              onPreprocessingChange={setPreprocessing}
-              onAugmentationChange={setAugmentation}
             />
           )}
 

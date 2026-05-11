@@ -136,7 +136,7 @@ function PlazaDetail() {
                 </span>
               </div>
 
-              <div style={{ display: 'flex', gap: 24, paddingBottom: 20, borderBottom: '1px solid var(--border-dim)' }}>
+              <div style={{ display: 'flex', gap: 24, paddingBottom: 20, marginBottom: 16, borderBottom: '1px solid var(--border-dim)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
                   <User size={12} />
                   <span>{model.author}</span>
@@ -151,41 +151,10 @@ function PlazaDetail() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
                   <Layers size={12} />
-                  <span>{model.versions.length} 个版本</span>
+                  <span>最新版本 {latestVersion.version}</span>
                 </div>
               </div>
 
-              {/* Latest version metrics */}
-              <div style={{ marginTop: 20 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 12 }}>
-                  最新版本 {latestVersion.version} · 评估指标
-                </div>
-                {hasMetrics ? (
-                  <div className="card card-padded">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-                      <MetricCard label="mAP@0.5" value={latestVersion.metrics!.mAP.toFixed(3)} color="var(--accent-bright)" />
-                      <MetricCard label="Precision" value={latestVersion.metrics!.precision.toFixed(3)} color="var(--teal)" />
-                      <MetricCard label="Recall" value={latestVersion.metrics!.recall.toFixed(3)} color="var(--warning)" />
-                      <MetricCard label="F1 Score" value={latestVersion.metrics!.f1.toFixed(3)} color="var(--success)" />
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ padding: 16, background: 'var(--bg-elevated)', borderRadius: 4, fontSize: 12, color: 'var(--text-muted)' }}>
-                    该模型暂未包含评估指标。公开预训练模型的指标请参考其官方文档。
-                  </div>
-                )}
-              </div>
-
-              {/* Version info */}
-              <div style={{ marginTop: 16, display: 'flex', gap: 24, fontSize: 11, color: 'var(--text-muted)' }}>
-                <span>文件大小: <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--text-secondary)' }}>{latestVersion.fileSize}</span></span>
-                <span>输入尺寸: <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--text-secondary)' }}>{latestVersion.inputSize}</span></span>
-                <span>文件格式: <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--text-secondary)' }}>.{latestVersion.fileFormat}</span></span>
-              </div>
-            </div>
-
-            {/* Classes */}
-            <div className="card" style={{ padding: 24, marginTop: 24 }}>
               <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>检测类别</div>
               {model.classes.length > 0 ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
@@ -202,7 +171,10 @@ function PlazaDetail() {
               ) : (
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>该模型未定义检测类别（可能为大语言模型）</div>
               )}
+
             </div>
+
+            
 
             {/* Visualization */}
             <div className="card" style={{ padding: 24, marginTop: 24 }}>
@@ -395,53 +367,13 @@ function PlazaDetail() {
                 <Link to="/validate/create" className="btn btn-teal">
                   <CheckCircle2 size={14} /> 验证该模型
                 </Link>
+                <Link href="https://kebao-platform.example.com" className="btn btn-teal"> 
+                  前往科宝平台使用模型
+                </Link>
               </div>
             </div>
 
-            {/* Version history */}
-            <div className="card card-padded">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <History size={15} style={{ color: 'var(--text-secondary)' }} />
-                <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>版本历史</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {model.versions.map((ver, index) => (
-                  <div
-                    key={ver.version}
-                    className="version-item"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      padding: '10px 0',
-                      borderBottom: index < model.versions.length - 1 ? '1px solid var(--border-dim)' : 'none',
-                    }}
-                  >
-                    <div className={`version-badge ${index === 0 ? 'version-badge-latest' : ''}`}>
-                      {index === 0 ? <CheckCircle2 size={11} /> : <Layers size={11} />}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', fontFamily: "'JetBrains Mono', monospace" }}>
-                          {ver.version}
-                        </span>
-                        {index === 0 && (
-                          <span style={{ fontSize: 10, color: 'var(--success)', background: 'var(--success-glow)', padding: '1px 6px', borderRadius: 3 }}>最新</span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
-                        {ver.fileSize} · {ver.createdAt}
-                      </div>
-                      {ver.metrics && (
-                        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
-                          mAP {ver.metrics.mAP.toFixed(3)} · F1 {ver.metrics.f1.toFixed(3)}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            
 
             {/* Source info */}
             <div className="card card-padded" style={{ marginTop: 16 }}>
@@ -464,11 +396,60 @@ function PlazaDetail() {
                   {model.architectureName}
                 </span>
               </div>
+            </div>
+
+            {/* 参数信息 */}
+            <div className="card card-padded" style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>参数信息</div>
+              
               <div className="data-row">
                 <span className="data-row-label">当前版本</span>
                 <span className="data-row-value">{latestVersion.version}</span>
               </div>
+
+              <div className="data-row">
+                <span className="data-row-label">文件大小</span>
+                <span className="data-row-value">{latestVersion.fileSize}</span>
+              </div>
+
+              <div className="data-row">
+                <span className="data-row-label">输入尺寸</span>
+                <span className="data-row-value">{latestVersion.inputSize}</span>
+              </div>
+
+              <div className="data-row">
+                <span className="data-row-label">文件格式</span>
+                <span className="data-row-value">{latestVersion.fileFormat}</span>
+              </div>
+              
+
+              
+              {hasMetrics ? ( <>
+                <div className="data-row">
+                  <span className="data-row-label">mAP@0.5</span>
+                  <span className="data-row-value">{latestVersion.metrics!.mAP.toFixed(3)}</span>
+                </div>
+                <div className="data-row">
+                  <span className="data-row-label">Precision</span>
+                  <span className="data-row-value">{latestVersion.metrics!.precision.toFixed(3)}</span>
+                </div>
+                <div className="data-row">
+                  <span className="data-row-label">Recall</span>
+                  <span className="data-row-value">{latestVersion.metrics!.recall.toFixed(3)}</span>
+                </div>
+                <div className="data-row">
+                  <span className="data-row-label">F1 Score</span>
+                  <span className="data-row-value">{latestVersion.metrics!.f1.toFixed(3)}</span>
+                </div>
+                
+              </ >) : (
+                <div style={{ padding: 16, background: 'var(--bg-elevated)', borderRadius: 4, fontSize: 12, color: 'var(--text-muted)' }}>
+                  该模型暂未包含评估指标。公开预训练模型的指标请参考其官方文档。
+                </div>
+              )}
+
             </div>
+
           </div>
         </div>
       </div>

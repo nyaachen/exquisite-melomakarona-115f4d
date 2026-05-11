@@ -1,16 +1,36 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Search, ChevronDown, ChevronLeft, ChevronRight, X, CheckCircle2, Layers } from 'lucide-react'
+import { Search, ChevronDown, ChevronLeft, ChevronRight, X, CheckCircle2 } from 'lucide-react'
+import type { Dataset } from '../data/datasets'
 
 export interface DatasetEntry {
   id: string
   name: string
-  type: 'parent' | 'subdataset'
-  parentName?: string
   totalImages: number
   trainImages: number
   valImages: number
   testImages: number
   classes: string[]
+}
+
+/** 将 Dataset 转为 DatasetPicker 所需的 DatasetEntry */
+export function datasetToEntry(dataset: Dataset): DatasetEntry {
+  const counts = { train: 0, val: 0, test: 0 }
+  dataset.resources.forEach(r => { counts[r.set]++ })
+  const classes: string[] = []
+  dataset.contentTagList.forEach(g =>
+    g.labelDetails.forEach(d => {
+      if (!classes.includes(d.labelName)) classes.push(d.labelName)
+    })
+  )
+  return {
+    id: dataset.id,
+    name: dataset.datasetName,
+    totalImages: dataset.dataCount,
+    trainImages: counts.train,
+    valImages: counts.val,
+    testImages: counts.test,
+    classes,
+  }
 }
 
 interface Props {
@@ -53,16 +73,12 @@ export function DatasetPicker({ label, color, selectedId, onChange, entries, ima
     const q = search.toLowerCase()
     return entries.filter(e =>
       e.name.toLowerCase().includes(q) ||
-      (e.parentName && e.parentName.toLowerCase().includes(q)) ||
       e.classes.some(c => c.toLowerCase().includes(q))
     )
   }, [entries, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
-
-  const parentEntries = paged.filter(e => e.type === 'parent')
-  const subEntries = paged.filter(e => e.type === 'subdataset')
 
   function select(id: string) {
     onChange(id)
@@ -103,15 +119,6 @@ export function DatasetPicker({ label, color, selectedId, onChange, entries, ima
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {selectedId ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{
-                fontSize: 10,
-                padding: '1px 6px',
-                background: selected?.type === 'subdataset' ? 'rgba(64, 158, 255,0.12)' : 'rgba(64, 158, 255,0.1)',
-                color: selected?.type === 'subdataset' ? 'var(--teal)' : 'var(--accent-bright)',
-                fontWeight: 600,
-              }}>
-                {selected?.type === 'subdataset' ? '子数据集' : '父数据集'}
-              </span>
               <span>{selected?.name}</span>
               <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono', color, fontWeight: 600, marginLeft: 'auto' }}>
                 {imageCount.toLocaleString()} 张
@@ -177,42 +184,16 @@ export function DatasetPicker({ label, color, selectedId, onChange, entries, ima
                 未找到匹配的数据集
               </div>
             ) : (
-              <>
-                {parentEntries.length > 0 && (
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '6px 6px 4px' }}>
-                      父数据集
-                    </div>
-                    {parentEntries.map(entry => (
-                      <DatasetRow
-                        key={entry.id}
-                        entry={entry}
-                        imageKey={imageKey}
-                        isSelected={selectedId === entry.id}
-                        color={color}
-                        onSelect={select}
-                      />
-                    ))}
-                  </div>
-                )}
-                {subEntries.length > 0 && (
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '6px 6px 4px', marginTop: parentEntries.length > 0 ? 6 : 0 }}>
-                      子数据集
-                    </div>
-                    {subEntries.map(entry => (
-                      <DatasetRow
-                        key={entry.id}
-                        entry={entry}
-                        imageKey={imageKey}
-                        isSelected={selectedId === entry.id}
-                        color={color}
-                        onSelect={select}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
+              paged.map(entry => (
+                <DatasetRow
+                  key={entry.id}
+                  entry={entry}
+                  imageKey={imageKey}
+                  isSelected={selectedId === entry.id}
+                  color={color}
+                  onSelect={select}
+                />
+              ))
             )}
           </div>
 
@@ -291,11 +272,7 @@ function DatasetRow({ entry, imageKey, isSelected, color, onSelect }: {
           </span>
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2, marginLeft: isSelected ? 18 : 0 }}>
-          {entry.type === 'subdataset' ? (
-            <>来自「{entry.parentName}」· 已预划分</>
-          ) : (
-            <>{entry.classes.length} 个类别 · {entry.totalImages.toLocaleString()} 张图片</>
-          )}
+          {entry.classes.length} 个类别 · {entry.totalImages.toLocaleString()} 张图片
         </div>
         {/* Class tags */}
         {entry.classes.length <= 5 && (

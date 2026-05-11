@@ -15,6 +15,7 @@ import {
   Search,
   X,
 } from 'lucide-react'
+import type { DatasetResource } from '../data/datasets'
 import { SplitAdjuster } from './SplitAdjuster'
 
 // ─── Types ───
@@ -35,21 +36,30 @@ const SET_META = {
   test:  { label: '测试集', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', badge: '测试' },
 } as const
 
+function resourceToAnnotation(r: DatasetResource): Annotation {
+  return {
+    id: r.id,
+    name: r.fileName,
+    set: r.set,
+    classes: [...new Set(r.labelResultJson.shapes.map(s => s.labelInfo.name))],
+  }
+}
+
 // ─── Props ───
 
 interface DatasetSplitManagerProps {
-  annotations: Annotation[]
+  resources: DatasetResource[]
   classNames: string[]
   currentSplit: { train: number; val: number; test: number }
   totalCount: number
   datasetName: string
-  onSave: (split: { train: number; val: number; test: number }) => void
+  onSave: (split: { train: number; val: number; test: number }, assignments: Record<string, SetType>) => void
 }
 
 // ─── Component ───
 
 export function DatasetSplitManager({
-  annotations,
+  resources,
   classNames,
   currentSplit,
   totalCount,
@@ -59,9 +69,13 @@ export function DatasetSplitManager({
   const [mode, setMode] = useState<SplitMode>('auto')
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize] = useState(20)
+
+  // Derive annotations from resources once
+  const annotations = useMemo(() => resources.map(resourceToAnnotation), [resources])
+
   const [assignments, setAssignments] = useState<Record<string, SetType>>(() => {
     const init: Record<string, SetType> = {}
-    annotations.forEach(a => { init[a.id] = 'train' })
+    annotations.forEach(a => { init[a.id] = a.set })
     return init
   })
   const [form, setForm] = useState({
@@ -180,7 +194,10 @@ export function DatasetSplitManager({
   async function handleSave() {
     setSaveStatus('saving')
     await new Promise(r => setTimeout(r, 800))
-    onSave({ train: form.trainRatio, val: form.valRatio, test: form.testRatio })
+    onSave(
+      { train: form.trainRatio, val: form.valRatio, test: form.testRatio },
+      assignments,
+    )
     setSaveStatus('saved')
     setTimeout(() => setSaveStatus('idle'), 2500)
   }
