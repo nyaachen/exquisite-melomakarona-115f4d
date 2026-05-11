@@ -29,10 +29,11 @@ import { Route as PresetsPresetIdRouteImport } from './routes/presets/$presetId'
 import { Route as PlazaModelIdRouteImport } from './routes/plaza/$modelId'
 import { Route as ModelManagementUploadRouteImport } from './routes/model-management/upload'
 import { Route as GpuServersCreateRouteImport } from './routes/gpu-servers/create'
-import { Route as GpuServersServerIdRouteImport } from './routes/gpu-servers/$serverId'
 import { Route as DatasetsDatasetIdRouteImport } from './routes/datasets/$datasetId'
 import { Route as ArchitecturesCreateRouteImport } from './routes/architectures/create'
 import { Route as ArchitecturesArchitectureIdRouteImport } from './routes/architectures/$architectureId'
+import { Route as GpuServersServerIdIndexRouteImport } from './routes/gpu-servers/$serverId/index'
+import { Route as GpuServersServerIdExecuteRouteImport } from './routes/gpu-servers/$serverId/execute'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -134,11 +135,6 @@ const GpuServersCreateRoute = GpuServersCreateRouteImport.update({
   path: '/gpu-servers/create',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GpuServersServerIdRoute = GpuServersServerIdRouteImport.update({
-  id: '/gpu-servers/$serverId',
-  path: '/gpu-servers/$serverId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DatasetsDatasetIdRoute = DatasetsDatasetIdRouteImport.update({
   id: '/datasets/$datasetId',
   path: '/datasets/$datasetId',
@@ -155,13 +151,23 @@ const ArchitecturesArchitectureIdRoute =
     path: '/architectures/$architectureId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GpuServersServerIdIndexRoute = GpuServersServerIdIndexRouteImport.update({
+  id: '/gpu-servers/$serverId/',
+  path: '/gpu-servers/$serverId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GpuServersServerIdExecuteRoute =
+  GpuServersServerIdExecuteRouteImport.update({
+    id: '/gpu-servers/$serverId/execute',
+    path: '/gpu-servers/$serverId/execute',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
-  '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
   '/gpu-servers/create': typeof GpuServersCreateRoute
   '/model-management/upload': typeof ModelManagementUploadRoute
   '/plaza/$modelId': typeof PlazaModelIdRoute
@@ -181,13 +187,14 @@ export interface FileRoutesByFullPath {
   '/presets/': typeof PresetsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
+  '/gpu-servers/$serverId/execute': typeof GpuServersServerIdExecuteRoute
+  '/gpu-servers/$serverId/': typeof GpuServersServerIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
-  '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
   '/gpu-servers/create': typeof GpuServersCreateRoute
   '/model-management/upload': typeof ModelManagementUploadRoute
   '/plaza/$modelId': typeof PlazaModelIdRoute
@@ -207,6 +214,8 @@ export interface FileRoutesByTo {
   '/presets': typeof PresetsIndexRoute
   '/train': typeof TrainIndexRoute
   '/validate': typeof ValidateIndexRoute
+  '/gpu-servers/$serverId/execute': typeof GpuServersServerIdExecuteRoute
+  '/gpu-servers/$serverId': typeof GpuServersServerIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -214,7 +223,6 @@ export interface FileRoutesById {
   '/architectures/$architectureId': typeof ArchitecturesArchitectureIdRoute
   '/architectures/create': typeof ArchitecturesCreateRoute
   '/datasets/$datasetId': typeof DatasetsDatasetIdRoute
-  '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
   '/gpu-servers/create': typeof GpuServersCreateRoute
   '/model-management/upload': typeof ModelManagementUploadRoute
   '/plaza/$modelId': typeof PlazaModelIdRoute
@@ -234,6 +242,8 @@ export interface FileRoutesById {
   '/presets/': typeof PresetsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
+  '/gpu-servers/$serverId/execute': typeof GpuServersServerIdExecuteRoute
+  '/gpu-servers/$serverId/': typeof GpuServersServerIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -242,7 +252,6 @@ export interface FileRouteTypes {
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
-    | '/gpu-servers/$serverId'
     | '/gpu-servers/create'
     | '/model-management/upload'
     | '/plaza/$modelId'
@@ -262,13 +271,14 @@ export interface FileRouteTypes {
     | '/presets/'
     | '/train/'
     | '/validate/'
+    | '/gpu-servers/$serverId/execute'
+    | '/gpu-servers/$serverId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
-    | '/gpu-servers/$serverId'
     | '/gpu-servers/create'
     | '/model-management/upload'
     | '/plaza/$modelId'
@@ -288,13 +298,14 @@ export interface FileRouteTypes {
     | '/presets'
     | '/train'
     | '/validate'
+    | '/gpu-servers/$serverId/execute'
+    | '/gpu-servers/$serverId'
   id:
     | '__root__'
     | '/'
     | '/architectures/$architectureId'
     | '/architectures/create'
     | '/datasets/$datasetId'
-    | '/gpu-servers/$serverId'
     | '/gpu-servers/create'
     | '/model-management/upload'
     | '/plaza/$modelId'
@@ -314,6 +325,8 @@ export interface FileRouteTypes {
     | '/presets/'
     | '/train/'
     | '/validate/'
+    | '/gpu-servers/$serverId/execute'
+    | '/gpu-servers/$serverId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -321,7 +334,6 @@ export interface RootRouteChildren {
   ArchitecturesArchitectureIdRoute: typeof ArchitecturesArchitectureIdRoute
   ArchitecturesCreateRoute: typeof ArchitecturesCreateRoute
   DatasetsDatasetIdRoute: typeof DatasetsDatasetIdRoute
-  GpuServersServerIdRoute: typeof GpuServersServerIdRoute
   GpuServersCreateRoute: typeof GpuServersCreateRoute
   ModelManagementUploadRoute: typeof ModelManagementUploadRoute
   PlazaModelIdRoute: typeof PlazaModelIdRoute
@@ -341,6 +353,8 @@ export interface RootRouteChildren {
   PresetsIndexRoute: typeof PresetsIndexRoute
   TrainIndexRoute: typeof TrainIndexRoute
   ValidateIndexRoute: typeof ValidateIndexRoute
+  GpuServersServerIdExecuteRoute: typeof GpuServersServerIdExecuteRoute
+  GpuServersServerIdIndexRoute: typeof GpuServersServerIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -485,13 +499,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GpuServersCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/gpu-servers/$serverId': {
-      id: '/gpu-servers/$serverId'
-      path: '/gpu-servers/$serverId'
-      fullPath: '/gpu-servers/$serverId'
-      preLoaderRoute: typeof GpuServersServerIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/datasets/$datasetId': {
       id: '/datasets/$datasetId'
       path: '/datasets/$datasetId'
@@ -513,6 +520,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArchitecturesArchitectureIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gpu-servers/$serverId/': {
+      id: '/gpu-servers/$serverId/'
+      path: '/gpu-servers/$serverId'
+      fullPath: '/gpu-servers/$serverId/'
+      preLoaderRoute: typeof GpuServersServerIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gpu-servers/$serverId/execute': {
+      id: '/gpu-servers/$serverId/execute'
+      path: '/gpu-servers/$serverId/execute'
+      fullPath: '/gpu-servers/$serverId/execute'
+      preLoaderRoute: typeof GpuServersServerIdExecuteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -521,7 +542,6 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitecturesArchitectureIdRoute: ArchitecturesArchitectureIdRoute,
   ArchitecturesCreateRoute: ArchitecturesCreateRoute,
   DatasetsDatasetIdRoute: DatasetsDatasetIdRoute,
-  GpuServersServerIdRoute: GpuServersServerIdRoute,
   GpuServersCreateRoute: GpuServersCreateRoute,
   ModelManagementUploadRoute: ModelManagementUploadRoute,
   PlazaModelIdRoute: PlazaModelIdRoute,
@@ -541,6 +561,8 @@ const rootRouteChildren: RootRouteChildren = {
   PresetsIndexRoute: PresetsIndexRoute,
   TrainIndexRoute: TrainIndexRoute,
   ValidateIndexRoute: ValidateIndexRoute,
+  GpuServersServerIdExecuteRoute: GpuServersServerIdExecuteRoute,
+  GpuServersServerIdIndexRoute: GpuServersServerIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

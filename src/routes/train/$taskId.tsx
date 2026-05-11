@@ -16,6 +16,7 @@ import { TaskInfoCards } from '../../components/train/TaskInfoCards'
 import { TrainingChartsSection } from '../../components/train/TrainingChartsSection'
 import { TrainingLogPanel } from '../../components/train/TrainingLogPanel'
 import { PublishModelModal } from '../../components/train/PublishModelModal'
+import { useSimulatedWebSocket } from '../../lib/useSimulatedWebSocket'
 import {
   TASK_DATA_DETAILED,
   VERIFICATION_RESULTS,
@@ -34,6 +35,40 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
   completed: <CheckCircle2 size={11} />,
   failed: <XCircle size={11} />,
   pending: <Clock size={11} />,
+}
+
+// ─── WebSocket 模拟：生成下一个 epoch 的训练数据 ───
+
+interface TrainingUpdate {
+  nextEpoch: number
+  done: boolean
+  metric: EpochMetric
+  newPrec: number
+  newRecall: number
+}
+
+function generateTrainingUpdate(
+  currentEpoch: number,
+  totalEpochs: number,
+  targetMAP: number,
+): TrainingUpdate {
+  const next = currentEpoch + 1
+  const done = next >= totalEpochs
+  const t = next / totalEpochs
+  const mapProgress = 1 / (1 + Math.exp(-10 * (t - 0.3)))
+  const metric: EpochMetric = {
+    epoch: next,
+    mAP: Math.round((0.15 + (targetMAP - 0.15) * mapProgress) * 10000) / 10000,
+    loss: Math.round((2.0 - (2.0 - 0.35) * mapProgress) * 10000) / 10000,
+    valLoss: Math.round((2.1 - (2.1 - 0.4) * mapProgress) * 10000) / 10000,
+  }
+  return {
+    nextEpoch: next,
+    done,
+    metric,
+    newPrec: Math.round((metric.mAP * 1.07) * 10000) / 10000,
+    newRecall: Math.round((metric.mAP * 0.96) * 10000) / 10000,
+  }
 }
 
 function TaskDetail() {
@@ -55,34 +90,34 @@ function TaskDetail() {
   const [perfView, setPerfView] = useState<'val' | 'test'>('val')
   const [logExpanded, setLogExpanded] = useState(false)
   const [showPublishModal, setShowPublishModal] = useState(false)
+  const [wsEnabled, setWsEnabled] = useState(false)
 
+  // WebSocket — 训练任务持续推送 epoch 数据和指标
+  const { status: wsStatus, connect } = useSimulatedWebSocket<TrainingUpdate>({
+    generateData: () => generateTrainingUpdate(epoch, task.totalEpochs, task.mAP),
+    dataIntervalMs: 1200,
+    onData: (update) => {
+      if (update.done) return
+      setEpoch(update.nextEpoch)
+      setMAP(update.metric.mAP)
+      setPrecision(update.newPrec)
+      setRecall(update.newRecall)
+      setMapHistory(h => [...h, update.metric.mAP])
+      setLossHistory(h => [...h, update.metric.loss])
+      setLogs(prev => [
+        ...prev.slice(-60),
+        ...generateLog(update.metric, task.totalEpochs).map(t => ({ text: t, cls: 'log-info' })),
+      ])
+    },
+  })
+
+  // 训练中的任务：挂载后建立 WebSocket 接收实时数据
   useEffect(() => {
-    if (task.status !== 'running') return
-    const interval = setInterval(() => {
-      setEpoch(prev => {
-        if (prev >= task.totalEpochs) { clearInterval(interval); return prev }
-        const next = prev + 1
-        const t = next / task.totalEpochs
-        const mapProgress = 1 / (1 + Math.exp(-10 * (t - 0.3)))
-        const metric: EpochMetric = {
-          epoch: next,
-          mAP: Math.round((0.15 + (task.mAP - 0.15) * mapProgress) * 10000) / 10000,
-          loss: Math.round((2.0 - (2.0 - 0.35) * mapProgress) * 10000) / 10000,
-          valLoss: Math.round((2.1 - (2.1 - 0.4) * mapProgress) * 10000) / 10000,
-        }
-        const newPrec = Math.round((metric.mAP * 1.07) * 10000) / 10000
-        const newRecall = Math.round((metric.mAP * 0.96) * 10000) / 10000
-        setMAP(metric.mAP)
-        setPrecision(newPrec)
-        setRecall(newRecall)
-        setMapHistory(h => [...h, metric.mAP])
-        setLossHistory(h => [...h, metric.loss])
-        setLogs(prev => [...prev.slice(-60), ...generateLog(metric, task.totalEpochs).map(t => ({ text: t, cls: 'log-info' }))])
-        return next
-      })
-    }, 1200)
-    return () => clearInterval(interval)
-  }, [task.status, task.totalEpochs, task.mAP])
+    if (task.status === 'running' && !wsEnabled) {
+      setWsEnabled(true)
+      connect()
+    }
+  }, [task.status, wsEnabled, connect])
 
   const progress = Math.round((epoch / task.totalEpochs) * 100)
   const sc = TRAIN_STATUS[task.status]
@@ -133,7 +168,10 @@ function TaskDetail() {
     <div className="slide-in">
       <TaskHeader
         taskName={task.name}
-        statusBadge={<span className={`badge ${sc.cls}`}>{ic} {sc.label}</span>}
+        statusBadge={
+          <span className={`badge ${sc.cls}`}>{ic} {sc.label}</span>
+        }
+        wsStatus={task.status === 'running' ? wsStatus : undefined}
       />
 
       <div className="content-padded">

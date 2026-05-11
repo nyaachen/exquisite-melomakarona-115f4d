@@ -16,7 +16,34 @@ import {
   ArrowRight,
   Filter,
 } from 'lucide-react'
-import { MOCK_TASKS } from '../../data/monitorTasks'
+import { MOCK_TASKS, type MonitorTask } from '../../data/monitorTasks'
+import { useSimulatedWebSocket } from '../../lib/useSimulatedWebSocket'
+
+// ─── 模拟 API ───
+
+async function fetchTaskMonitorData(): Promise<MonitorTask[]> {
+  await new Promise(resolve => setTimeout(resolve, 400 + Math.random() * 400))
+  return MOCK_TASKS
+}
+
+// ─── WebSocket 模拟数据生成 ───
+
+function simulateTaskUpdate(tasks: MonitorTask[]): MonitorTask[] {
+  return tasks.map(task => {
+    if (task.status !== 'running') return task
+    const maxEpoch = parseInt(task.epoch.split('/')[1]) || 100
+    const current = parseInt(task.epoch.split('/')[0]) || 0
+    const newEpoch = Math.min(current + 1, maxEpoch)
+    const newProgress = Math.round((newEpoch / maxEpoch) * 100)
+    return {
+      ...task,
+      progress: newProgress,
+      epoch: task.type === 'train' ? `${newEpoch}/${maxEpoch}` : task.epoch,
+    }
+  })
+}
+
+// ─── 常量 ───
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   running: <RefreshCw size={11} className="spinning" />,
@@ -47,29 +74,33 @@ const TYPE_CONFIG = {
   validate: { label: '验证', cls: 'badge' },
 }
 
+// ─── 主组件 ───
+
 export function TaskMonitor() {
-  const [tasks, setTasks] = useState(MOCK_TASKS)
+  const [tasks, setTasks] = useState<MonitorTask[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
 
+  // WebSocket 连接 — 首次 API 加载完成后建立
+  const { status: wsStatus, connect } = useSimulatedWebSocket<MonitorTask[]>({
+    generateData: () => simulateTaskUpdate(tasks),
+    onData: (updated) => setTasks(updated),
+  })
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTasks(prev => prev.map(task => {
-        if (task.status !== 'running') return task
-        const maxEpoch = parseInt(task.epoch.split('/')[1]) || 100
-        const current = parseInt(task.epoch.split('/')[0]) || 0
-        const newEpoch = Math.min(current + 1, maxEpoch)
-        const newProgress = Math.round((newEpoch / maxEpoch) * 100)
-        return {
-          ...task,
-          progress: newProgress,
-          epoch: task.type === 'train' ? `${newEpoch}/${maxEpoch}` : task.epoch,
-        }
-      }))
-    }, 5000)
-    return () => clearInterval(interval)
+    fetchTaskMonitorData().then(data => {
+      setTasks(data)
+      setLoading(false)
+    })
   }, [])
+
+  useEffect(() => {
+    if (!loading && tasks.length > 0) {
+      connect()
+    }
+  }, [loading, tasks.length, connect])
 
   const handlePause = (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'paused' as const } : t))
@@ -85,6 +116,15 @@ export function TaskMonitor() {
 
   const handleRerun = (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'pending' as const, progress: 0, epoch: t.type === 'train' ? `0/${t.epoch.split('/')[1]}` : t.epoch, errorMessage: undefined } : t))
+  }
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: 12 }}>
+        <div className="spinner" />
+        <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>加载中…</span>
+      </div>
+    )
   }
 
   const filtered = tasks.filter(t => {
@@ -107,6 +147,18 @@ export function TaskMonitor() {
 
   return (
     <div>
+      {/* Connection status */}
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{
+          width: 7, height: 7, borderRadius: '50%',
+          background: wsStatus === 'connected' ? 'var(--success)' : wsStatus === 'connecting' ? 'var(--warning)' : 'var(--text-muted)',
+        }} />
+        <span style={{ color: wsStatus === 'connected' ? 'var(--success)' : 'var(--text-muted)' }}>
+          {wsStatus === 'connected' ? 'WS 已连接' : wsStatus === 'connecting' ? 'WS 连接中…' : 'WS 未连接'}
+        </span>
+        <span style={{ marginLeft: 8 }}>每 5s 推送一次更新</span>
+      </div>
+
       {/* Stats */}
       <div className="grid-4 mb-5">
         <div className="stat-card">

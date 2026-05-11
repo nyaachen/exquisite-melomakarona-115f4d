@@ -1,25 +1,57 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
-import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Search } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Plus, Edit3, Trash2, Copy, CheckCircle2, XCircle, Search, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
 import { CATEGORY_MAP } from '../../constants'
-import { ARCHITECTURES, Architecture } from '../../data/architectures'
+import { ARCHITECTURES } from '../../data/architectures'
+import type { Architecture } from '../../data/architectures'
 
 export const Route = createFileRoute('/architectures/')({
   component: ArchitectureList,
 })
 
 function ArchitectureList() {
-  const [architectures, setArchitectures] = useState(ARCHITECTURES)
-  const [deleting, setDeleting] = useState<string | null>(null)
-  const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [architectures, setArchitectures] = useState<Architecture[]>(ARCHITECTURES)
+  const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<Architecture[]>([])
+  const [total, setTotal] = useState(0)
+  const [deleting, setDeleting] = useState<string | null>(null)
 
-  const filtered = architectures.filter(a =>
-    (filterCategory === 'all' || a.category === filterCategory) &&
-    (a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     a.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     a.baseModel.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    await new Promise(resolve => setTimeout(resolve, 350 + Math.random() * 350))
+
+    const filtered = architectures.filter(a =>
+      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.baseModel.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
+    const start = (currentPage - 1) * pageSize
+    setData(filtered.slice(start, start + pageSize))
+    setTotal(filtered.length)
+    setLoading(false)
+  }, [searchQuery, currentPage, pageSize, architectures])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const handleSearch = () => {
+    setSearchQuery(searchInput)
+    setCurrentPage(1)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch()
+  }
+
+  const handleReset = () => {
+    setSearchInput('')
+  }
 
   async function handleDelete(id: string) {
     const arch = architectures.find(a => a.id === id)
@@ -46,6 +78,8 @@ function ArchitectureList() {
     setArchitectures(prev => [newArch, ...prev])
   }
 
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+
   return (
     <div style={{ animation: 'slideIn 0.3s ease-out' }}>
       <div className="page-header">
@@ -62,31 +96,41 @@ function ArchitectureList() {
       </div>
 
       <div className="content-padded">
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-          <button className={`btn btn-sm ${filterCategory === 'all' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilterCategory('all')}>
-            全部
-          </button>
-          {Object.entries(CATEGORY_MAP).map(([key, label]) => (
-            <button key={key} className={`btn btn-sm ${filterCategory === key ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilterCategory(key)}>
-              {label}
-            </button>
-          ))}
-        </div>
-
         <div className="card">
           <div className="card-header">
-            <div className="search-input">
-              <Search size={14} style={{ color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                placeholder="搜索模板名称、基础模型或描述..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input-field"
-              />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div className="search-input">
+                <Search size={14} style={{ color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  placeholder="搜索模板名称、基础模型或描述..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="search-input-field"
+                />
+              </div>
+              <button className="btn btn-primary btn-sm" onClick={handleSearch} disabled={loading}>
+                <Search size={12} /> 查询
+              </button>
+              <button className="btn btn-ghost btn-sm" onClick={handleReset} disabled={loading}>
+                <RotateCcw size={12} /> 重置
+              </button>
             </div>
+            <span className="text-xs text-muted">共 {total} 条</span>
           </div>
-          <div style={{ overflowX: 'auto' }}>
+
+          <div style={{ overflowX: 'auto', minHeight: 200, position: 'relative' }}>
+            {loading && (
+              <div style={{
+                position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.6)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
+              }}>
+                <div className="spinner" />
+                <span style={{ marginLeft: 10, fontSize: 13, color: 'var(--text-muted)' }}>加载中…</span>
+              </div>
+            )}
+
             <table className="data-table">
               <thead>
                 <tr>
@@ -102,54 +146,75 @@ function ArchitectureList() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(arch => (
-                  <tr key={arch.id}>
-                    <td>
-                      <div className="primary" style={{ fontWeight: 500 }}>{arch.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, maxWidth: 260 }}>
-                        {arch.description}
-                      </div>
-                    </td>
-                    <td className="mono" style={{ fontSize: 12 }}>{arch.baseModel}</td>
-                    <td>
-                      <span className="badge badge-secondary">{CATEGORY_MAP[arch.category] || arch.category}</span>
-                    </td>
-                    <td>
-                      {arch.isActive ? (
-                        <span className="badge badge-success"><CheckCircle2 size={10} /> 启用</span>
-                      ) : (
-                        <span className="badge badge-archived"><XCircle size={10} /> 禁用</span>
-                      )}
-                    </td>
-                    <td className="mono" style={{ textAlign: 'right' }}>{arch.params.length}</td>
-                    <td className="mono" style={{ textAlign: 'right' }}>{arch.usageCount}</td>
-                    <td style={{ fontSize: 12 }}>{arch.author}</td>
-                    <td style={{ fontSize: 12 }}>{arch.createdAt}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <Link to="/architectures/$architectureId" params={{ architectureId: arch.id }} className="btn btn-ghost btn-sm">
-                          <Edit3 size={12} />
-                        </Link>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(arch.id)}>
-                          <Copy size={12} />
-                        </button>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(arch.id)}
-                          disabled={deleting === arch.id || arch.usageCount > 0}>
-                          <Trash2 size={12} />
-                        </button>
+                {!loading && data.length === 0 ? (
+                  <tr>
+                    <td colSpan={9}>
+                      <div className="empty-state">
+                        <Plus size={32} className="empty-state-icon" />
+                        <div className="empty-state-text">暂无模型模板</div>
+                        <div className="empty-state-hint">点击右上角"创建模板"添加新的模型架构配置</div>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  data.map(arch => (
+                    <tr key={arch.id}>
+                      <td>
+                        <div className="primary" style={{ fontWeight: 500 }}>{arch.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, maxWidth: 260 }}>
+                          {arch.description}
+                        </div>
+                      </td>
+                      <td className="mono" style={{ fontSize: 12 }}>{arch.baseModel}</td>
+                      <td>
+                        <span className="badge badge-secondary">{CATEGORY_MAP[arch.category] || arch.category}</span>
+                      </td>
+                      <td>
+                        {arch.isActive ? (
+                          <span className="badge badge-success"><CheckCircle2 size={10} /> 启用</span>
+                        ) : (
+                          <span className="badge badge-archived"><XCircle size={10} /> 禁用</span>
+                        )}
+                      </td>
+                      <td className="mono" style={{ textAlign: 'right' }}>{arch.params.length}</td>
+                      <td className="mono" style={{ textAlign: 'right' }}>{arch.usageCount}</td>
+                      <td style={{ fontSize: 12 }}>{arch.author}</td>
+                      <td style={{ fontSize: 12 }}>{arch.createdAt}</td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <Link to="/architectures/$architectureId" params={{ architectureId: arch.id }} className="btn btn-ghost btn-sm">
+                            <Edit3 size={12} /> 编辑
+                          </Link>
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(arch.id)}>
+                            <Copy size={12} /> 复制
+                          </button>
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(arch.id)}
+                            disabled={deleting === arch.id || arch.usageCount > 0}>
+                            <Trash2 size={12} /> 删除
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
-          {filtered.length === 0 && (
-            <div className="empty-state">
-              <div className="empty-state-icon"><Plus size={32} /></div>
-              <div className="empty-state-text">暂无模型模板</div>
-              <div className="empty-state-hint">点击右上角"创建模板"添加新的模型架构配置</div>
+          {total > 0 && (
+            <div className="pagination-bar">
+              <div className="pagination-info">
+                第 {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, total)} 条 / 共 {total} 条
+              </div>
+              <div className="pagination-controls">
+                <button className="btn btn-ghost btn-sm" disabled={currentPage <= 1 || loading} onClick={() => setCurrentPage(p => p - 1)}>
+                  <ChevronLeft size={14} /> 上一页
+                </button>
+                <span className="pagination-current">{currentPage} / {totalPages}</span>
+                <button className="btn btn-ghost btn-sm" disabled={currentPage >= totalPages || loading} onClick={() => setCurrentPage(p => p + 1)}>
+                  下一页 <ChevronRight size={14} />
+                </button>
+              </div>
             </div>
           )}
         </div>

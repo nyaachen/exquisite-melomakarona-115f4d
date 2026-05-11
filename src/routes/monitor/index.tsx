@@ -51,7 +51,7 @@ function MonitorPage() {
         ))}
       </div>
 
-      {/* Tab content */}
+      {/* Tab content — each component handles its own async data loading */}
       <div className="content-padded">
         {tab === 'resource' && <ResourceMonitor />}
         {tab === 'tasks' && <TaskMonitor />}

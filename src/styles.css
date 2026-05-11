@@ -1214,6 +1214,36 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* ═══════════════════════════════════════════
+   Pagination
+   ═══════════════════════════════════════════ */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-dim);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.pagination-info {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pagination-current {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════
    Empty State
    ═══════════════════════════════════════════ */
 .empty-state {
@@ -1676,4 +1706,20 @@ input[type="range"]::-webkit-slider-thumb:hover {
    ═══════════════════════════════════════════ */
 .version-item:last-child {
   border-bottom: none;
+}
+
+/* ═══════════════════════════════════════════
+   Training Command Input
+   ═══════════════════════════════════════════ */
+.command-input-area {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.command-input-area .command-textarea {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  background: var(--bg-card);
+  resize: vertical;
 }

@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, Save, Plus, X, HelpCircle, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Save, Plus, X, HelpCircle, AlertCircle, Terminal, Wand2 } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
 import { CATEGORY_OPTIONS } from '../../constants'
 import { ARCHITECTURES, ArchitectureParam } from '../../data/architectures'
+import { parseTrainingCommand } from '../../lib/trainingCommand'
 
 export const Route = createFileRoute('/architectures/$architectureId')({
   component: EditArchitecture,
@@ -24,6 +25,23 @@ function EditArchitecture() {
   const [params, setParams] = useState<ArchitectureParam[]>(data.params)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+  const [commandText, setCommandText] = useState('')
+  const [commandError, setCommandError] = useState('')
+
+  function handleParseCommand() {
+    setCommandError('')
+    if (!commandText.trim()) {
+      setCommandError('请输入训练指令')
+      return
+    }
+    const parsed = parseTrainingCommand(commandText)
+    if (parsed.length === 0) {
+      setCommandError('未识别到有效的 --参数，请检查指令格式')
+      return
+    }
+    setParams([...params, ...parsed])
+    setCommandText('')
+  }
 
   function addParam() {
     setParams([...params, { name: '', key: '', type: 'number', defaultValue: 0, required: false, description: '' }])
@@ -140,6 +158,30 @@ function EditArchitecture() {
               <button className="btn btn-sm btn-secondary" onClick={addParam}>
                 <Plus size={13} /> 添加参数
               </button>
+            </div>
+
+            <div className="command-input-area" style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                <Terminal size={13} style={{ color: 'var(--text-muted)' }} />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>训练指令输入</span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>粘贴训练命令，自动提取参数</span>
+              </div>
+              <textarea
+                className="form-input command-textarea"
+                rows={2}
+                value={commandText}
+                onChange={e => { setCommandText(e.target.value); setCommandError('') }}
+                placeholder="例如：python train.py --epochs 100 --batch-size 16 --img-size 640 --optimizer SGD"
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                <div>
+                  {commandError && <span style={{ fontSize: 11, color: 'var(--error)' }}>{commandError}</span>}
+                  {!commandError && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>支持 --key value / --key=value / --flag / --no-flag 格式</span>}
+                </div>
+                <button className="btn btn-sm btn-teal" onClick={handleParseCommand}>
+                  <Wand2 size={12} /> 解析添加
+                </button>
+              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

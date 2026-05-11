@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ArrowLeft, Save, Info, Cpu } from 'lucide-react'
-import { NotFound } from '../../components/NotFound'
-import { GPU_SERVERS, type GpuServer } from '../../data/gpuServers'
+import { NotFound } from '../../../components/NotFound'
+import { GPU_SERVERS, type GpuServer } from '../../../data/gpuServers'
 
-export const Route = createFileRoute('/gpu-servers/$serverId')({
+export const Route = createFileRoute('/gpu-servers/$serverId/')({
   component: EditGpuServer,
 })
 

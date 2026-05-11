@@ -98,6 +98,7 @@ function CreateTask() {
 
   const architecture = ARCHITECTURES.find(a => a.id === architectureId)
   const selectedDs = DATASET_ENTRIES.find(d => d.id === datasetId)
+  const selectedDataset = DATASETS.find(d => d.id === datasetId)
 
   const totalImages = selectedDs ? selectedDs.totalImages : 0
   const trainImageCount = Math.round(totalImages * datasetSplit.train / 100)
@@ -218,6 +219,7 @@ function CreateTask() {
               classDistribution={classDistribution}
               entries={DATASET_ENTRIES}
               selectedDs={selectedDs}
+              selectedDataset={selectedDataset}
               totalImages={totalImages}
               trainImageCount={trainImageCount}
               valImageCount={valImageCount}
