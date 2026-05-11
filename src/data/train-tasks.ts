@@ -257,3 +257,24 @@ export const TEST_IMAGES: TestImage[] = [
   { id: 'test-004', name: 'test_0004.jpg', width: 640, height: 480 },
   { id: 'test-005', name: 'test_0005.jpg', width: 640, height: 480 },
 ]
+
+// ─── 历史训练任务（用于"从训练任务结果继续训练"） ───
+
+/** 可复用的历史训练任务 */
+export interface ExistingTask {
+  id: string
+  name: string
+  model: string
+  epochs: number
+  bestMap: number
+  lastEpoch: number
+  status: string
+  createdAt: string
+}
+
+/** 历史训练任务列表（用于创建训练任务时选择起点） */
+export const EXISTING_TASKS: ExistingTask[] = [
+  { id: 'task-prev-001', name: '道路缺陷检测 v1.0', model: 'YOLOv8s', epochs: 120, bestMap: 52.3, lastEpoch: 120, status: 'completed', createdAt: '2026-04-25' },
+  { id: 'task-prev-002', name: '安全帽检测实验组A', model: 'YOLOv8n', epochs: 80, bestMap: 48.7, lastEpoch: 80, status: 'completed', createdAt: '2026-04-20' },
+  { id: 'task-prev-003', name: '设备异常检测 v2', model: 'YOLOv8m', epochs: 100, bestMap: 45.2, lastEpoch: 45, status: 'stopped', createdAt: '2026-04-18' },
+]

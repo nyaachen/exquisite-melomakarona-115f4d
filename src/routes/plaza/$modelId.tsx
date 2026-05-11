@@ -18,18 +18,11 @@ import {
 } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
 import { PLAZA_MODELS } from '../../data/plaza-models'
+import { TEST_IMAGES } from '../../data/train-tasks'
 
 export const Route = createFileRoute('/plaza/$modelId')({
   component: PlazaDetail,
 })
-
-const TEST_IMAGES = [
-  { id: 'test-001', name: 'test_0001.jpg', width: 640, height: 480 },
-  { id: 'test-002', name: 'test_0002.jpg', width: 640, height: 480 },
-  { id: 'test-003', name: 'test_0003.jpg', width: 640, height: 480 },
-  { id: 'test-004', name: 'test_0004.jpg', width: 640, height: 480 },
-  { id: 'test-005', name: 'test_0005.jpg', width: 640, height: 480 },
-]
 
 type ImageSource = 'upload' | 'testset'
 

@@ -73,7 +73,7 @@ export function CompletedTaskPanel({
                 <Package size={13} /> 发布模型
               </button>
             ) : (
-              <Link to="/models/$modelId" params={{ modelId: 'model-001' }} className="btn btn-primary btn-sm">
+              <Link to="/plaza/$modelId" params={{ modelId: 'plaza-001' }} className="btn btn-primary btn-sm">
                 <Package size={13} /> 查看模型
               </Link>
             )}

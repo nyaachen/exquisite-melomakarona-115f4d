@@ -6,40 +6,9 @@ import {
 } from 'lucide-react'
 import { SearchableDropdown } from '../SearchableDropdown'
 import { SectionTitle } from './SectionTitle'
-
-interface Param {
-  name: string
-  key: string
-  type: 'number' | 'string' | 'select' | 'boolean' | 'range'
-  defaultValue: number | string | boolean
-  min?: number
-  max?: number
-  step?: number
-  options?: { label: string; value: string | number }[]
-  required: boolean
-  description: string
-}
-
-interface Architecture {
-  id: string
-  name: string
-  category: string
-  baseModel: string
-  description: string
-  params: Param[]
-  isActive: boolean
-}
-
-interface Preset {
-  id: string
-  name: string
-  architectureId: string
-  desc: string
-  icon: string
-  visibility: 'public' | 'private'
-  author: string
-  values: Record<string, any>
-}
+import type { Architecture } from '../../data/architectures'
+import type { Preset } from '../../data/presets'
+import type { ExistingTask } from '../../data/train-tasks'
 
 interface StartingPointType {
   id: string
@@ -95,7 +64,7 @@ export function ModelConfigStep({
   architectures: Architecture[]
   visiblePresets: Preset[]
   visiblePublicModels: PublicModel[]
-  existingTasks: { id: string; name: string; model: string; epochs: number; bestMap: number; lastEpoch: number; status: string; createdAt: string }[]
+  existingTasks: ExistingTask[]
   squareModels: ModelWithVersions[]
   startingPointTypes: StartingPointType[]
   architecture?: Architecture
@@ -146,7 +115,7 @@ export function ModelConfigStep({
           items={matchingPresets.map(p => ({
             id: p.id,
             name: p.name,
-            subtitle: p.desc,
+            subtitle: p.description,
           }))}
           placeholder={matchingPresets.length === 0 ? '该架构暂无可用预设' : '选择训练预设快速填充参数...'}
         />

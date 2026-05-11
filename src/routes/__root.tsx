@@ -9,8 +9,7 @@ import {
   Sliders,
   Boxes,
   User,
-  Globe,
-  Shield,
+
 } from 'lucide-react'
 import '../styles.css'
 
@@ -66,9 +65,7 @@ function Sidebar() {
         <div className="nav-label">模型</div>
         <NavLink to="/plaza" icon={<Package size={15} />} label="模型广场" />
         <NavLink to="/model-management" icon={<Layers size={15} />} label="模型管理" />
-        <NavLink to="/models" icon={<Package size={15} />} label="模型广场 (旧)" />
-        <NavLink to="/pretrained-models" icon={<Globe size={15} />} label="公开模型 (旧)" />
-        <NavLink to="/system/private-models" icon={<Shield size={15} />} label="私有模型 (旧)" />
+
 
         <div className="nav-label">数据</div>
         <NavLink to="/datasets" icon={<Layers size={15} />} label="数据集" />

@@ -7,10 +7,10 @@ import {
   Globe,
   Shield,
   Layers,
-  Zap,
   Save,
   Filter,
   AlertCircle,
+  Trash2,
   Plus,
   CheckCircle2,
   XCircle,
@@ -32,6 +32,7 @@ function ModelManagement() {
   const [filterArch, setFilterArch] = useState('all')
   const [editing, setEditing] = useState<PlazaModel | null>(null)
   const [editForm, setEditForm] = useState({ name: '', description: '', architectureId: '', coverImage: '' })
+  const [deleteConfirm, setDeleteConfirm] = useState<PlazaModel | null>(null)
 
   const filtered = models.filter(m => {
     if (activeTab !== 'all' && m.source !== activeTab) return false
@@ -79,6 +80,12 @@ function ModelManagement() {
     setModels(prev => prev.map(m =>
       m.id === id ? { ...m, isActive: !m.isActive } : m
     ))
+  }
+
+  function handleDelete() {
+    if (!deleteConfirm) return
+    setModels(prev => prev.filter(m => m.id !== deleteConfirm.id))
+    setDeleteConfirm(null)
   }
 
   return (
@@ -180,7 +187,7 @@ function ModelManagement() {
                   <th>状态</th>
                   <th>作者</th>
                   <th>创建日期</th>
-                  <th style={{ width: 180 }}>操作</th>
+                  <th style={{ width: 220 }}>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -260,46 +267,28 @@ function ModelManagement() {
                       <td style={{ fontSize: 12 }}>{model.author}</td>
                       <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{model.createdAt}</td>
                       <td>
-                        <div style={{ display: 'flex', gap: 4 }}>
+                        <div style={{ display: 'flex', gap: 6 }}>
                           <button
                             className="btn btn-ghost btn-sm"
                             onClick={() => openEdit(model)}
-                            title="编辑基本信息"
+                            style={{ gap: 4 }}
                           >
-                            <Edit3 size={12} />
+                            <Edit3 size={12} /> 编辑
                           </button>
                           <button
                             className="btn btn-ghost btn-sm"
                             onClick={() => toggleActive(model.id)}
-                            title={model.isActive !== false ? '停用模型' : '启用模型'}
+                            style={{ gap: 4, color: model.isActive !== false ? 'var(--success)' : 'var(--text-muted)' }}
                           >
-                            <Power size={12} style={{ color: model.isActive !== false ? 'var(--success)' : 'var(--text-muted)' }} />
+                            <Power size={12} /> {model.isActive !== false ? '停用' : '启用'}
                           </button>
-                          {model.source === 'public' ? (
-                            <button
-                              className="btn btn-ghost btn-sm"
-                              title="公开模型仅限管理员上传权重文件"
-                              style={{ opacity: 0.5 }}
-                              disabled
-                            >
-                              <Zap size={12} />
-                            </button>
-                          ) : (
-                            <Link
-                              to="/train/create"
-                              className="btn btn-ghost btn-sm"
-                              title="从训练任务发布新版本"
-                            >
-                              <Zap size={12} />
-                            </Link>
-                          )}
-                          <Link
-                            to="/model-management/upload"
+                          <button
                             className="btn btn-ghost btn-sm"
-                            title={model.source === 'public' ? '上传权重文件（管理员）' : '上传新权重版本'}
+                            onClick={() => setDeleteConfirm(model)}
+                            style={{ gap: 4, color: 'var(--error)' }}
                           >
-                            <Upload size={12} />
-                          </Link>
+                            <Trash2 size={12} /> 删除
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -323,9 +312,9 @@ function ModelManagement() {
           <AlertCircle size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
           <div>
             <div style={{ fontWeight: 600, marginBottom: 2 }}>模型管理规则</div>
-            <div>平台模型：支持上传权重文件 或 从已完成的训练任务发布新版本。</div>
-            <div>公开模型：仅限管理员上传权重文件，不支持从训练任务发布。</div>
+            <div>通过「上传权重」或「新建模型」按钮将模型添加到管理列表。</div>
             <div>启用/停用：停用的模型在创建训练任务时不会出现在可选列表中。</div>
+            <div>删除模型将同时移除该模型的所有版本数据，此操作不可撤销。</div>
           </div>
         </div>
       </div>
@@ -397,6 +386,30 @@ function ModelManagement() {
               <button className="btn btn-secondary" onClick={() => setEditing(null)}>取消</button>
               <button className="btn btn-primary" onClick={handleSave} disabled={!editForm.name.trim()}>
                 <Save size={14} /> 保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <div className="modal-backdrop" onClick={() => setDeleteConfirm(null)}>
+          <div className="modal" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>确认删除</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setDeleteConfirm(null)}>✕</button>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
+              确定要删除模型 <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{deleteConfirm.name}</span> 吗？该操作将移除该模型的所有版本数据，且不可撤销。
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button className="btn btn-secondary" onClick={() => setDeleteConfirm(null)}>取消</button>
+              <button
+                className="btn btn-danger"
+                onClick={handleDelete}
+              >
+                <Trash2 size={14} /> 确认删除
               </button>
             </div>
           </div>

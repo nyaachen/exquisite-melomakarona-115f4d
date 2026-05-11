@@ -12,11 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ValidateIndexRouteImport } from './routes/validate/index'
 import { Route as TrainIndexRouteImport } from './routes/train/index'
-import { Route as PretrainedModelsIndexRouteImport } from './routes/pretrained-models/index'
 import { Route as PresetsIndexRouteImport } from './routes/presets/index'
 import { Route as PlazaIndexRouteImport } from './routes/plaza/index'
 import { Route as MonitorIndexRouteImport } from './routes/monitor/index'
-import { Route as ModelsIndexRouteImport } from './routes/models/index'
 import { Route as ModelManagementIndexRouteImport } from './routes/model-management/index'
 import { Route as GpuServersIndexRouteImport } from './routes/gpu-servers/index'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets/index'
@@ -26,14 +24,9 @@ import { Route as ValidateTaskIdRouteImport } from './routes/validate/$taskId'
 import { Route as TrainCreateRouteImport } from './routes/train/create'
 import { Route as TrainTaskIdRouteImport } from './routes/train/$taskId'
 import { Route as SystemUserRouteImport } from './routes/system/user'
-import { Route as SystemPrivateModelsRouteImport } from './routes/system/private-models'
-import { Route as PretrainedModelsCreateRouteImport } from './routes/pretrained-models/create'
-import { Route as PretrainedModelsModelIdRouteImport } from './routes/pretrained-models/$modelId'
 import { Route as PresetsCreateRouteImport } from './routes/presets/create'
 import { Route as PresetsPresetIdRouteImport } from './routes/presets/$presetId'
 import { Route as PlazaModelIdRouteImport } from './routes/plaza/$modelId'
-import { Route as ModelsManualUploadRouteImport } from './routes/models/manualUpload'
-import { Route as ModelsModelIdRouteImport } from './routes/models/$modelId'
 import { Route as ModelManagementUploadRouteImport } from './routes/model-management/upload'
 import { Route as GpuServersCreateRouteImport } from './routes/gpu-servers/create'
 import { Route as GpuServersServerIdRouteImport } from './routes/gpu-servers/$serverId'
@@ -56,11 +49,6 @@ const TrainIndexRoute = TrainIndexRouteImport.update({
   path: '/train/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PretrainedModelsIndexRoute = PretrainedModelsIndexRouteImport.update({
-  id: '/pretrained-models/',
-  path: '/pretrained-models/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PresetsIndexRoute = PresetsIndexRouteImport.update({
   id: '/presets/',
   path: '/presets/',
@@ -74,11 +62,6 @@ const PlazaIndexRoute = PlazaIndexRouteImport.update({
 const MonitorIndexRoute = MonitorIndexRouteImport.update({
   id: '/monitor/',
   path: '/monitor/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModelsIndexRoute = ModelsIndexRouteImport.update({
-  id: '/models/',
-  path: '/models/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelManagementIndexRoute = ModelManagementIndexRouteImport.update({
@@ -126,21 +109,6 @@ const SystemUserRoute = SystemUserRouteImport.update({
   path: '/system/user',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SystemPrivateModelsRoute = SystemPrivateModelsRouteImport.update({
-  id: '/system/private-models',
-  path: '/system/private-models',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PretrainedModelsCreateRoute = PretrainedModelsCreateRouteImport.update({
-  id: '/pretrained-models/create',
-  path: '/pretrained-models/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PretrainedModelsModelIdRoute = PretrainedModelsModelIdRouteImport.update({
-  id: '/pretrained-models/$modelId',
-  path: '/pretrained-models/$modelId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PresetsCreateRoute = PresetsCreateRouteImport.update({
   id: '/presets/create',
   path: '/presets/create',
@@ -154,16 +122,6 @@ const PresetsPresetIdRoute = PresetsPresetIdRouteImport.update({
 const PlazaModelIdRoute = PlazaModelIdRouteImport.update({
   id: '/plaza/$modelId',
   path: '/plaza/$modelId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModelsManualUploadRoute = ModelsManualUploadRouteImport.update({
-  id: '/models/manualUpload',
-  path: '/models/manualUpload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModelsModelIdRoute = ModelsModelIdRouteImport.update({
-  id: '/models/$modelId',
-  path: '/models/$modelId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelManagementUploadRoute = ModelManagementUploadRouteImport.update({
@@ -206,14 +164,9 @@ export interface FileRoutesByFullPath {
   '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
   '/gpu-servers/create': typeof GpuServersCreateRoute
   '/model-management/upload': typeof ModelManagementUploadRoute
-  '/models/$modelId': typeof ModelsModelIdRoute
-  '/models/manualUpload': typeof ModelsManualUploadRoute
   '/plaza/$modelId': typeof PlazaModelIdRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
   '/presets/create': typeof PresetsCreateRoute
-  '/pretrained-models/$modelId': typeof PretrainedModelsModelIdRoute
-  '/pretrained-models/create': typeof PretrainedModelsCreateRoute
-  '/system/private-models': typeof SystemPrivateModelsRoute
   '/system/user': typeof SystemUserRoute
   '/train/$taskId': typeof TrainTaskIdRoute
   '/train/create': typeof TrainCreateRoute
@@ -223,11 +176,9 @@ export interface FileRoutesByFullPath {
   '/datasets/': typeof DatasetsIndexRoute
   '/gpu-servers/': typeof GpuServersIndexRoute
   '/model-management/': typeof ModelManagementIndexRoute
-  '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
   '/plaza/': typeof PlazaIndexRoute
   '/presets/': typeof PresetsIndexRoute
-  '/pretrained-models/': typeof PretrainedModelsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
 }
@@ -239,14 +190,9 @@ export interface FileRoutesByTo {
   '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
   '/gpu-servers/create': typeof GpuServersCreateRoute
   '/model-management/upload': typeof ModelManagementUploadRoute
-  '/models/$modelId': typeof ModelsModelIdRoute
-  '/models/manualUpload': typeof ModelsManualUploadRoute
   '/plaza/$modelId': typeof PlazaModelIdRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
   '/presets/create': typeof PresetsCreateRoute
-  '/pretrained-models/$modelId': typeof PretrainedModelsModelIdRoute
-  '/pretrained-models/create': typeof PretrainedModelsCreateRoute
-  '/system/private-models': typeof SystemPrivateModelsRoute
   '/system/user': typeof SystemUserRoute
   '/train/$taskId': typeof TrainTaskIdRoute
   '/train/create': typeof TrainCreateRoute
@@ -256,11 +202,9 @@ export interface FileRoutesByTo {
   '/datasets': typeof DatasetsIndexRoute
   '/gpu-servers': typeof GpuServersIndexRoute
   '/model-management': typeof ModelManagementIndexRoute
-  '/models': typeof ModelsIndexRoute
   '/monitor': typeof MonitorIndexRoute
   '/plaza': typeof PlazaIndexRoute
   '/presets': typeof PresetsIndexRoute
-  '/pretrained-models': typeof PretrainedModelsIndexRoute
   '/train': typeof TrainIndexRoute
   '/validate': typeof ValidateIndexRoute
 }
@@ -273,14 +217,9 @@ export interface FileRoutesById {
   '/gpu-servers/$serverId': typeof GpuServersServerIdRoute
   '/gpu-servers/create': typeof GpuServersCreateRoute
   '/model-management/upload': typeof ModelManagementUploadRoute
-  '/models/$modelId': typeof ModelsModelIdRoute
-  '/models/manualUpload': typeof ModelsManualUploadRoute
   '/plaza/$modelId': typeof PlazaModelIdRoute
   '/presets/$presetId': typeof PresetsPresetIdRoute
   '/presets/create': typeof PresetsCreateRoute
-  '/pretrained-models/$modelId': typeof PretrainedModelsModelIdRoute
-  '/pretrained-models/create': typeof PretrainedModelsCreateRoute
-  '/system/private-models': typeof SystemPrivateModelsRoute
   '/system/user': typeof SystemUserRoute
   '/train/$taskId': typeof TrainTaskIdRoute
   '/train/create': typeof TrainCreateRoute
@@ -290,11 +229,9 @@ export interface FileRoutesById {
   '/datasets/': typeof DatasetsIndexRoute
   '/gpu-servers/': typeof GpuServersIndexRoute
   '/model-management/': typeof ModelManagementIndexRoute
-  '/models/': typeof ModelsIndexRoute
   '/monitor/': typeof MonitorIndexRoute
   '/plaza/': typeof PlazaIndexRoute
   '/presets/': typeof PresetsIndexRoute
-  '/pretrained-models/': typeof PretrainedModelsIndexRoute
   '/train/': typeof TrainIndexRoute
   '/validate/': typeof ValidateIndexRoute
 }
@@ -308,14 +245,9 @@ export interface FileRouteTypes {
     | '/gpu-servers/$serverId'
     | '/gpu-servers/create'
     | '/model-management/upload'
-    | '/models/$modelId'
-    | '/models/manualUpload'
     | '/plaza/$modelId'
     | '/presets/$presetId'
     | '/presets/create'
-    | '/pretrained-models/$modelId'
-    | '/pretrained-models/create'
-    | '/system/private-models'
     | '/system/user'
     | '/train/$taskId'
     | '/train/create'
@@ -325,11 +257,9 @@ export interface FileRouteTypes {
     | '/datasets/'
     | '/gpu-servers/'
     | '/model-management/'
-    | '/models/'
     | '/monitor/'
     | '/plaza/'
     | '/presets/'
-    | '/pretrained-models/'
     | '/train/'
     | '/validate/'
   fileRoutesByTo: FileRoutesByTo
@@ -341,14 +271,9 @@ export interface FileRouteTypes {
     | '/gpu-servers/$serverId'
     | '/gpu-servers/create'
     | '/model-management/upload'
-    | '/models/$modelId'
-    | '/models/manualUpload'
     | '/plaza/$modelId'
     | '/presets/$presetId'
     | '/presets/create'
-    | '/pretrained-models/$modelId'
-    | '/pretrained-models/create'
-    | '/system/private-models'
     | '/system/user'
     | '/train/$taskId'
     | '/train/create'
@@ -358,11 +283,9 @@ export interface FileRouteTypes {
     | '/datasets'
     | '/gpu-servers'
     | '/model-management'
-    | '/models'
     | '/monitor'
     | '/plaza'
     | '/presets'
-    | '/pretrained-models'
     | '/train'
     | '/validate'
   id:
@@ -374,14 +297,9 @@ export interface FileRouteTypes {
     | '/gpu-servers/$serverId'
     | '/gpu-servers/create'
     | '/model-management/upload'
-    | '/models/$modelId'
-    | '/models/manualUpload'
     | '/plaza/$modelId'
     | '/presets/$presetId'
     | '/presets/create'
-    | '/pretrained-models/$modelId'
-    | '/pretrained-models/create'
-    | '/system/private-models'
     | '/system/user'
     | '/train/$taskId'
     | '/train/create'
@@ -391,11 +309,9 @@ export interface FileRouteTypes {
     | '/datasets/'
     | '/gpu-servers/'
     | '/model-management/'
-    | '/models/'
     | '/monitor/'
     | '/plaza/'
     | '/presets/'
-    | '/pretrained-models/'
     | '/train/'
     | '/validate/'
   fileRoutesById: FileRoutesById
@@ -408,14 +324,9 @@ export interface RootRouteChildren {
   GpuServersServerIdRoute: typeof GpuServersServerIdRoute
   GpuServersCreateRoute: typeof GpuServersCreateRoute
   ModelManagementUploadRoute: typeof ModelManagementUploadRoute
-  ModelsModelIdRoute: typeof ModelsModelIdRoute
-  ModelsManualUploadRoute: typeof ModelsManualUploadRoute
   PlazaModelIdRoute: typeof PlazaModelIdRoute
   PresetsPresetIdRoute: typeof PresetsPresetIdRoute
   PresetsCreateRoute: typeof PresetsCreateRoute
-  PretrainedModelsModelIdRoute: typeof PretrainedModelsModelIdRoute
-  PretrainedModelsCreateRoute: typeof PretrainedModelsCreateRoute
-  SystemPrivateModelsRoute: typeof SystemPrivateModelsRoute
   SystemUserRoute: typeof SystemUserRoute
   TrainTaskIdRoute: typeof TrainTaskIdRoute
   TrainCreateRoute: typeof TrainCreateRoute
@@ -425,11 +336,9 @@ export interface RootRouteChildren {
   DatasetsIndexRoute: typeof DatasetsIndexRoute
   GpuServersIndexRoute: typeof GpuServersIndexRoute
   ModelManagementIndexRoute: typeof ModelManagementIndexRoute
-  ModelsIndexRoute: typeof ModelsIndexRoute
   MonitorIndexRoute: typeof MonitorIndexRoute
   PlazaIndexRoute: typeof PlazaIndexRoute
   PresetsIndexRoute: typeof PresetsIndexRoute
-  PretrainedModelsIndexRoute: typeof PretrainedModelsIndexRoute
   TrainIndexRoute: typeof TrainIndexRoute
   ValidateIndexRoute: typeof ValidateIndexRoute
 }
@@ -457,13 +366,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pretrained-models/': {
-      id: '/pretrained-models/'
-      path: '/pretrained-models'
-      fullPath: '/pretrained-models/'
-      preLoaderRoute: typeof PretrainedModelsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/presets/': {
       id: '/presets/'
       path: '/presets'
@@ -483,13 +385,6 @@ declare module '@tanstack/react-router' {
       path: '/monitor'
       fullPath: '/monitor/'
       preLoaderRoute: typeof MonitorIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/models/': {
-      id: '/models/'
-      path: '/models'
-      fullPath: '/models/'
-      preLoaderRoute: typeof ModelsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/model-management/': {
@@ -555,27 +450,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SystemUserRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/system/private-models': {
-      id: '/system/private-models'
-      path: '/system/private-models'
-      fullPath: '/system/private-models'
-      preLoaderRoute: typeof SystemPrivateModelsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pretrained-models/create': {
-      id: '/pretrained-models/create'
-      path: '/pretrained-models/create'
-      fullPath: '/pretrained-models/create'
-      preLoaderRoute: typeof PretrainedModelsCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pretrained-models/$modelId': {
-      id: '/pretrained-models/$modelId'
-      path: '/pretrained-models/$modelId'
-      fullPath: '/pretrained-models/$modelId'
-      preLoaderRoute: typeof PretrainedModelsModelIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/presets/create': {
       id: '/presets/create'
       path: '/presets/create'
@@ -595,20 +469,6 @@ declare module '@tanstack/react-router' {
       path: '/plaza/$modelId'
       fullPath: '/plaza/$modelId'
       preLoaderRoute: typeof PlazaModelIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/models/manualUpload': {
-      id: '/models/manualUpload'
-      path: '/models/manualUpload'
-      fullPath: '/models/manualUpload'
-      preLoaderRoute: typeof ModelsManualUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/models/$modelId': {
-      id: '/models/$modelId'
-      path: '/models/$modelId'
-      fullPath: '/models/$modelId'
-      preLoaderRoute: typeof ModelsModelIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/model-management/upload': {
@@ -664,14 +524,9 @@ const rootRouteChildren: RootRouteChildren = {
   GpuServersServerIdRoute: GpuServersServerIdRoute,
   GpuServersCreateRoute: GpuServersCreateRoute,
   ModelManagementUploadRoute: ModelManagementUploadRoute,
-  ModelsModelIdRoute: ModelsModelIdRoute,
-  ModelsManualUploadRoute: ModelsManualUploadRoute,
   PlazaModelIdRoute: PlazaModelIdRoute,
   PresetsPresetIdRoute: PresetsPresetIdRoute,
   PresetsCreateRoute: PresetsCreateRoute,
-  PretrainedModelsModelIdRoute: PretrainedModelsModelIdRoute,
-  PretrainedModelsCreateRoute: PretrainedModelsCreateRoute,
-  SystemPrivateModelsRoute: SystemPrivateModelsRoute,
   SystemUserRoute: SystemUserRoute,
   TrainTaskIdRoute: TrainTaskIdRoute,
   TrainCreateRoute: TrainCreateRoute,
@@ -681,11 +536,9 @@ const rootRouteChildren: RootRouteChildren = {
   DatasetsIndexRoute: DatasetsIndexRoute,
   GpuServersIndexRoute: GpuServersIndexRoute,
   ModelManagementIndexRoute: ModelManagementIndexRoute,
-  ModelsIndexRoute: ModelsIndexRoute,
   MonitorIndexRoute: MonitorIndexRoute,
   PlazaIndexRoute: PlazaIndexRoute,
   PresetsIndexRoute: PresetsIndexRoute,
-  PretrainedModelsIndexRoute: PretrainedModelsIndexRoute,
   TrainIndexRoute: TrainIndexRoute,
   ValidateIndexRoute: ValidateIndexRoute,
 }

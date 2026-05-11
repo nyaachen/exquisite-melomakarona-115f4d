@@ -11,6 +11,10 @@ import {
 } from 'lucide-react'
 import { datasetToEntry, type DatasetEntry } from '../../components/DatasetPicker'
 import { DATASETS } from '../../data/datasets'
+import { PLAZA_MODELS } from '../../data/plaza-models'
+import { ARCHITECTURES } from '../../data/architectures'
+import { PRESETS } from '../../data/presets'
+import { EXISTING_TASKS } from '../../data/train-tasks'
 import { CreateStepper, type StepDef } from '../../components/train/CreateStepper'
 import { DatasetStep } from '../../components/train/DatasetStep'
 import { ModelConfigStep } from '../../components/train/ModelConfigStep'
@@ -21,103 +25,7 @@ export const Route = createFileRoute('/train/create')({
   component: CreateTask,
 })
 
-// ─── 模型模板 (Architectures) ───
-interface Param {
-  name: string
-  key: string
-  type: 'number' | 'string' | 'select' | 'boolean' | 'range'
-  defaultValue: number | string | boolean
-  min?: number
-  max?: number
-  step?: number
-  options?: { label: string; value: string | number }[]
-  required: boolean
-  description: string
-}
-
-interface Architecture {
-  id: string
-  name: string
-  category: string
-  baseModel: string
-  description: string
-  params: Param[]
-  isActive: boolean
-}
-
-const ARCHITECTURES: Architecture[] = [
-  {
-    id: 'arch-yolov8', name: 'YOLOv8 目标检测', category: 'object-detection', baseModel: 'YOLOv8m',
-    description: 'YOLOv8 系列目标检测模型架构，支持 nano~xlarge 多尺寸变体',
-    isActive: true,
-    params: [
-      { name: '模型尺寸', key: 'variant', type: 'select', defaultValue: 'm', required: true, description: '模型尺寸变体', options: [
-        { label: 'YOLOv8n (Nano · 3.2M)', value: 'n' },
-        { label: 'YOLOv8s (Small · 11.2M)', value: 's' },
-        { label: 'YOLOv8m (Medium · 25.9M)', value: 'm' },
-        { label: 'YOLOv8l (Large · 43.7M)', value: 'l' },
-        { label: 'YOLOv8x (XLarge · 68.2M)', value: 'x' },
-      ]},
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 100, min: 1, max: 1000, required: true, description: '完整遍历数据集的次数' },
-      { name: '批次大小', key: 'batchSize', type: 'number', defaultValue: 16, min: 1, max: 128, required: true, description: '每批训练样本数' },
-      { name: '输入尺寸', key: 'imgSize', type: 'select', defaultValue: 640, required: true, description: '模型输入图片尺寸', options: [
-        { label: '416×416', value: 416 }, { label: '512×512', value: 512 }, { label: '640×640', value: 640 },
-        { label: '800×800', value: 800 }, { label: '1024×1024', value: 1024 },
-      ]},
-      { name: '初始学习率', key: 'lr0', type: 'range', defaultValue: 0.01, min: 0.0001, max: 0.1, step: 0.0001, required: true, description: 'SGD推荐0.01，Adam推荐0.001' },
-      { name: '最终学习率', key: 'lrf', type: 'number', defaultValue: 0.001, min: 0.00001, max: 0.01, required: false, description: '余弦退火终止学习率' },
-      { name: '优化器', key: 'optimizer', type: 'select', defaultValue: 'SGD', required: true, description: '优化器类型', options: [
-        { label: 'SGD（推荐）', value: 'SGD' }, { label: 'Adam', value: 'Adam' }, { label: 'AdamW', value: 'AdamW' }, { label: 'RMSProp', value: 'RMSProp' },
-      ]},
-      { name: '早停轮数', key: 'patience', type: 'number', defaultValue: 10, min: 0, max: 50, required: false, description: '验证损失不下降时的等待轮数' },
-      { name: '启用数据增强', key: 'useAugmentation', type: 'boolean', defaultValue: true, required: false, description: '随机翻转、旋转、色彩抖动等' },
-      { name: '启用 Mosaic', key: 'useMosaic', type: 'boolean', defaultValue: true, required: false, description: '4图拼接增强' },
-      { name: '保存间隔', key: 'saveEvery', type: 'number', defaultValue: 10, min: 1, max: 50, required: false, description: '每隔多少轮保存一次检查点' },
-      { name: '训练设备', key: 'device', type: 'select', defaultValue: 'cuda', required: false, description: '训练硬件', options: [
-        { label: 'CUDA GPU（推荐）', value: 'cuda' }, { label: 'CUDA GPU 0,1（双卡）', value: 'cuda:0,1' },
-        { label: 'CUDA GPU 0-3（四卡）', value: 'cuda:0,1,2,3' }, { label: 'CPU（仅调试）', value: 'cpu' },
-      ]},
-    ],
-  },
-  {
-    id: 'arch-qwen', name: 'Qwen 大语言模型微调', category: 'llm', baseModel: 'Qwen-7B-Chat',
-    description: 'Qwen 系列大语言模型的 LoRA/全参数微调架构', isActive: true,
-    params: [
-      { name: '模型版本', key: 'baseModel', type: 'select', defaultValue: 'Qwen-7B-Chat', required: true, description: '预训练模型版本', options: [
-        { label: 'Qwen-7B-Chat', value: 'Qwen-7B-Chat' }, { label: 'Qwen-14B-Chat', value: 'Qwen-14B-Chat' }, { label: 'Qwen-72B-Chat', value: 'Qwen-72B-Chat' },
-      ]},
-      { name: '微调方式', key: 'finetuneMode', type: 'select', defaultValue: 'lora', required: true, description: '微调方式', options: [
-        { label: 'LoRA（参数高效）', value: 'lora' }, { label: '全参数微调', value: 'full' },
-      ]},
-      { name: '训练轮数', key: 'epochs', type: 'number', defaultValue: 3, min: 1, max: 20, required: true, description: '推荐大模型1-5轮' },
-      { name: '批次大小', key: 'batchSize', type: 'number', defaultValue: 8, min: 1, max: 64, required: true, description: '根据GPU显存调整' },
-      { name: '学习率', key: 'lr0', type: 'range', defaultValue: 0.0001, min: 0.00001, max: 0.001, step: 0.00001, required: true, description: 'LoRA推荐1e-4' },
-      { name: '最大序列长度', key: 'maxSeqLen', type: 'number', defaultValue: 2048, min: 512, max: 8192, required: true, description: '输入序列最大长度' },
-      { name: '启用 DeepSpeed', key: 'useDeepSpeed', type: 'boolean', defaultValue: true, required: false, description: 'DeepSpeed ZeRO 优化' },
-    ],
-  },
-]
-
-// ─── 训练预设 (Presets) ───
 const CURRENT_USER = '张工'
-
-const ALL_PRESETS = [
-  { id: 'preset-quick', name: '快速验证', architectureId: 'arch-yolov8', desc: '快速测试可行性', icon: '⚡', visibility: 'public' as const, author: '张工',
-    values: { variant: 's', epochs: 30, batchSize: 32, imgSize: 416, lr0: 0.02, lrf: 0.001, optimizer: 'SGD', patience: 15, useAugmentation: true, useMosaic: false, saveEvery: 10, device: 'cuda' },
-  },
-  { id: 'preset-standard', name: '标准训练', architectureId: 'arch-yolov8', desc: '平衡速度与精度', icon: '⚖️', visibility: 'public' as const, author: '系统管理员',
-    values: { variant: 'm', epochs: 100, batchSize: 16, imgSize: 640, lr0: 0.01, lrf: 0.001, optimizer: 'SGD', patience: 20, useAugmentation: true, useMosaic: true, saveEvery: 10, device: 'cuda' },
-  },
-  { id: 'preset-highacc', name: '高精度', architectureId: 'arch-yolov8', desc: '追求最佳精度', icon: '🎯', visibility: 'public' as const, author: '李工',
-    values: { variant: 'l', epochs: 150, batchSize: 8, imgSize: 1024, lr0: 0.005, lrf: 0.0005, optimizer: 'AdamW', patience: 30, useAugmentation: true, useMosaic: true, saveEvery: 5, device: 'cuda:0,1' },
-  },
-  { id: 'preset-edge', name: '边缘部署', architectureId: 'arch-yolov8', desc: '适合边缘设备', icon: '📱', visibility: 'private' as const, author: '王工',
-    values: { variant: 'n', epochs: 80, batchSize: 64, imgSize: 416, lr0: 0.01, lrf: 0.001, optimizer: 'SGD', patience: 15, useAugmentation: true, useMosaic: false, saveEvery: 10, device: 'cuda' },
-  },
-  { id: 'preset-qwen-lora', name: 'Qwen LoRA 微调', architectureId: 'arch-qwen', desc: '参数高效微调', icon: '🔧', visibility: 'private' as const, author: '张工',
-    values: { baseModel: 'Qwen-7B-Chat', finetuneMode: 'lora', epochs: 3, batchSize: 8, lr0: 0.0001, maxSeqLen: 2048, useDeepSpeed: true },
-  },
-]
 
 // ─── Datasets ───
 const DATASET_ENTRIES: DatasetEntry[] = DATASETS.map(datasetToEntry)
@@ -129,29 +37,25 @@ const STARTING_POINT_TYPES = [
   { id: 'public', name: '公开预训练模型', icon: <Globe size={16} />, desc: '使用社区预训练权重' },
 ]
 
-const EXISTING_TASKS = [
-  { id: 'task-prev-001', name: '道路缺陷检测 v1.0', model: 'YOLOv8s', epochs: 120, bestMap: 52.3, lastEpoch: 120, status: 'completed', createdAt: '2026-04-25' },
-  { id: 'task-prev-002', name: '安全帽检测实验组A', model: 'YOLOv8n', epochs: 80, bestMap: 48.7, lastEpoch: 80, status: 'completed', createdAt: '2026-04-20' },
-  { id: 'task-prev-003', name: '设备异常检测 v2', model: 'YOLOv8m', epochs: 100, bestMap: 45.2, lastEpoch: 45, status: 'stopped', createdAt: '2026-04-18' },
-]
+const SQUARE_MODELS_WITH_VERSIONS = PLAZA_MODELS
+  .filter(m => m.source === 'platform')
+  .map(m => ({ id: m.id, name: m.name, versions: m.versions.map(v => v.version) }))
 
-const SQUARE_MODELS_WITH_VERSIONS = [
-  { id: 'sq-model-001', name: '道路缺陷检测', versions: ['v2.3', 'v2.2', 'v2.1'] },
-  { id: 'sq-model-002', name: '施工安全帽检测', versions: ['v1.0'] },
-  { id: 'sq-model-003', name: '人员跌倒检测', versions: ['v1.0'] },
-  { id: 'sq-model-004', name: '火焰烟雾检测', versions: ['v2.1', 'v2.0', 'v1.5'] },
-]
-
-const ALL_PUBLIC_MODELS = [
-  { id: 'pub-yolov8n-coco', name: 'YOLOv8n (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '6.2 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
-  { id: 'pub-yolov8s-coco', name: 'YOLOv8s (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '21.5 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
-  { id: 'pub-yolov8m-coco', name: 'YOLOv8m (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '49.7 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
-  { id: 'pub-yolov8l-coco', name: 'YOLOv8l (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '83.7 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
-  { id: 'pub-yolov8x-coco', name: 'YOLOv8x (COCO)', architectureId: 'arch-yolov8', source: 'Ultralytics', fileSize: '130.5 MB', desc: 'COCO 80类预训练', inputSize: 640, numClasses: 80 },
-  { id: 'pub-yolov8n-pothole', name: 'YOLOv8n (道路缺陷)', architectureId: 'arch-yolov8', source: 'Roboflow', fileSize: '6.3 MB', desc: '道路坑洼检测预训练', inputSize: 640, numClasses: 5 },
-  { id: 'pub-qwen-7b-base', name: 'Qwen-7B-Chat (原版)', architectureId: 'arch-qwen', source: 'Alibaba', fileSize: '14.0 GB', desc: '通义千问 70亿参数预训练', inputSize: 2048, numClasses: 0 },
-  { id: 'pub-qwen-14b-base', name: 'Qwen-14B-Chat (原版)', architectureId: 'arch-qwen', source: 'Alibaba', fileSize: '28.0 GB', desc: '通义千问 140亿参数预训练', inputSize: 2048, numClasses: 0 },
-]
+const ALL_PUBLIC_MODELS = PLAZA_MODELS
+  .filter(m => m.source === 'public')
+  .map(m => {
+    const latest = m.versions[0]
+    return {
+      id: m.id,
+      name: m.name,
+      architectureId: m.architectureId,
+      source: m.sourceLabel || m.author,
+      fileSize: latest?.fileSize || '未知',
+      desc: m.description,
+      inputSize: latest?.inputSize || 640,
+      numClasses: m.classes.length,
+    }
+  })
 
 const STEPS: StepDef[] = [
   { id: 1, label: '选择数据集', icon: <Layers size={14} /> },
@@ -183,7 +87,7 @@ function CreateTask() {
   const [taskName, setTaskName] = useState('')
 
   const visiblePresets = useMemo(() =>
-    ALL_PRESETS.filter(p => p.visibility === 'public' || p.author === CURRENT_USER),
+    PRESETS.filter(p => p.visibility === 'public' || p.author === CURRENT_USER),
   [])
 
   const visiblePublicModels = useMemo(() =>
@@ -246,14 +150,14 @@ function CreateTask() {
   }
 
   function applyPreset(presetId: string) {
-    const preset = ALL_PRESETS.find(p => p.id === presetId)
+    const preset = PRESETS.find(p => p.id === presetId)
     if (!preset) return
     setArchitectureId(preset.architectureId)
     setAppliedPresetId(presetId)
     const arch = ARCHITECTURES.find(a => a.id === preset.architectureId)
     const values: Record<string, any> = {}
     if (arch) arch.params.forEach(p => { values[p.key] = p.defaultValue })
-    Object.assign(values, preset.values)
+    Object.assign(values, preset.paramValues)
     setParamValues(values)
   }
 

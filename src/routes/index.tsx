@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import {
-  Cpu,
   CheckCircle2,
   XCircle,
   Clock,
@@ -11,68 +10,12 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { TRAIN_STATUS } from '../constants'
+import { ALL_TASKS } from '../data/train-tasks'
+import { STATS, WEEKLY_STATS, LATEST_PUBLISHED } from '../data/dashboard'
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
 })
-
-const MOCK_TASKS = [
-  {
-    id: 'task-001',
-    name: '道路缺陷检测 v2.3',
-    dataset: '道路缺陷标注集·4872张',
-    baseModel: 'YOLOv8m',
-    status: 'running' as const,
-    progress: 47,
-    epoch: '47/100',
-    mAP: 0.782,
-    createdAt: '2026-04-29 09:14',
-    gpu: 'A100×2',
-  },
-  {
-    id: 'task-002',
-    name: '施工人员安全帽检测',
-    dataset: '安全帽标注集·2391张',
-    baseModel: 'YOLOv8s',
-    status: 'completed' as const,
-    progress: 100,
-    epoch: '80/80',
-    mAP: 0.923,
-    createdAt: '2026-04-28 14:30',
-    gpu: 'A100×1',
-  },
-  {
-    id: 'task-003',
-    name: '车牌识别增强版',
-    dataset: '车牌数据集·7840张',
-    baseModel: 'YOLOv8l',
-    status: 'failed' as const,
-    progress: 23,
-    epoch: '23/120',
-    mAP: 0,
-    createdAt: '2026-04-27 22:05',
-    gpu: 'A100×4',
-  },
-  {
-    id: 'task-004',
-    name: '工厂设备异常检测',
-    dataset: '设备标注集·1628张',
-    baseModel: 'YOLOv8n',
-    status: 'pending' as const,
-    progress: 0,
-    epoch: '0/60',
-    mAP: 0,
-    createdAt: '2026-04-29 10:47',
-    gpu: 'A100×1',
-  },
-]
-
-const STATS = [
-  { label: '训练任务总数', value: '17', delta: '+3 本周', icon: <Cpu size={16} />, color: 'var(--accent)' },
-  { label: '正在训练', value: '1', delta: 'GPU 利用率 89%', icon: <RefreshCw size={16} />, color: 'var(--warning)' },
-  { label: '已完成任务', value: '12', delta: '成功率 92.3%', icon: <CheckCircle2 size={16} />, color: 'var(--success)' },
-  { label: '已发布模型', value: '5', delta: '至科宝智能体中台', icon: <Package size={16} />, color: 'var(--teal)' },
-]
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   running: <RefreshCw size={10} className="spinning" />,
@@ -80,16 +23,6 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
   failed: <XCircle size={10} />,
   pending: <Clock size={10} />,
 }
-
-const WEEKLY_STATS = [
-  { label: '训练时长', value: '38.4', unit: 'h' },
-  { label: '数据量', value: '16.2', unit: 'k张' },
-]
-
-const LATEST_PUBLISHED = [
-  { name: '安全帽检测 v1.2', map: 0.923, target: '智能体中台·工地安全', time: '昨天 16:22' },
-  { name: '车辆检测 v3.1', map: 0.891, target: '智能体中台·交通分析', time: '4月27日' },
-]
 
 function Dashboard() {
   return (
@@ -146,7 +79,7 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_TASKS.map((task) => {
+                {ALL_TASKS.map((task) => {
                   const sc = TRAIN_STATUS[task.status]
                   const ic = STATUS_ICONS[task.status]
                   return (
@@ -225,7 +158,7 @@ function Dashboard() {
                 </div>
               </div>
             ))}
-            <Link to="/models" className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }}>
+            <Link to="/plaza" className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center', marginTop: 12 }}>
               管理所有模型
             </Link>
           </div>
