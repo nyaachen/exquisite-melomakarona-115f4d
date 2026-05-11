@@ -11,6 +11,7 @@ import {
   Upload,
   ImageIcon,
   AlertCircle,
+  ExternalLink,
   Zap,
 } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
@@ -467,6 +468,9 @@ function ModelDetail() {
                 <Link to="/validate/create" className="btn btn-teal">
                   <CheckCircle2 size={14} /> 验证该模型
                 </Link>
+                <a href="https://kebao-platform.example.com" className="btn btn-accent" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink size={14} /> 前往科宝平台使用模型
+                </a>
               </div>
             </div>
           </div>

@@ -379,6 +379,12 @@ html, body {
   border-color: rgba(64, 158, 255,0.3);
 }
 .btn-teal:hover:not(:disabled) { background: rgba(64, 158, 255,0.22); }
+.btn-accent {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.btn-accent:hover:not(:disabled) { background: rgba(139, 92, 246, 0.22); }
 .btn-danger {
   background: var(--error-glow);
   color: var(--error);
