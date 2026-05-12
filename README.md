@@ -1,72 +1,100 @@
 # 科宝训练平台
 
-科宝训练平台 (Kebao Training Platform) is a professional YOLO model training management system built for computer vision AI pipelines. It enables data scientists and ML engineers to manage the full lifecycle of YOLO object detection models — from dataset ingestion to cloud training to model publishing.
+科宝训练平台是一个面向计算机视觉 AI 管线的 YOLO 模型训练管理平台，覆盖从数据集导入、云端训练、模型验证到发布至科宝智能体中台的完整生命周期。
 
-## Key Features
+## 核心功能
 
-- **模型广场 (Model Hub)** — Browse, validate, and publish trained YOLO models to the 科宝智能体中台 (Kebao Agent Hub)
-- **数据集管理 (Dataset Management)** — Import and manage annotated image datasets synchronized from 科宝标注平台 (Kebao Annotation Platform)
-- **数据切分 (Data Splitting)** — Configure train/val/test split ratios with visual distribution bars
-- **训练预设 (Training Templates)** — Reusable hyperparameter and base model configuration presets for training jobs
-- **训练任务 (Training Tasks)** — Launch and monitor GPU cloud training jobs with real-time metrics and logs
-- **验证任务 (Validation Tasks)** — Run validation against trained models with per-class metrics (mAP, Precision, Recall, F1)
-- **资源监控 (Resource Monitoring)** — Real-time GPU utilization and cloud server status dashboard
-- **FAQ** — Frequently asked questions and troubleshooting guide
+- **模型广场** — 浏览、验证已训练模型，支持一键发布至科宝智能体中台
+- **模型管理** — 管理模型版本、上传本地 .pt 模型文件
+- **数据集管理** — 从科宝标注平台同步标注数据集，支持图片预览与标注框可视化
+- **训练任务** — 发起 GPU 云端训练，实时查看训练指标与日志
+- **验证任务** — 对已训练模型进行验证评估，输出 mAP / Precision / Recall / F1 等指标
+- **训练预设** — 可复用的超参数与模型配置模板
+- **模型模板** — 模型架构模板管理，支持动态参数配置
+- **GPU 服务器** — GPU 服务器管理与远程命令执行
+- **监控中心** — GPU 资源利用率与系统状态实时监控
 
-## Tech Stack
+## 技术栈
 
-| Layer | Technology |
-|-------|------------|
-| Framework | TanStack Start (SSR + React 19) |
-| Routing | TanStack Router v1 (file-based) |
-| Build | Vite 7 |
-| Styling | Tailwind CSS 4 + custom CSS variables |
-| Charts | Recharts |
-| Icons | Lucide React |
-| Language | TypeScript 5.7 (strict mode) |
-| Deployment | Netlify |
+| 层级       | 技术                              |
+| ---------- | --------------------------------- |
+| 框架       | TanStack Start（SSR + React 19）  |
+| 路由       | TanStack Router v1（文件系统路由） |
+| 构建       | Vite 7                            |
+| 样式       | Tailwind CSS 4 + CSS 变量         |
+| 图表       | Recharts                          |
+| 图标       | Lucide React                      |
+| 语言       | TypeScript 5.7（strict 模式）      |
+| 部署       | Netlify                           |
 
-## Getting Started
+## 快速开始
 
 ```bash
-# Install dependencies
+# 安装依赖
 npm install
 
-# Start development server (port 3000)
+# 启动开发服务器（端口 3000）
 npm run dev
 
-# Production build
+# 生产构建
 npm run build
 ```
 
-The app is also served via Netlify Dev on port 8888 when using the Netlify CLI:
+也可通过 Netlify CLI 在 8888 端口启动：
 
 ```bash
 netlify dev
 ```
 
-## Navigation
+## 路由导航
 
-| Route | Description |
-|-------|-------------|
-| `/` | Dashboard — training overview, stats, and recent tasks |
-| `/models` | Model hub — browse, validate, and publish models |
-| `/models/create` | Create a new model entry |
-| `/models/manualUpload` | Manually upload a model file |
-| `/models/:modelId` | Model detail with validation reports and publish actions |
-| `/datasets` | Dataset management — sync from 科宝标注平台 |
-| `/datasets/:datasetId` | Dataset detail view |
-| `/split` | Data split configurations for train/val/test |
-| `/split/create` | Create a new split configuration |
-| `/template` | Training template presets |
-| `/template/create` | Create a new training template |
-| `/template/:templateId` | Template detail view |
-| `/train` | Training task list and management |
-| `/train/create` | Launch a new training task |
-| `/train/:taskId` | Training task detail — live metrics, logs, and progress |
-| `/validate` | Validation task list |
-| `/validate/create` | Create a new validation task |
-| `/validate/:taskId` | Validation task detail with per-class metrics |
-| `/monitor` | Real-time GPU resource monitoring |
-| `/faq` | Frequently asked questions |
-| `/system/user` | User profile and settings |
+| 路由                             | 说明                       |
+| -------------------------------- | -------------------------- |
+| `/`                              | 首页，重定向至模型广场     |
+| `/plaza`                         | 模型广场 — 浏览已发布模型  |
+| `/plaza/$modelId`                | 模型详情 — 指标、预测示例  |
+| `/model-management`              | 模型管理 — 版本列表        |
+| `/model-management/upload`       | 手动上传模型文件           |
+| `/datasets`                      | 数据集管理 — 同步标注平台  |
+| `/datasets/$datasetId`           | 数据集详情 — 标注预览      |
+| `/train`                         | 训练任务列表               |
+| `/train/create`                  | 创建训练任务（三步向导）   |
+| `/train/$taskId`                 | 训练详情 — 实时指标、日志  |
+| `/validate`                      | 验证任务列表               |
+| `/validate/create`               | 创建验证任务               |
+| `/validate/$taskId`              | 验证详情 — 分类指标、评级  |
+| `/presets`                       | 训练预设列表               |
+| `/presets/create`                | 创建训练预设               |
+| `/presets/$presetId`             | 编辑预设参数               |
+| `/architectures`                 | 模型模板列表               |
+| `/architectures/create`          | 创建模型模板               |
+| `/architectures/$architectureId` | 编辑模型模板               |
+| `/gpu-servers`                   | GPU 服务器列表             |
+| `/gpu-servers/create`            | 添加 GPU 服务器            |
+| `/gpu-servers/$serverId`         | 服务器详情与命令执行       |
+| `/monitor`                       | 监控中心 — GPU 资源监控    |
+| `/system/user`                   | 用户设置                   |
+
+## 项目结构
+
+```
+src/
+├── routes/                  # 文件系统路由
+│   ├── __root.tsx           # 根布局：侧边栏 + Outlet
+│   ├── index.tsx            # 首页重定向
+│   ├── plaza/               # 模型广场
+│   ├── model-management/    # 模型管理
+│   ├── datasets/            # 数据集管理
+│   ├── train/               # 训练任务
+│   ├── validate/            # 验证任务
+│   ├── presets/             # 训练预设
+│   ├── architectures/       # 模型模板
+│   ├── gpu-servers/         # GPU 服务器
+│   ├── monitor/             # 监控中心
+│   └── system/              # 系统设置
+├── components/              # 可复用组件
+├── data/                    # 模拟数据
+├── lib/                     # 工具库
+├── styles.css               # 全局样式（CSS 变量 + 组件样式）
+└── router.tsx               # 路由实例配置
+```

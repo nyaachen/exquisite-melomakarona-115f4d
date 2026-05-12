@@ -24,7 +24,13 @@ A YOLO model training management platform built with TanStack Start, deployed on
 src/
 ├── routes/
 │   ├── __root.tsx             # Root layout: sidebar nav + Outlet
-│   ├── index.tsx              # Dashboard (training overview, stats, recent tasks)
+│   ├── index.tsx              # Redirect / → /plaza
+│   ├── plaza/
+│   │   ├── index.tsx          # Model plaza: published model grid
+│   │   └── $modelId.tsx       # Model detail: metrics, prediction, publish
+│   ├── model-management/
+│   │   ├── index.tsx          # Model management: version history list
+│   │   └── upload.tsx         # Manual .pt model file upload
 │   ├── train/
 │   │   ├── index.tsx          # All training tasks list table
 │   │   ├── create.tsx         # 3-step wizard (datasets → model/params → review)
@@ -33,10 +39,6 @@ src/
 │   │   ├── index.tsx          # Model architecture templates list
 │   │   ├── create.tsx         # Create architecture with dynamic params
 │   │   └── $architectureId.tsx # Edit architecture template
-│   ├── models/
-│   │   ├── index.tsx          # Published model grid with version history
-│   │   ├── $modelId.tsx       # Model detail: metrics, prediction, version switcher
-│   │   └── manualUpload.tsx   # Manual .pt model file upload
 │   ├── presets/
 │   │   ├── index.tsx          # Training presets list (public/private)
 │   │   ├── create.tsx         # Create preset from architecture template
@@ -44,18 +46,55 @@ src/
 │   ├── datasets/
 │   │   ├── index.tsx          # Dataset sync from 科宝标注平台
 │   │   └── $datasetId.tsx     # Dataset detail: labels, image preview, bounding boxes
-│   ├── subdatasets/
-│   │   ├── index.tsx          # Pre-split subdatasets list
-│   │   └── create.tsx         # Auto/manual train/val/test split creation
 │   ├── validate/
 │   │   ├── index.tsx          # Validation tasks list
 │   │   ├── create.tsx         # Create validation task (model + dataset)
 │   │   └── $taskId.tsx        # Validation detail: per-class metrics, grading
+│   ├── gpu-servers/
+│   │   ├── index.tsx          # GPU server list
+│   │   ├── create.tsx         # Add GPU server
+│   │   └── $serverId/
+│   │       ├── index.tsx      # Server detail
+│   │       └── execute.tsx    # Remote command execution terminal
+│   ├── monitor/
+│   │   └── index.tsx          # Resource monitoring dashboard
 │   └── system/
 │       └── user.tsx           # User profile page (stub)
 ├── components/
+│   ├── train/                 # Training-related components
+│   │   ├── DatasetStep.tsx    # Step 1: dataset selection
+│   │   ├── ModelConfigStep.tsx # Step 2: model & hyperparameter config
+│   │   ├── ReviewStep.tsx     # Step 3: review & launch
+│   │   ├── CreateStepper.tsx  # 3-step progress indicator
+│   │   ├── CreateBottomBar.tsx # Bottom action bar for wizard
+│   │   ├── SectionTitle.tsx   # Section header with icon
+│   │   ├── TaskHeader.tsx     # Training task detail header
+│   │   ├── TaskInfoCards.tsx  # Task status/info card grid
+│   │   ├── TrainingChartsSection.tsx # Metric charts
+│   │   ├── TrainingLogPanel.tsx # Real-time log terminal
+│   │   ├── ReLineChart.tsx    # Recharts line chart wrapper
+│   │   ├── CompletedTaskPanel.tsx # Post-training actions
+│   │   ├── PublishModelModal.tsx # Publish-to-hub modal
+│   │   └── ModelValidationPanel.tsx # Validation panel within task detail
+│   ├── monitor/               # Monitor components
+│   │   ├── ResourceMonitor.tsx # GPU/CPU/Memory charts
+│   │   ├── TaskMonitor.tsx    # Active task monitoring
+│   │   └── SystemLogs.tsx     # System log viewer
 │   ├── DatasetPicker.tsx      # Reusable dataset picker with grouping
-│   └── SearchableDropdown.tsx # Searchable dropdown with keyboard nav
+│   ├── DatasetSplitManager.tsx # Train/val/test split configurator
+│   ├── SplitAdjuster.tsx      # Ratio slider adjuster
+│   ├── SearchableDropdown.tsx # Searchable dropdown with keyboard nav
+│   ├── AnnotationPreview.tsx  # Bounding box overlay preview
+│   ├── ClassDistributionChart.tsx # Per-class distribution chart
+│   └── NotFound.tsx           # 404 page component
+├── data/                      # Mock data modules
+│   ├── userinfo.ts
+│   ├── gpuServers.ts
+│   ├── train-tasks.ts
+│   ├── validate.ts
+│   ├── plaza-models.ts
+│   └── architectures.ts
+├── lib/                       # Utility modules
 ├── styles.css                 # All styling: CSS variables, component classes, animations
 └── router.tsx                 # TanStack Router setup
 ```
@@ -72,11 +111,13 @@ CSS variables define the entire palette (see `:root` in `styles.css`). The theme
 
 ### Mock Data
 
-All data is currently **in-memory mock data** defined directly in each route file. There is no backend or database. Task IDs `task-001` through `task-006` and model IDs `model-001` through `model-004` are pre-defined. The create task wizard navigates to `task-001` after submission.
+All data is **in-memory mock data** defined in `src/data/` modules and consumed by route files. There is no backend or database. Task IDs `task-001` through `task-006` and model IDs `model-001` through `model-004` are pre-defined. The create task wizard navigates to `task-001` after submission.
 
 ### Real-time Simulation
 
-`train/$taskId.tsx` uses `useEffect` with `setInterval` to simulate live training progress when `status === 'running'`. The interval fires every 1200ms, incrementing epoch count and updating metrics/logs.
+- `train/$taskId.tsx` uses `useEffect` with `setInterval` to simulate live training progress when `status === 'running'`. The interval fires every 1200ms, incrementing epoch count and updating metrics/logs.
+- `validate/$taskId.tsx` uses a similar interval pattern to poll validation progress.
+- `gpu-servers/$serverId/execute.tsx` uses `useSimulatedWebSocket` to simulate WebSocket-based remote command execution with log streaming.
 
 ### Root Layout
 
@@ -116,4 +157,7 @@ To add real backend persistence, use Netlify Database (Postgres) via the `genera
 - **Split bar visualization**: The train/val/test split is shown as a CSS flexbox bar with `flex: <ratio>` on each segment — no canvas or SVG needed.
 - **Log terminal**: Simulated with a div + `useRef` scroll-to-bottom, styled with `.log-terminal` monospace class and color helper classes (`.log-info`, `.log-success`, etc.).
 - **Sidebar** **`position: sticky`**: The sidebar is `sticky` with `height: 100vh` so it stays in view during page scroll without `fixed` positioning breaking document flow.
+- **Icon-as-string pattern in constants**: `GRADE_THRESHOLDS` stores icon names as strings (`'CheckCircle2'`, `'AlertCircle'`, `'XCircle'`). Route files use a local `RenderIcon` switch function to map these strings back to Lucide components at render time.
+- **WebSocket simulation**: `lib/useSimulatedWebSocket.ts` provides a hook that mimics WebSocket lifecycle (connect, disconnect, data events) using `setInterval` timers — no real network connection.
+- **Plaza vs Model Management**: `/plaza` is the public-facing model hub for browsing and publishing; `/model-management` is the internal model registry for version tracking and manual uploads.
 
