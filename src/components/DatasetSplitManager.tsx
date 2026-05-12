@@ -13,8 +13,10 @@ import {
   Image,
   Search,
   X,
+  Loader2,
 } from 'lucide-react'
 import type { DatasetResource } from '../data/datasets'
+import { simulateAutoSplitSave, simulateManualSplitSave } from '../data/datasets'
 import { SplitAdjuster } from './SplitAdjuster'
 import { ClassDistributionChart, type ClassDistribution } from './ClassDistributionChart'
 
@@ -50,6 +52,8 @@ function resourceToAnnotation(r: DatasetResource): Annotation {
 interface DatasetSplitManagerProps {
   resources: DatasetResource[]
   classNames: string[]
+  datasetId: string
+  onSaved?: (assignments: Record<string, SetType>) => void
 }
 
 // ─── Component ───
@@ -57,8 +61,11 @@ interface DatasetSplitManagerProps {
 export function DatasetSplitManager({
   resources,
   classNames,
+  datasetId,
+  onSaved,
 }: DatasetSplitManagerProps) {
   const [mode, setMode] = useState<SplitMode>('auto')
+  const [saving, setSaving] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize] = useState(20)
 
@@ -145,7 +152,7 @@ export function DatasetSplitManager({
     })
   }
 
-  function autoSplit() {
+  function computeAutoAssignments(): Record<string, SetType> {
     const total = allAnnotations.length
     const selected = form.selectedLabels
 
@@ -181,7 +188,50 @@ export function DatasetSplitManager({
       if (!(a.id in newAssignments)) newAssignments[a.id] = 'train'
     })
 
-    setAssignments(newAssignments)
+    return newAssignments
+  }
+
+  async function handleAutoSave() {
+    setSaving(true)
+    const newAssignments = computeAutoAssignments()
+    const trainCount = Object.values(newAssignments).filter(s => s === 'train').length
+    const valCount = Object.values(newAssignments).filter(s => s === 'val').length
+    const testCount = Object.values(newAssignments).filter(s => s === 'test').length
+
+    try {
+      await simulateAutoSplitSave({
+        datasetId,
+        trainCount,
+        valCount,
+        testCount,
+        trainRatio: form.trainRatio,
+        valRatio: form.valRatio,
+        testRatio: form.testRatio,
+        totalCount: allAnnotations.length,
+        priorityLabels: form.selectedLabels,
+      })
+      setAssignments(newAssignments)
+      onSaved?.(newAssignments)
+    } catch (e) {
+      alert('保存失败，请重试')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleManualSave() {
+    setSaving(true)
+    try {
+      await simulateManualSplitSave({
+        datasetId,
+        assignments: Object.entries(assignments).map(([resourceId, set]) => ({ resourceId, set })),
+      })
+      onSaved?.(assignments)
+    } catch (e) {
+      alert('保存失败，请重试')
+    } finally {
+      setSaving(false)
+    }
   }
 
   function cycleAnnotationSet(annId: string) {
@@ -270,8 +320,9 @@ export function DatasetSplitManager({
               />
             </div>
 
-            <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={autoSplit}>
-              <Save size={14} /> 保存
+            <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={handleAutoSave} disabled={saving}>
+              {saving ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={14} />}
+              {saving ? '保存中...' : '保存'}
             </button>
           </div>
         )}
@@ -378,11 +429,12 @@ export function DatasetSplitManager({
 
             <div style={{ padding: '10px 14px', background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
               <Info size={13} style={{ color: 'var(--teal)', flexShrink: 0, marginTop: 1 }} />
-              <span>点击单张图片可循环切换（训练→验证→测试→训练）。使用搜索可快速定位特定标签的图片。</span>
+              <span>点击单张图片可循环切换（训练→验证→测试→训练），修改仅在本地暂存。使用搜索可快速定位特定标签的图片。</span>
             </div>
 
-            <button className="btn btn-primary" style={{ marginTop: 16 }}>
-              <Save size={14} /> 保存
+            <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={handleManualSave} disabled={saving}>
+              {saving ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={14} />}
+              {saving ? '保存中...' : '保存'}
             </button>
           </div>
         )}

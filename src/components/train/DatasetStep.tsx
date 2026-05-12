@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Layers,
   Info,
@@ -50,6 +50,13 @@ export function DatasetStep({
   onDatasetChange: (id: string) => void
 }) {
   const [showSplitModal, setShowSplitModal] = useState(false)
+  const [adjustedResources, setAdjustedResources] = useState(selectedDataset?.resources ?? [])
+
+  useEffect(() => {
+    if (selectedDataset) {
+      setAdjustedResources(selectedDataset.resources)
+    }
+  }, [selectedDataset])
 
   const flatClassNames = useMemo(() => {
     if (!selectedDataset) return selectedDs?.classes ?? []
@@ -144,8 +151,15 @@ export function DatasetStep({
             </div>
             <div style={{ padding: 24 }}>
               <DatasetSplitManager
-                resources={selectedDataset.resources}
+                resources={adjustedResources}
                 classNames={flatClassNames}
+                datasetId={selectedDataset.id}
+                onSaved={(assignments) => {
+                  setAdjustedResources(prev => prev.map(r => ({
+                    ...r,
+                    set: assignments[r.id] ?? r.set,
+                  })))
+                }}
               />
             </div>
           </div>

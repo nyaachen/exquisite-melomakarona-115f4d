@@ -150,6 +150,201 @@ function makeResource(
   }
 }
 
+// ─── 划分保存 API 类型 ───
+
+/** 自动划分保存请求参数 */
+export interface AutoSplitParams {
+  datasetId: string
+  trainCount: number
+  valCount: number
+  testCount: number
+  trainRatio: number
+  valRatio: number
+  testRatio: number
+  totalCount: number
+  priorityLabels: string[]
+}
+
+/** 手动划分保存请求参数 */
+export interface ManualSplitParams {
+  datasetId: string
+  assignments: Array<{ resourceId: string; set: 'train' | 'val' | 'test' }>
+}
+
+/** 划分保存响应 */
+export interface SplitSaveResponse {
+  code: number
+  msg: string | null
+  data: {
+    datasetId: string
+    splitResult: { train: number; val: number; test: number }
+    trainCount: number
+    valCount: number
+    testCount: number
+    updatedAt: string
+  }
+}
+
+/**
+ * 模拟「根据目标比例调整数据集划分」接口
+ * POST /api/v1/datasets/{datasetId}/split/auto
+ */
+export async function simulateAutoSplitSave(params: AutoSplitParams): Promise<SplitSaveResponse> {
+  const body = JSON.stringify({
+    datasetId: params.datasetId,
+    splitConfig: {
+      trainRatio: params.trainRatio,
+      valRatio: params.valRatio,
+      testRatio: params.testRatio,
+      trainCount: params.trainCount,
+      valCount: params.valCount,
+      testCount: params.testCount,
+    },
+    priorityLabels: params.priorityLabels,
+    totalResources: params.totalCount,
+  })
+  console.log('[Mock API] POST /api/v1/datasets/{id}/split/auto', body)
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        code: 200,
+        msg: null,
+        data: {
+          datasetId: params.datasetId,
+          splitResult: { train: params.trainRatio, val: params.valRatio, test: params.testRatio },
+          trainCount: params.trainCount,
+          valCount: params.valCount,
+          testCount: params.testCount,
+          updatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        },
+      })
+    }, 800 + Math.random() * 400)
+  })
+}
+
+/**
+ * 模拟「保存手动指定数据集资源划分」接口
+ * POST /api/v1/datasets/{datasetId}/split/manual
+ */
+export async function simulateManualSplitSave(params: ManualSplitParams): Promise<SplitSaveResponse> {
+  const body = JSON.stringify({
+    datasetId: params.datasetId,
+    assignments: params.assignments,
+    totalResources: params.assignments.length,
+  })
+  console.log('[Mock API] POST /api/v1/datasets/{id}/split/manual', body)
+
+  const counts = { train: 0, val: 0, test: 0 }
+  params.assignments.forEach(a => { counts[a.set]++ })
+  const total = params.assignments.length || 1
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        code: 200,
+        msg: null,
+        data: {
+          datasetId: params.datasetId,
+          splitResult: {
+            train: Math.round(counts.train / total * 100),
+            val: Math.round(counts.val / total * 100),
+            test: 100 - Math.round(counts.train / total * 100) - Math.round(counts.val / total * 100),
+          },
+          trainCount: counts.train,
+          valCount: counts.val,
+          testCount: counts.test,
+          updatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        },
+      })
+    }, 800 + Math.random() * 400)
+  })
+}
+
+// ─── 标注资源分页查询 API 类型 ───
+
+/** 标注资源分页查询响应 */
+export interface AnnotationResourcesResponse {
+  code: number
+  msg: string | null
+  data: {
+    resources: DatasetResource[]
+    total: number
+    page: number
+    pageSize: number
+  }
+}
+
+/**
+ * 模拟「分页查询数据集标注资源」接口
+ * GET /api/v1/datasets/{datasetId}/resources?page=&pageSize=
+ */
+export async function simulateFetchAnnotationResources(
+  datasetId: string,
+  page: number,
+  pageSize: number,
+): Promise<AnnotationResourcesResponse> {
+  console.log(`[Mock API] GET /api/v1/datasets/${datasetId}/resources?page=${page}&pageSize=${pageSize}`)
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const dataset = DATASETS.find(d => d.id === datasetId)
+      if (!dataset) {
+        resolve({ code: 404, msg: '数据集不存在', data: { resources: [], total: 0, page, pageSize } })
+        return
+      }
+      const total = dataset.resources.length
+      const start = (page - 1) * pageSize
+      const resources = dataset.resources.slice(start, start + pageSize)
+      resolve({
+        code: 200,
+        msg: null,
+        data: { resources, total, page, pageSize },
+      })
+    }, 400 + Math.random() * 300)
+  })
+}
+
+// ─── 类别分布查询 API 类型 ───
+
+/** 类别分布查询响应 */
+export interface ClassDistributionResponse {
+  code: number
+  msg: string | null
+  data: Array<{
+    name: string
+    训练集: number
+    验证集: number
+    测试集: number
+  }>
+}
+
+/**
+ * 模拟「查询数据集类别分布」接口
+ * GET /api/v1/datasets/{datasetId}/class-distribution
+ */
+export async function simulateFetchClassDistribution(
+  datasetId: string,
+  split: { train: number; val: number; test: number },
+  flatContentTags: string[],
+): Promise<ClassDistributionResponse> {
+  console.log(`[Mock API] GET /api/v1/datasets/${datasetId}/class-distribution`)
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h) }
+      const data = flatContentTags.map(cls => {
+        const h = hash(cls)
+        const base = 100 + (h % 600)
+        const t = Math.round(base * (split.train / 100))
+        const v = Math.round(base * (split.val / 100))
+        return { name: cls, 训练集: t, 验证集: v, 测试集: Math.max(0, base - t - v) }
+      })
+      resolve({ code: 200, msg: null, data })
+    }, 350 + Math.random() * 250)
+  })
+}
+
 export const DATASETS: Dataset[] = [
   {
     id: '84',

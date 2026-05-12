@@ -1,6 +1,6 @@
 // 从 userdata/userinfo.js 中提取的凭证配置
-const BASE_URL = "http://172.16.6.8:81/data-annotation-platform/"
-const SATOKEN = "1c4bc60e-e97a-4e4a-8148-c03b9bc3ab41"
+const BASE_URL = "http://example/"
+const SATOKEN = "TOKEN"
 const AUTHORIZATION = `Bearer ${SATOKEN}`
 
 interface RequestOptions extends Omit<RequestInit, "headers"> {

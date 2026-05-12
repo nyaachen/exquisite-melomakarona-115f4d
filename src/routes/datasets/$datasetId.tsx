@@ -3,7 +3,6 @@ import { useState, useMemo } from 'react'
 import {
   ArrowLeft,
   Tag,
-  Images,
   Calendar,
   User,
   MapPin,
@@ -13,6 +12,7 @@ import {
 import { NotFound } from '../../components/NotFound'
 import { ClassDistributionChart } from '../../components/ClassDistributionChart'
 import { DatasetSplitManager } from '../../components/DatasetSplitManager'
+import { AnnotationPreview } from '../../components/AnnotationPreview'
 import { DATASETS } from '../../data/datasets'
 
 export const Route = createFileRoute('/datasets/$datasetId')({
@@ -26,11 +26,13 @@ function DatasetDetail() {
   const dataset = DATASETS.find(ds => ds.id === params.datasetId)
   if (!dataset) return <NotFound />
 
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [showSplitModal, setShowSplitModal] = useState(false)
 
+  // Mutable resources state — updated after split save
+  const [adjustedResources, setAdjustedResources] = useState(dataset.resources)
+
   // 从 resources 推导划分比例
-  const resources = dataset.resources
+  const resources = adjustedResources
   const split = useMemo(() => {
     const total = resources.length
     if (total === 0) return { train: 70, val: 15, test: 15 }
@@ -53,17 +55,6 @@ function DatasetDetail() {
     )
     return names
   }, [dataset.contentTagList])
-
-  const classDistribution = useMemo(() => {
-    const hash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h) }
-    return flatContentTags.map(cls => {
-      const h = hash(cls)
-      const base = 100 + (h % 600)
-      const t = Math.round(base * (split.train / 100))
-      const v = Math.round(base * (split.val / 100))
-      return { name: cls, 训练集: t, 验证集: v, 测试集: Math.max(0, base - t - v) }
-    })
-  }, [flatContentTags, split])
 
   return (
     <div>
@@ -197,6 +188,13 @@ function DatasetDetail() {
                 <DatasetSplitManager
                   resources={resources}
                   classNames={flatContentTags}
+                  datasetId={params.datasetId}
+                  onSaved={(assignments) => {
+                    setAdjustedResources(prev => prev.map(r => ({
+                      ...r,
+                      set: assignments[r.id] ?? r.set,
+                    })))
+                  }}
                 />
               </div>
             </div>
@@ -205,110 +203,16 @@ function DatasetDetail() {
 
         {/* Class distribution */}
         <div style={{ marginBottom: 24 }}>
-          <ClassDistributionChart data={classDistribution} />
+          <ClassDistributionChart
+          datasetId={params.datasetId}
+          split={split}
+          flatContentTags={flatContentTags}
+        />
         </div>
 
-        {/* Image preview */}
-        <div className="card" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Images size={16} style={{ color: 'var(--accent-bright)' }} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>标注数据预览</span>
-            </div>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>共 {resources.length} 张预览图</span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            {resources.map((res) => {
-              const firstShape = res.labelResultJson.shapes[0]
-              const w = res.labelResultJson.imageWidth || 1920
-              const h = res.labelResultJson.imageHeight || 1080
-              const boxes = firstShape?.boxes
-              return (
-                <div key={res.id} className="select-card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', position: 'relative' }}
-                  onClick={() => setSelectedImage(res.id)}>
-                  <div style={{ position: 'relative', aspectRatio: '4/3' }}>
-                    <img src={res.url} alt={res.fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {boxes && (
-                      <>
-                        <div style={{
-                          position: 'absolute',
-                          left: `${(Number(boxes[0]) / w) * 100}%`,
-                          top: `${(Number(boxes[1]) / h) * 100}%`,
-                          width: `${((Number(boxes[2]) - Number(boxes[0])) / w) * 100}%`,
-                          height: `${((Number(boxes[3]) - Number(boxes[1])) / h) * 100}%`,
-                          border: '3px solid #409eff',
-                          backgroundColor: 'rgba(0, 85, 213, 0.2)',
-                        }} />
-                        <div style={{
-                          position: 'absolute',
-                          top: `${(Number(boxes[1]) / h) * 100 - 24}px`,
-                          left: `${(Number(boxes[0]) / w) * 100}%`,
-                          color: 'white',
-                          fontSize: 10,
-                          padding: '2px 6px',
-                          background: '#0055d5',
-                          borderRadius: 2,
-                          whiteSpace: 'nowrap',
-                        }}>
-                          {firstShape.labelInfo.name}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        {/* Annotation preview with pagination */}
+        <AnnotationPreview datasetId={params.datasetId} />
       </div>
-
-      {/* Image zoom modal */}
-      {selectedImage && (() => {
-        const res = resources.find(r => r.id === selectedImage)
-        if (!res) return null
-        const firstShape = res.labelResultJson.shapes[0]
-        const w = res.labelResultJson.imageWidth || 1920
-        const h = res.labelResultJson.imageHeight || 1080
-        const boxes = firstShape?.boxes
-        return (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, animation: 'fadeIn 0.2s ease-out' }}
-            onClick={() => setSelectedImage(null)}>
-            <button style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              onClick={() => setSelectedImage(null)}>
-              <X size={20} />
-            </button>
-            <div style={{ position: 'relative', maxWidth: '80vw', maxHeight: '80vh' }}>
-              <img src={res.url} alt={res.fileName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              {boxes && (
-                <>
-                  <div style={{
-                    position: 'absolute',
-                    left: `${(Number(boxes[0]) / w) * 100}%`,
-                    top: `${(Number(boxes[1]) / h) * 100}%`,
-                    width: `${((Number(boxes[2]) - Number(boxes[0])) / w) * 100}%`,
-                    height: `${((Number(boxes[3]) - Number(boxes[1])) / h) * 100}%`,
-                    border: '3px solid #409eff',
-                    backgroundColor: 'rgba(0,85,213,0.15)',
-                  }} />
-                  <div style={{
-                    position: 'absolute',
-                    top: `${(Number(boxes[1]) / h) * 100 - 28}px`,
-                    left: `${(Number(boxes[0]) / w) * 100}%`,
-                    color: 'white',
-                    fontSize: 14,
-                    padding: '4px 12px',
-                    background: '#0055d5',
-                    borderRadius: 6,
-                    fontWeight: 600,
-                  }}>
-                    {firstShape.labelInfo.name}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )
-      })()}
     </div>
   )
 }
