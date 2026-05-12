@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, CheckCircle2, XCircle, RefreshCw, AlertCircle, Award, Target, Zap, Clock } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, XCircle, RefreshCw, AlertCircle, Award, Target, Clock } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
 import { getGrade } from '../../constants'
 import { VALIDATE_TASKS } from '../../data/validate'
@@ -190,15 +190,17 @@ function ValidateDetail() {
                     </span>
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', padding: '20px', background: `${overallGrade.color}15`, borderRadius: 12, border: `1px solid ${overallGrade.color}30` }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>综合评价</div>
-                  <div style={{ fontSize: 32, fontWeight: 700, color: overallGrade.color }}>
-                    {overallGrade.label}
+                {overallGrade && (
+                  <div style={{ textAlign: 'center', padding: '20px', background: `${overallGrade.color}15`, borderRadius: 12, border: `1px solid ${overallGrade.color}30` }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>综合评价</div>
+                    <div style={{ fontSize: 32, fontWeight: 700, color: overallGrade.color }}>
+                      {overallGrade.label}
+                    </div>
+                    <div style={{ marginTop: 8 }}>
+                      <RenderIcon icon={overallGrade.icon} size={24} style={{ color: overallGrade.color }} />
+                    </div>
                   </div>
-                  <div style={{ marginTop: 8 }}>
-                    <overallGrade.icon size={24} style={{ color: overallGrade.color }} />
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 

@@ -92,8 +92,9 @@ function WsStatusBadge({ status }: { status: ConnectionStatus }) {
 
 function ExecuteCommand() {
   const { serverId } = Route.useParams()
-  const data = GPU_SERVERS.find(s => s.id === serverId)
-  if (!data) return <NotFound />
+  const server = GPU_SERVERS.find(s => s.id === serverId)
+  if (!server) return <NotFound />
+  const { host, port, username } = server
 
   const [command, setCommand] = useState('')
   const [logs, setLogs] = useState<LogLine[]>([])
@@ -140,8 +141,8 @@ function ExecuteCommand() {
 
     const now = new Date().toLocaleTimeString('zh-CN', { hour12: false })
     setLogs([
-      { id: 1, text: `┌─ 建立 WebSocket 连接到: ${data.host}:${data.port}`, type: 'dim', timestamp: now },
-      { id: 2, text: `├─ 认证用户: ${data.username}`, type: 'dim', timestamp: now },
+      { id: 1, text: `┌─ 建立 WebSocket 连接到: ${host}:${port}`, type: 'dim', timestamp: now },
+      { id: 2, text: `├─ 认证用户: ${username}`, type: 'dim', timestamp: now },
       { id: 3, text: `├─ 执行命令: ${command.trim()}`, type: 'info', timestamp: now },
       { id: 4, text: '', type: 'info', timestamp: now },
     ])
@@ -213,21 +214,21 @@ function ExecuteCommand() {
         <div className="card" style={{ padding: 16, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{
             width: 40, height: 40, borderRadius: 4,
-            background: data.status === 'online' ? 'var(--success-glow)' : 'var(--error-glow)',
+            background: server.status === 'online' ? 'var(--success-glow)' : 'var(--error-glow)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: data.status === 'online' ? 'var(--success)' : 'var(--error)',
+            color: server.status === 'online' ? 'var(--success)' : 'var(--error)',
           }}>
             <Server size={20} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{data.name}</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{server.name}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}>
-              {data.host}:{data.port} · {data.username}
+              {server.host}:{server.port} · {server.username}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <WsStatusBadge status={wsStatus} />
-            {data.gpus.slice(0, 4).map(g => (
+            {server.gpus.slice(0, 4).map(g => (
               <span key={g.id} style={{
                 fontSize: 11, padding: '3px 8px',
                 background: 'var(--bg-elevated)',
@@ -265,7 +266,7 @@ function ExecuteCommand() {
           <div className="command-input-area" style={{ background: '#020811', border: '1px solid var(--border-default)', borderRadius: 4, padding: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
               <span style={{ fontFamily: 'JetBrains Mono', fontSize: 11, color: 'var(--success)' }}>
-                {data.username}@{data.host}
+                {server.username}@{server.host}
               </span>
               <span style={{ fontFamily: 'JetBrains Mono', fontSize: 11, color: 'var(--text-muted)', margin: '0 6px' }}>:</span>
               <span style={{ fontFamily: 'JetBrains Mono', fontSize: 11, color: 'var(--accent-bright)' }}>~</span>

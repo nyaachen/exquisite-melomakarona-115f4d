@@ -14,7 +14,6 @@ import {
   Zap,
   Globe,
   Shield,
-  History,
 } from 'lucide-react'
 import { NotFound } from '../../components/NotFound'
 import { PLAZA_MODELS } from '../../data/plaza-models'
@@ -360,9 +359,9 @@ function PlazaDetail() {
                 <Link to="/validate/create" className="btn btn-teal">
                   <CheckCircle2 size={14} /> 验证该模型
                 </Link>
-                <Link href="https://kebao-platform.example.com" className="btn btn-teal"> 
+                <a href="https://kebao-platform.example.com" className="btn btn-teal" target="_blank" rel="noopener noreferrer">
                   前往科宝平台使用模型
-                </Link>
+                </a>
               </div>
             </div>
 
@@ -450,11 +449,3 @@ function PlazaDetail() {
   )
 }
 
-function MetricCard({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div className="stat-card metric-card">
-      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 24, fontWeight: 600, color }}>{value}</div>
-    </div>
-  )
-}

@@ -71,7 +71,8 @@ export function DatasetStep({
 
   return (
     <div>
-      <SectionTitle icon={<Layers size={15} />} title="选择数据集" />
+      <SectionTitle icon={<Layers size={15} />} title="选择数据集" 
+        subtitle='选择用于训练模型的数据集'/>
 
       {datasetErrors.dataset && (
         <div style={{ padding: '10px 14px', background: 'var(--error-glow)', border: '1px solid rgba(239,68,68,0.3)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--error)' }}>

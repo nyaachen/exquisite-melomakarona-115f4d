@@ -5,7 +5,7 @@ export function SectionTitle({
 }: {
   icon: React.ReactNode
   title: string
-  subtitle: string
+  subtitle?: string
 }) {
   return (
     <div style={{ marginBottom: 14 }}>

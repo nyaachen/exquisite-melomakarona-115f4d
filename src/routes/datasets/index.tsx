@@ -217,7 +217,7 @@ function DatasetsPage() {
                         <td style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{ds.createTime}</td>
                         <td className="sticky-col">
                           <div style={{ display: 'flex', gap: 5, flexWrap: 'nowrap' }}>
-                            <Link to={`/datasets/${ds.id}`} className="btn btn-ghost btn-sm">
+                            <Link to={`/datasets/${ds.id}` as any} className="btn btn-ghost btn-sm">
                               查看详情 <ArrowRight size={11} />
                             </Link>
                             <Link to="/train/create" className="btn btn-ghost btn-sm">
