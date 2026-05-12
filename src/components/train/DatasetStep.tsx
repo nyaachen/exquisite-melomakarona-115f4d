@@ -34,7 +34,6 @@ export function DatasetStep({
   valImageCount,
   testImageCount,
   onDatasetChange,
-  onSplitChange,
 }: {
   datasetId: string
   datasetSplit: { train: number; val: number; test: number }
@@ -49,7 +48,6 @@ export function DatasetStep({
   valImageCount: number
   testImageCount: number
   onDatasetChange: (id: string) => void
-  onSplitChange: (split: { train: number; val: number; test: number }) => void
 }) {
   const [showSplitModal, setShowSplitModal] = useState(false)
 
@@ -64,20 +62,9 @@ export function DatasetStep({
     return names
   }, [selectedDataset, selectedDs])
 
-  const handleSaveSplit = (split: { train: number; val: number; test: number }, assignments: Record<string, 'train' | 'val' | 'test'>) => {
-    if (selectedDataset) {
-      selectedDataset.resources.forEach(r => {
-        if (assignments[r.id]) r.set = assignments[r.id]
-      })
-    }
-    onSplitChange(split)
-    setShowSplitModal(false)
-  }
-
   return (
     <div>
-      <SectionTitle icon={<Layers size={15} />} title="选择训练/验证/测试数据集"
-        subtitle="为每个集合独立选择数据集或子数据集" />
+      <SectionTitle icon={<Layers size={15} />} title="选择数据集" />
 
       {datasetErrors.dataset && (
         <div style={{ padding: '10px 14px', background: 'var(--error-glow)', border: '1px solid rgba(239,68,68,0.3)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--error)' }}>
@@ -159,10 +146,6 @@ export function DatasetStep({
               <DatasetSplitManager
                 resources={selectedDataset.resources}
                 classNames={flatClassNames}
-                currentSplit={datasetSplit}
-                totalCount={totalImages}
-                datasetName={selectedDataset.datasetName}
-                onSave={handleSaveSplit}
               />
             </div>
           </div>
@@ -213,10 +196,7 @@ export function DatasetStep({
         </div>
       )}
 
-      <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-        <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
-        <span>选择一个数据集后，可点击「调整划分」按钮按比例或逐张图片调整训练/验证/测试的划分。调整后的结果将保存到数据集中。</span>
-      </div>
+      
     </div>
   )
 }

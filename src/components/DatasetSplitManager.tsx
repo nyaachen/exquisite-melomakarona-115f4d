@@ -10,13 +10,13 @@ import {
   ChevronRight,
   Shuffle,
   Save,
-  RotateCcw,
   Image,
   Search,
   X,
 } from 'lucide-react'
 import type { DatasetResource } from '../data/datasets'
 import { SplitAdjuster } from './SplitAdjuster'
+import { ClassDistributionChart, type ClassDistribution } from './ClassDistributionChart'
 
 // ─── Types ───
 
@@ -50,10 +50,6 @@ function resourceToAnnotation(r: DatasetResource): Annotation {
 interface DatasetSplitManagerProps {
   resources: DatasetResource[]
   classNames: string[]
-  currentSplit: { train: number; val: number; test: number }
-  totalCount: number
-  datasetName: string
-  onSave: (split: { train: number; val: number; test: number }, assignments: Record<string, SetType>) => void
 }
 
 // ─── Component ───
@@ -61,10 +57,6 @@ interface DatasetSplitManagerProps {
 export function DatasetSplitManager({
   resources,
   classNames,
-  currentSplit,
-  totalCount,
-  datasetName,
-  onSave,
 }: DatasetSplitManagerProps) {
   const [mode, setMode] = useState<SplitMode>('auto')
   const [currentPage, setCurrentPage] = useState(0)
@@ -73,21 +65,30 @@ export function DatasetSplitManager({
   // Derive annotations from resources once
   const annotations = useMemo(() => resources.map(resourceToAnnotation), [resources])
 
+  // Compute real split ratios from actual annotation assignments
+  const realSplit = useMemo(() => {
+    const setCounts = { train: 0, val: 0, test: 0 }
+    annotations.forEach(a => { setCounts[a.set]++ })
+    const total = annotations.length || 1
+    return {
+      train: Math.round((setCounts.train / total) * 100),
+      val: Math.round((setCounts.val / total) * 100),
+      test: 100 - Math.round((setCounts.train / total) * 100) - Math.round((setCounts.val / total) * 100),
+    }
+  }, [annotations])
+
   const [assignments, setAssignments] = useState<Record<string, SetType>>(() => {
     const init: Record<string, SetType> = {}
     annotations.forEach(a => { init[a.id] = a.set })
     return init
   })
   const [form, setForm] = useState({
-    name: '',
-    comment: '',
-    trainRatio: currentSplit.train,
-    valRatio: currentSplit.val,
-    testRatio: currentSplit.test,
+    trainRatio: realSplit.train,
+    valRatio: realSplit.val,
+    testRatio: realSplit.test,
     selectedLabels: [] as string[],
   })
   const [labelSearch, setLabelSearch] = useState('')
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
   // ─── Derived data ───
 
@@ -115,6 +116,19 @@ export function DatasetSplitManager({
     allAnnotations.forEach(a => { result[a.set]++ })
     return result
   }, [allAnnotations])
+
+  const classDistributionData = useMemo<ClassDistribution[]>(() => {
+    return classNames.map(name => {
+      const dist = { 训练集: 0, 验证集: 0, 测试集: 0 }
+      allAnnotations.forEach(ann => {
+        if (ann.classes.includes(name)) {
+          const key = ann.set === 'train' ? '训练集' : ann.set === 'val' ? '验证集' : '测试集'
+          dist[key]++
+        }
+      })
+      return { name, ...dist }
+    })
+  }, [classNames, allAnnotations])
 
   // ─── Handlers ───
 
@@ -170,13 +184,6 @@ export function DatasetSplitManager({
     setAssignments(newAssignments)
   }
 
-  function resetToTrain() {
-    const init: Record<string, SetType> = {}
-    annotations.forEach(a => { init[a.id] = 'train' })
-    setAssignments(init)
-    setCurrentPage(0)
-  }
-
   function cycleAnnotationSet(annId: string) {
     setAssignments(prev => {
       const cur = prev[annId] || 'train'
@@ -191,61 +198,12 @@ export function DatasetSplitManager({
     setAssignments(prev => ({ ...prev, ...updates }))
   }
 
-  async function handleSave() {
-    setSaveStatus('saving')
-    await new Promise(r => setTimeout(r, 800))
-    onSave(
-      { train: form.trainRatio, val: form.valRatio, test: form.testRatio },
-      assignments,
-    )
-    setSaveStatus('saved')
-    setTimeout(() => setSaveStatus('idle'), 2500)
-  }
-
   // ─── Render ───
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, animation: 'slideIn 0.25s ease-out' }}>
       {/* Main area */}
       <div>
-        {/* Labels of interest */}
-        <div className="card" style={{ padding: 20, marginBottom: 20 }}>
-          <SectionTitle icon={<Tag size={15} />} title="感兴趣标签" subtitle="最多选择 3 个，系统优先按比例分配含这些标签的图片（可选）" />
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {classNames.map(cls => {
-              const isSelected = form.selectedLabels.includes(cls)
-              const disabled = !isSelected && form.selectedLabels.length >= 3
-              return (
-                <button
-                  key={cls}
-                  className="class-tag"
-                  style={{
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                    opacity: disabled ? 0.4 : 1,
-                    background: isSelected ? 'var(--accent-glow)' : 'var(--bg-elevated)',
-                    color: isSelected ? 'var(--accent-bright)' : 'var(--text-secondary)',
-                    border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border-default)'}`,
-                    fontWeight: isSelected ? 600 : 400,
-                    padding: '6px 12px',
-                    fontSize: 12,
-                    transition: 'all 0.15s',
-                  }}
-                  onClick={() => toggleLabel(cls)}
-                  disabled={disabled}
-                >
-                  {isSelected && <CheckCircle2 size={11} style={{ marginRight: 4 }} />}
-                  {cls}
-                </button>
-              )
-            })}
-          </div>
-          {form.selectedLabels.length > 0 && (
-            <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
-              已选 {form.selectedLabels.length}/3 个 · 自动划分时优先分配
-            </div>
-          )}
-        </div>
-
         {/* Mode toggle */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
           <button className={`btn ${mode === 'auto' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setMode('auto')}>
@@ -261,74 +219,60 @@ export function DatasetSplitManager({
           <div style={{ animation: 'slideIn 0.2s ease-out' }}>
             <SectionTitle icon={<SplitSquareVertical size={15} />} title="自动划分" subtitle="调节滑块或直接输入比例/数量，实时预览" />
             <div className="card" style={{ padding: 24 }}>
+              {/* Labels of interest */}
+              <div style={{ marginBottom: 20, padding: 16, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)' }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Tag size={13} style={{ color: 'var(--accent-bright)' }} />
+                  感兴趣标签
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>最多选择 3 个，系统优先按比例分配含这些标签的图片（可选）</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {classNames.map(cls => {
+                    const isSelected = form.selectedLabels.includes(cls)
+                    const disabled = !isSelected && form.selectedLabels.length >= 3
+                    return (
+                      <button
+                        key={cls}
+                        className="class-tag"
+                        style={{
+                          cursor: disabled ? 'not-allowed' : 'pointer',
+                          opacity: disabled ? 0.4 : 1,
+                          background: isSelected ? 'var(--accent-glow)' : 'var(--bg-surface)',
+                          color: isSelected ? 'var(--accent-bright)' : 'var(--text-secondary)',
+                          border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border-default)'}`,
+                          fontWeight: isSelected ? 600 : 400,
+                          padding: '6px 12px',
+                          fontSize: 12,
+                          transition: 'all 0.15s',
+                        }}
+                        onClick={() => toggleLabel(cls)}
+                        disabled={disabled}
+                      >
+                        {isSelected && <CheckCircle2 size={11} style={{ marginRight: 4 }} />}
+                        {cls}
+                      </button>
+                    )
+                  })}
+                </div>
+                {form.selectedLabels.length > 0 && (
+                  <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
+                    已选 {form.selectedLabels.length}/3 个 · 自动划分时优先分配
+                  </div>
+                )}
+              </div>
+
               <SplitAdjuster
-                totalCount={totalCount}
+                totalCount={allAnnotations.length}
                 split={{ train: form.trainRatio, val: form.valRatio, test: form.testRatio }}
                 onChange={handleSplitChange}
                 showPercentInputs
                 showCountInputs
               />
-
-              {/* Action buttons */}
-              <div style={{ marginTop: 18, display: 'flex', gap: 10 }}>
-                <button className="btn btn-primary" onClick={autoSplit}>
-                  <Shuffle size={14} /> 分配
-                </button>
-                <button className="btn btn-ghost" onClick={resetToTrain}>
-                  <RotateCcw size={14} /> 重置
-                </button>
-              </div>
-
-              {/* Per-label distribution */}
-              {form.selectedLabels.length > 0 && (
-                <div style={{ marginTop: 16, padding: 12, background: 'rgba(64, 158, 255,0.06)', border: '1px solid rgba(64, 158, 255,0.15)' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--teal)', marginBottom: 10 }}>
-                    <Tag size={11} style={{ display: 'inline', marginRight: 4 }} />
-                    每个标签的分布情况
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {form.selectedLabels.map(label => {
-                      const labelCounts = { train: 0, val: 0, test: 0 }
-                      allAnnotations.forEach(ann => {
-                        if (ann.classes.includes(label)) labelCounts[ann.set]++
-                      })
-                      const total = labelCounts.train + labelCounts.val + labelCounts.test
-                      return (
-                        <div key={label}>
-                          <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-primary)', marginBottom: 3 }}>{label}</div>
-                          <div style={{ display: 'flex', gap: 0, height: 14 }}>
-                            {(['train', 'val', 'test'] as const).map(set => {
-                              const w = total > 0 ? (labelCounts[set] / total) * 100 : 0
-                              if (w === 0) return null
-                              return (
-                                <div key={set} style={{
-                                  width: `${w}%`, background: SET_META[set].color,
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  fontSize: 8, color: '#fff', fontWeight: 600,
-                                  minWidth: w > 8 ? 0 : 0,
-                                }}>
-                                  {w > 12 ? labelCounts[set] : ''}
-                                </div>
-                              )
-                            })}
-                          </div>
-                          <div style={{ display: 'flex', gap: 10, fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
-                            {(['train', 'val', 'test'] as const).map(set => (
-                              <span key={set}>{SET_META[set].label} {labelCounts[set]} 张</span>
-                            ))}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(29,78,216,0.06)', border: '1px solid rgba(29,78,216,0.15)', display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-                <Info size={13} style={{ color: 'var(--accent-bright)', flexShrink: 0, marginTop: 1 }} />
-                <span>调节比例或输入期望数量后，点击"随机分配"将按当前比例随机打乱并分配图片到各集合。</span>
-              </div>
             </div>
+
+            <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={autoSplit}>
+              <Save size={14} /> 保存
+            </button>
           </div>
         )}
 
@@ -436,6 +380,10 @@ export function DatasetSplitManager({
               <Info size={13} style={{ color: 'var(--teal)', flexShrink: 0, marginTop: 1 }} />
               <span>点击单张图片可循环切换（训练→验证→测试→训练）。使用搜索可快速定位特定标签的图片。</span>
             </div>
+
+            <button className="btn btn-primary" style={{ marginTop: 16 }}>
+              <Save size={14} /> 保存
+            </button>
           </div>
         )}
       </div>
@@ -443,42 +391,7 @@ export function DatasetSplitManager({
       {/* ═══════════ Right sidebar ═══════════ */}
       <div>
         <div className="card" style={{ padding: 20, position: 'sticky', top: 24 }}>
-          <SectionTitle icon={<Settings2 size={15} />} title="配置保存" subtitle="" />
-
-          <div style={{ marginBottom: 16 }}>
-            <label className="form-label">子数据集名称</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder={`子数据集_${new Date().toLocaleDateString('zh-CN')}`}
-              value={form.name}
-              onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-            />
-          </div>
-
-          <div style={{ marginBottom: 16 }}>
-            <label className="form-label">备注</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="子数据集备注说明（可选）"
-              value={form.comment}
-              onChange={e => setForm(prev => ({ ...prev, comment: e.target.value }))}
-            />
-          </div>
-
-          {form.selectedLabels.length > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              <label className="form-label">感兴趣的标签</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                {form.selectedLabels.map(label => (
-                  <span key={label} className="class-tag" style={{ background: 'rgba(64, 158, 255,0.1)', color: 'var(--teal)', borderColor: 'rgba(64, 158, 255,0.3)' }}>
-                    <Tag size={9} /> {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          <SectionTitle icon={<Settings2 size={15} />} title="数据集分布情况" subtitle="" />
 
           {/* Live split results */}
           <div style={{ marginBottom: 20 }}>
@@ -496,31 +409,8 @@ export function DatasetSplitManager({
             </div>
           </div>
 
-          {/* Data preview */}
-          <div style={{ padding: 12, background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', marginBottom: 16, fontSize: 11.5, color: 'var(--text-secondary)' }}>
-            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>数据保存格式</div>
-            <div style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-              名称：{form.name || '(自动生成)'}<br />
-              数据集：{datasetName}<br />
-              标签：{classNames.join('、')}<br />
-              训练 {counts.train.toLocaleString()} 张 / 验证 {counts.val.toLocaleString()} 张 / 测试 {counts.test.toLocaleString()} 张
-            </div>
-          </div>
-
-          <button
-            className="btn btn-primary"
-            style={{ width: '100%' }}
-            onClick={handleSave}
-            disabled={saveStatus === 'saving'}
-          >
-            {saveStatus === 'saving' ? (
-              <><span className="spinner" style={{ width: 14, height: 14 }} /> 保存中…</>
-            ) : saveStatus === 'saved' ? (
-              <><CheckCircle2 size={14} /> 已保存</>
-            ) : (
-              <><Save size={14} /> 保存划分配置</>
-            )}
-          </button>
+          {/* Class distribution chart */}
+          <ClassDistributionChart data={classDistributionData} minHeight={200} rowHeight={32} />
         </div>
       </div>
     </div>

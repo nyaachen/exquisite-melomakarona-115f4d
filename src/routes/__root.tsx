@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { HeadContent, Link, Outlet, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
 import {
   LayoutDashboard,
@@ -11,6 +12,7 @@ import {
   User,
 
 } from 'lucide-react'
+import { fetchUserInfo, type UserInfo } from '../data/userinfo'
 import '../styles.css'
 
 export const Route = createRootRoute({
@@ -40,6 +42,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function Sidebar() {
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+
+  useEffect(() => {
+    fetchUserInfo().then(setUserInfo)
+  }, [])
+
   return (
     <nav className="sidebar">
       <div className="brand">
@@ -54,7 +62,7 @@ function Sidebar() {
       </div>
 
       <div className="nav-section">
-        
+
         <NavLink to="/" icon={<LayoutDashboard size={15} />} label="首页" />
 
         <div className="nav-label">模型</div>
@@ -88,8 +96,9 @@ function Sidebar() {
             <User size={16} style={{ color: '#fff' }} />
           </div>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>张工</div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>zhanggong@kebao.cn</div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>
+              {userInfo?.nickName ?? '加载中...'}
+            </div>
           </div>
         </div>
       </div>

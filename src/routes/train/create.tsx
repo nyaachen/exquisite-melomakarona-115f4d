@@ -240,7 +240,6 @@ function CreateTask() {
                   }
                 }
               }}
-              onSplitChange={setDatasetSplit}
             />
           )}
 

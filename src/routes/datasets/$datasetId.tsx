@@ -65,11 +65,6 @@ function DatasetDetail() {
     })
   }, [flatContentTags, split])
 
-  const handleSaveSplit = (_split: { train: number; val: number; test: number }, _assignments: Record<string, 'train' | 'val' | 'test'>) => {
-    // 划分调整结果：_split 为比例，_assignments 为每张图片的归属
-    setShowSplitModal(false)
-  }
-
   return (
     <div>
       <div className="page-header">
@@ -202,10 +197,6 @@ function DatasetDetail() {
                 <DatasetSplitManager
                   resources={resources}
                   classNames={flatContentTags}
-                  currentSplit={split}
-                  totalCount={dataset.dataCount}
-                  datasetName={dataset.datasetName}
-                  onSave={handleSaveSplit}
                 />
               </div>
             </div>

@@ -304,6 +304,18 @@ html, body {
 .data-table td.mono { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tbody tr:hover td { background: var(--bg-hover); }
+.data-table .sticky-col {
+  position: sticky;
+  right: 0;
+  background: var(--bg-card);
+  z-index: 1;
+}
+.data-table thead .sticky-col {
+  z-index: 2;
+}
+.data-table tbody tr:hover .sticky-col {
+  background: var(--bg-hover);
+}
 
 /* ─── Progress ─── */
 .progress-bar {

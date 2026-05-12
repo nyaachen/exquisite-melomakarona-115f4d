@@ -127,22 +127,26 @@ function DatasetsPage() {
               </div>
             )}
 
-            <table className="data-table">
+            <table className="data-table" style={{ minWidth: 1100 }}>
               <thead>
                 <tr>
                   <th>数据集名称</th>
                   <th>来源</th>
-                  <th>标签组</th>
+                  <th>内容标签</th>
+                  <th>场景标签</th>
                   <th>类别数</th>
                   <th>数据数量</th>
+                  <th>训练集</th>
+                  <th>验证集</th>
+                  <th>测试集</th>
                   <th>创建时间</th>
-                  <th>操作</th>
+                  <th className="sticky-col">操作</th>
                 </tr>
               </thead>
               <tbody>
                 {!loading && data.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>
+                    <td colSpan={11}>
                       <div className="empty-state">
                         <Database size={32} className="empty-state-icon" />
                         <div className="empty-state-text">
@@ -159,16 +163,60 @@ function DatasetsPage() {
                     const classCount = ds.contentTagList.reduce(
                       (sum, g) => sum + g.labelDetails.length, 0
                     )
+                    const allLabels = ds.contentTagList.flatMap(g =>
+                      g.labelDetails.map(d => d.labelName)
+                    )
+                    const sceneTags = ds.sceneTags
+                      ? ds.sceneTags.split(',').map(s => s.trim()).filter(Boolean)
+                      : []
+                    const resourceTotal = ds.resources.length || 1
+                    const trainCount = ds.resources.filter(r => r.set === 'train').length
+                    const valCount = ds.resources.filter(r => r.set === 'val').length
+                    const testCount = ds.resources.filter(r => r.set === 'test').length
                     return (
                       <tr key={ds.id}>
-                        <td className="primary">{ds.datasetName}</td>
-                        <td>{ds.sourceTypeName}</td>
-                        <td>{ds.contentTagList.map(g => g.name).join(', ') || '-'}</td>
+                        <td className="primary">
+                          <div style={{ fontWeight: 600 }}>{ds.datasetName}</div>
+                          {ds.description && (
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2, maxWidth: 180 }}>{ds.description}</div>
+                          )}
+                        </td>
+                        <td style={{ whiteSpace: 'nowrap' }}>{ds.sourceTypeName}</td>
+                        <td>
+                          {allLabels.length > 0 ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 200 }}>
+                              {allLabels.map(label => (
+                                <span key={label} className="class-tag" style={{ fontSize: 10, padding: '2px 8px' }}>{label}</span>
+                              ))}
+                            </div>
+                          ) : '-'}
+                        </td>
+                        <td>
+                          {sceneTags.length > 0 ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 140 }}>
+                              {sceneTags.map(tag => (
+                                <span key={tag} className="class-tag" style={{ fontSize: 10, padding: '2px 8px', background: 'rgba(13,148,136,0.08)', color: 'var(--teal)', borderColor: 'rgba(13,148,136,0.2)' }}>{tag}</span>
+                              ))}
+                            </div>
+                          ) : '-'}
+                        </td>
                         <td className="mono">{classCount}</td>
                         <td className="mono">{ds.dataCount.toLocaleString()}</td>
-                        <td style={{ fontSize: 12 }}>{ds.createTime}</td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 0 }}>
+                        <td className="mono" style={{ fontSize: 11 }}>
+                          <span style={{ color: '#409eff', fontWeight: 600 }}>{trainCount.toLocaleString()}</span>
+                          <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>({(trainCount / resourceTotal * 100).toFixed(1)}%)</span>
+                        </td>
+                        <td className="mono" style={{ fontSize: 11 }}>
+                          <span style={{ color: '#10b981', fontWeight: 600 }}>{valCount.toLocaleString()}</span>
+                          <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>({(valCount / resourceTotal * 100).toFixed(1)}%)</span>
+                        </td>
+                        <td className="mono" style={{ fontSize: 11 }}>
+                          <span style={{ color: '#f59e0b', fontWeight: 600 }}>{testCount.toLocaleString()}</span>
+                          <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>({(testCount / resourceTotal * 100).toFixed(1)}%)</span>
+                        </td>
+                        <td style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{ds.createTime}</td>
+                        <td className="sticky-col">
+                          <div style={{ display: 'flex', gap: 5, flexWrap: 'nowrap' }}>
                             <Link to={`/datasets/${ds.id}`} className="btn btn-ghost btn-sm">
                               查看详情 <ArrowRight size={11} />
                             </Link>
